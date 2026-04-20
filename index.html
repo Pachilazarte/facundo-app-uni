@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+  <meta name="theme-color" content="#f8f7ff"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="EstudioPsi"/>
+  <link rel="manifest" href="manifest.json"/>
+  <title>EstudioPsi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f4f3fc;
+      --bg2: #eceaf8;
+      --white: #ffffff;
+      --border: #e2e0f0;
+      --border2: #ccc9e8;
+      --v: #6d4af5;
+      --v-light: #ede9ff;
+      --v-mid: #c4b8ff;
+      --p: #d946a8;
+      --p-light: #fce7f5;
+      --g: #059669;
+      --g-light: #d1fae5;
+      --y: #d97706;
+      --y-light: #fef3c7;
+      --r: #dc2626;
+      --r-light: #fee2e2;
+      --b: #2563eb;
+      --b-light: #dbeafe;
+      --text: #1a1535;
+      --text2: #4a4568;
+      --text3: #8b85a8;
+      --shadow: 0 1px 3px rgba(109,74,245,.08), 0 4px 16px rgba(109,74,245,.06);
+      --shadow-lg: 0 4px 24px rgba(109,74,245,.12);
+      --radius: 14px;
+      --radius-sm: 8px;
+      --radius-lg: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { height: 100%; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; font-size: 15px; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--v-mid); border-radius: 4px; }
+
+    .hidden { display: none !important; }
+    .fade { animation: fadeIn .22s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+
+    /* ── HEADER ── */
+    #header {
+      position: sticky; top: 0; z-index: 90;
+      background: rgba(255,255,255,.96);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 0 var(--border);
+    }
+    .header-top {
+      max-width: 720px; margin: 0 auto;
+      padding: .75rem 1rem .5rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      font-size: 1.05rem; font-weight: 700; letter-spacing: -.02em;
+      color: var(--v);
+    }
+    .logo span { color: var(--text3); font-weight: 400; font-size: .8rem; margin-left: 4px; }
+    .header-actions { display: flex; align-items: center; gap: .4rem; }
+    .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--g); box-shadow: 0 0 0 2px var(--g-light); }
+    .sync-dot.s { background: var(--y); box-shadow: 0 0 0 2px var(--y-light); animation: blink 1s infinite; }
+    .sync-dot.e { background: var(--r); box-shadow: 0 0 0 2px var(--r-light); }
+    @keyframes blink { 50% { opacity: .3; } }
+    #syncLabel { font-size: .7rem; color: var(--text3); font-weight: 500; }
+
+    .btn-icon {
+      display: inline-flex; align-items: center; gap: .3rem;
+      font-family: inherit; font-size: .72rem; font-weight: 600;
+      padding: .32rem .75rem; border-radius: 100px;
+      border: 1px solid var(--border2); background: var(--white);
+      color: var(--text2); cursor: pointer; transition: all .18s;
+      white-space: nowrap;
+    }
+    .btn-icon:hover { background: var(--v-light); border-color: var(--v-mid); color: var(--v); }
+    .btn-icon.v { background: var(--v); border-color: var(--v); color: #fff; }
+    .btn-icon.v:hover { background: #5a39d4; }
+
+    /* Quick actions bar */
+    .quick-bar {
+      max-width: 720px; margin: 0 auto;
+      padding: .35rem 1rem .5rem;
+      display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none;
+    }
+    .quick-bar::-webkit-scrollbar { display: none; }
+
+    /* ── TABS ── */
+    .tabs {
+      max-width: 720px; margin: 0 auto;
+      padding: .3rem 1rem .55rem;
+      display: flex; gap: .3rem; overflow-x: auto; scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      font-family: inherit; font-size: .75rem; font-weight: 600;
+      padding: .38rem .9rem; border-radius: 100px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text3); cursor: pointer; white-space: nowrap;
+      transition: all .18s; flex-shrink: 0;
+    }
+    .tab.active { background: var(--v); border-color: var(--v); color: #fff; box-shadow: 0 2px 8px rgba(109,74,245,.3); }
+    .tab:hover:not(.active) { border-color: var(--v-mid); color: var(--v); background: var(--v-light); }
+
+    /* ── LAYOUT ── */
+    .page { max-width: 720px; margin: 0 auto; padding: 0 1rem; }
+    .sec { padding: .85rem 0 0; }
+
+    /* ── CHIPS SCROLL ── */
+    .chips { display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; margin-bottom: .65rem; }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip {
+      font-family: inherit; font-size: .72rem; font-weight: 600;
+      padding: .3rem .8rem; border-radius: 100px;
+      border: 1px solid var(--border); background: var(--white);
+      color: var(--text3); cursor: pointer; white-space: nowrap; flex-shrink: 0;
+      transition: all .18s;
+    }
+    .chip.active { background: var(--v); border-color: var(--v); color: #fff; box-shadow: 0 2px 6px rgba(109,74,245,.25); }
+    .chip:hover:not(.active) { border-color: var(--v-mid); color: var(--v); }
+
+    /* ── FILTER TABS ── */
+    .filter-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; }
+    .filter-pills { display: flex; gap: .25rem; background: var(--bg2); border-radius: 100px; padding: 3px; }
+    .fpill {
+      font-family: inherit; font-size: .7rem; font-weight: 600;
+      padding: .28rem .7rem; border-radius: 100px;
+      border: none; background: transparent;
+      color: var(--text3); cursor: pointer; transition: all .18s;
+    }
+    .fpill.active { background: var(--white); color: var(--v); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+
+    /* ── STATS ── */
+    .stats-card {
+      background: linear-gradient(135deg, var(--v) 0%, #9333ea 100%);
+      border-radius: var(--radius); padding: 1rem 1.1rem; margin-bottom: .85rem;
+      color: white; position: relative; overflow: hidden;
+    }
+    .stats-card::before {
+      content: ''; position: absolute; top: -30px; right: -30px;
+      width: 120px; height: 120px; border-radius: 50%;
+      background: rgba(255,255,255,.08);
+    }
+    .stats-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .7rem; }
+    .stats-title { font-size: .78rem; font-weight: 600; opacity: .85; }
+    .stats-pct { font-size: 1.6rem; font-weight: 700; letter-spacing: -.02em; }
+    .prog { height: 6px; border-radius: 100px; background: rgba(255,255,255,.25); overflow: hidden; margin-bottom: .6rem; }
+    .prog-fill { height: 100%; border-radius: 100px; background: rgba(255,255,255,.9); transition: width .6s ease; }
+    .stats-pills { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .spill { font-size: .67rem; font-weight: 600; padding: .18rem .6rem; border-radius: 100px; background: rgba(255,255,255,.18); }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-flex; align-items: center; font-size: .62rem; font-weight: 700;
+      letter-spacing: .03em; text-transform: uppercase; padding: .15rem .5rem;
+      border-radius: 100px; white-space: nowrap;
+    }
+    .b-sl { background: var(--bg2); color: var(--text3); }
+    .b-ok { background: var(--g-light); color: var(--g); }
+    .b-sk { background: var(--y-light); color: var(--y); }
+    .b-nv { background: var(--r-light); color: var(--r); }
+    .b-t  { background: var(--v-light); color: var(--v); }
+    .b-p  { background: var(--p-light); color: var(--p); }
+
+    /* ── UNIDAD SECTION ── */
+    .unidad-section { margin-bottom: .35rem; }
+    .unidad-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .6rem .9rem .45rem;
+      background: var(--v-light); border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      border: 1px solid var(--v-mid); border-bottom: none; margin-top: .85rem;
+    }
+    .unidad-name { font-size: .72rem; font-weight: 700; color: var(--v); text-transform: uppercase; letter-spacing: .05em; }
+    .unidad-prog { font-size: .7rem; font-weight: 700; color: var(--v); opacity: .7; }
+    .unidad-body { background: var(--white); border: 1px solid var(--v-mid); border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+
+    /* ── TEXTO ROW ── */
+    .texto-row {
+      display: flex; align-items: flex-start; gap: .6rem;
+      padding: .75rem .9rem; border-bottom: 1px solid var(--border);
+      transition: background .14s; position: relative;
+    }
+    .texto-row:last-child { border-bottom: none; }
+    .texto-row:hover { background: var(--bg); }
+    .texto-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--bg2); color: var(--text3);
+      font-size: .65rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .texto-content { flex: 1; min-width: 0; }
+    .texto-title { font-size: .875rem; font-weight: 600; line-height: 1.35; color: var(--text); margin-bottom: .2rem; }
+    .texto-author { font-size: .75rem; color: var(--text3); margin-bottom: .35rem; }
+    .texto-meta { display: flex; align-items: center; gap: .35rem; flex-wrap: wrap; }
+    .texto-row.leido .texto-title { color: var(--text3); text-decoration: line-through; }
+    .texto-row.nova { opacity: .4; }
+    .texto-row.nova .texto-title { text-decoration: line-through; }
+
+    /* ── ESTADO POPUP ── */
+    .pop-wrap { position: relative; flex-shrink: 0; }
+    .edit-btn {
+      padding: .22rem .45rem; border-radius: 6px; font-size: .72rem; cursor: pointer;
+      background: var(--bg2); border: 1px solid var(--border2);
+      color: var(--text3); transition: all .15s;
+    }
+    .edit-btn:hover { background: var(--v-light); border-color: var(--v-mid); color: var(--v); }
+    .estado-popup {
+      position: absolute; right: 0; top: calc(100% + 4px); z-index: 60;
+      background: var(--white); border: 1px solid var(--border2);
+      border-radius: var(--radius-sm); padding: 4px;
+      display: flex; flex-direction: column; gap: 2px;
+      box-shadow: var(--shadow-lg); min-width: 130px;
+      opacity: 0; pointer-events: none; transform: translateY(-4px); transition: all .14s;
+    }
+    .estado-popup.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+    .ep {
+      font-family: inherit; font-size: .78rem; font-weight: 500;
+      padding: .45rem .7rem; border-radius: 6px; cursor: pointer;
+      border: none; background: transparent; color: var(--text2);
+      text-align: left; transition: background .12s;
+    }
+    .ep:hover { background: var(--bg); }
+    .ep.ok:hover { background: var(--g-light); color: var(--g); }
+    .ep.sk:hover { background: var(--y-light); color: var(--y); }
+    .ep.nv:hover { background: var(--r-light); color: var(--r); }
+
+    /* ── LINK CHIP ── */
+    .lc {
+      font-family: inherit; font-size: .68rem; font-weight: 600;
+      padding: .2rem .55rem; border-radius: 6px; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 3px;
+      border: 1px solid var(--border2); color: var(--text3);
+      background: var(--white); transition: all .15s;
+    }
+    .lc:hover { border-color: var(--v-mid); color: var(--v); background: var(--v-light); }
+
+    /* ── CLASES ── */
+    .clase-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1rem; margin-bottom: .6rem;
+      box-shadow: var(--shadow); transition: all .18s;
+    }
+    .clase-card:hover { border-color: var(--v-mid); box-shadow: var(--shadow-lg); }
+    .clase-meta { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; margin-bottom: .35rem; }
+    .clase-title { font-size: .95rem; font-weight: 700; color: var(--text); margin-bottom: .15rem; }
+    .clase-sub { font-size: .78rem; color: var(--text3); }
+    .clase-links { display: flex; gap: .35rem; flex-wrap: wrap; margin-top: .6rem; }
+
+    /* ── FORM ── */
+    .form-wrap { padding: .85rem 0; }
+    .form-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem; margin-bottom: .75rem;
+      box-shadow: var(--shadow);
+    }
+    .form-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 1.1rem; display: flex; align-items: center; gap: .5rem; }
+    .field { margin-bottom: .85rem; }
+    .field-label {
+      display: block; font-size: .7rem; font-weight: 700; letter-spacing: .05em;
+      text-transform: uppercase; color: var(--text3); margin-bottom: .35rem;
+    }
+    .inp {
+      width: 100%; background: var(--bg);
+      border: 1.5px solid var(--border2);
+      border-radius: var(--radius-sm); padding: .65rem .85rem;
+      color: var(--text); font-family: inherit; font-size: .875rem;
+      outline: none; resize: none; transition: border-color .18s;
+    }
+    .inp:focus { border-color: var(--v); background: var(--white); }
+    .inp::placeholder { color: var(--text3); }
+    select.inp { cursor: pointer; }
+    .inp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+
+    .tipo-btns { display: flex; gap: .4rem; }
+    .tipo-btn {
+      flex: 1; font-family: inherit; font-size: .8rem; font-weight: 600;
+      padding: .55rem; border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border2); background: var(--white);
+      color: var(--text3); cursor: pointer; transition: all .18s;
+    }
+    .tipo-btn.active.t { background: var(--v-light); border-color: var(--v); color: var(--v); }
+    .tipo-btn.active.p { background: var(--p-light); border-color: var(--p); color: var(--p); }
+    .tipo-btn:hover:not(.active) { border-color: var(--border2); }
+
+    .ac-wrap { position: relative; }
+    .ac-list {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 60;
+      background: var(--white); border: 1.5px solid var(--v-mid);
+      border-radius: var(--radius-sm); max-height: 200px; overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+    .ac-item { padding: .6rem .85rem; cursor: pointer; font-size: .85rem; border-bottom: 1px solid var(--border); transition: background .12s; }
+    .ac-item:last-child { border-bottom: none; }
+    .ac-item:hover { background: var(--v-light); }
+    .ac-sub { font-size: .72rem; color: var(--text3); }
+
+    .btn {
+      font-family: inherit; font-weight: 700; font-size: .82rem;
+      padding: .72rem 1.25rem; border-radius: 100px; cursor: pointer;
+      transition: all .18s; border: none; width: 100%; display: block; text-align: center;
+    }
+    .btn-v { background: var(--v); color: #fff; box-shadow: 0 3px 12px rgba(109,74,245,.3); }
+    .btn-v:hover:not(:disabled) { background: #5a39d4; transform: translateY(-1px); }
+    .btn-v:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-out { background: var(--white); border: 1.5px solid var(--border2); color: var(--text2); }
+    .btn-out:hover { border-color: var(--v-mid); color: var(--v); background: var(--v-light); }
+    .btn-sm { font-size: .72rem; padding: .4rem .9rem; width: auto; display: inline-block; }
+
+    .info-box {
+      background: var(--v-light); border: 1px solid var(--v-mid);
+      border-radius: var(--radius-sm); padding: .6rem .85rem;
+      display: flex; align-items: center; gap: .5rem; margin-bottom: .85rem;
+    }
+    .info-box p { font-size: .78rem; color: var(--v); line-height: 1.4; }
+
+    /* ── BIBLIO UPLOAD ── */
+    .step-box { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: .85rem; }
+    .step-hdr { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; margin-bottom: .65rem; }
+    .step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--v); color: #fff; font-size: .68rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+    .step-title { font-size: .88rem; font-weight: 600; color: var(--text); margin-bottom: .12rem; }
+    .step-sub { font-size: .75rem; color: var(--text3); }
+    .code-box { background: #1e1b2e; border-radius: var(--radius-sm); padding: .85rem 1rem; font-family: 'JetBrains Mono', monospace; font-size: .73rem; line-height: 1.8; color: #c4b8ff; white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow-y: auto; }
+    .divider { display: flex; align-items: center; gap: .65rem; margin: .75rem 0; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .divider span { font-size: .65rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); white-space: nowrap; }
+
+    .tbl-wrap { overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 1rem; }
+    table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+    th { font-size: .62rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text3); padding: .5rem .75rem; text-align: left; border-bottom: 1px solid var(--border); background: var(--bg2); white-space: nowrap; }
+    td { padding: .5rem .75rem; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg); }
+    .mono { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--v); }
+
+    .err-box { background: var(--r-light); border: 1px solid #fca5a5; border-radius: var(--radius-sm); padding: .75rem .9rem; margin-bottom: .75rem; }
+    .err-box p { font-size: .78rem; font-weight: 700; color: var(--r); margin-bottom: .35rem; }
+    .err-box ul { font-size: .75rem; color: var(--text2); padding-left: .5rem; }
+    .err-box li { margin-bottom: .2rem; }
+
+    /* ── BOTTOM NAV ── */
+    #bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(255,255,255,.97); backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-around;
+      padding: .45rem 0 calc(.45rem + env(safe-area-inset-bottom));
+    }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; flex: 1; padding: .25rem 0; font-size: .52rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text3); transition: color .18s; }
+    .nav-item.active { color: var(--v); }
+    .nav-item svg { width: 20px; height: 20px; stroke-width: 1.7; }
+
+    /* ── TOAST ── */
+    #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--text); color: #fff; font-size: .78rem; font-weight: 600; padding: .55rem 1.25rem; border-radius: 100px; box-shadow: var(--shadow-lg); opacity: 0; pointer-events: none; transition: all .25s; z-index: 9999; white-space: nowrap; }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── EMPTY STATE ── */
+    .empty { text-align: center; padding: 3rem 1rem; }
+    .empty-icon { font-size: 2.5rem; margin-bottom: .6rem; }
+    .empty-title { font-size: .92rem; font-weight: 700; color: var(--text2); margin-bottom: .3rem; }
+    .empty-sub { font-size: .8rem; color: var(--text3); max-width: 240px; margin: 0 auto; line-height: 1.6; }
+
+    .spin { width: 26px; height: 26px; border-radius: 50%; border: 2.5px solid var(--border2); border-top-color: var(--v); animation: sp .7s linear infinite; margin: 0 auto; }
+    @keyframes sp { to { transform: rotate(360deg); } }
+
+    /* ── SECTION TITLE ── */
+    .sec-title { font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: .6rem; display: flex; align-items: center; gap: .4rem; }
+    .sec-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── PROGRESS MINI ── */
+    .prog-mini { height: 3px; border-radius: 100px; background: var(--border); overflow: hidden; margin-top: .3rem; }
+    .prog-mini-fill { height: 100%; border-radius: 100px; background: var(--v); transition: width .4s ease; }
+
+    /* Materia selector heading */
+    .mat-heading {
+      padding: .5rem .9rem;
+      background: linear-gradient(135deg, var(--v), #9333ea);
+      color: white;
+      border-radius: var(--radius-sm);
+      margin-bottom: .65rem;
+      font-size: .82rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- ══ HEADER ══ -->
+<div id="header">
+  <div class="header-top">
+    <div>
+      <div class="logo">EstudioPsi <span>Psicología 4°</span></div>
+    </div>
+    <div class="header-actions">
+      <div class="sync-dot s" id="syncDot"></div>
+      <span id="syncLabel">Cargando</span>
+      <button class="btn-icon" onclick="reloadData()">↺</button>
+    </div>
+  </div>
+
+  <!-- Quick access bar -->
+  <div class="quick-bar">
+    <button class="btn-icon" onclick="window.open('https://drive.google.com/drive/my-drive','_blank')" title="Ir a Google Drive">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.4 12a19.79 19.79 0 01-3.07-8.67A2 2 0 013.34 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.91 8.37a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 15.92z"/></svg>
+      Drive
+    </button>
+    <button class="btn-icon v" onclick="window.location.href='scanerocr/index.html'" title="Ir a ScanOCR">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+      ScanOCR
+    </button>
+    <button class="btn-icon" onclick="setSection('cargarbiblio')" title="Cargar bibliografía">
+      📚 + Biblio
+    </button>
+    <button class="btn-icon" onclick="setSection('cargar')" title="Cargar clase">
+      🎓 + Clase
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" id="tab-biblio"       onclick="setSection('biblio')">📚 Bibliografía</button>
+    <button class="tab"        id="tab-clases"       onclick="setSection('clases')">🎓 Clases</button>
+    <button class="tab"        id="tab-cargar"       onclick="setSection('cargar')">＋ Clase</button>
+    <button class="tab"        id="tab-cargarbiblio" onclick="setSection('cargarbiblio')">＋ Biblio</button>
+  </div>
+</div>
+
+<div style="position:relative;padding-bottom:5rem;">
+
+<!-- ══ BIBLIOGRAFÍA ══ -->
+<section id="sec-biblio" class="sec fade">
+  <div class="page">
+    <div id="stats-bar"></div>
+
+    <!-- Materias dinámicas -->
+    <div class="sec-title">Materia</div>
+    <div class="chips" id="chips-biblio"></div>
+
+    <!-- Tipo + contador -->
+    <div class="filter-row">
+      <div class="filter-pills">
+        <button class="fpill active" id="ft-todos"    onclick="setTipoBiblio('todos')">Todos</button>
+        <button class="fpill"        id="ft-Teorica"  onclick="setTipoBiblio('Teorica')">Teórica</button>
+        <button class="fpill"        id="ft-Practica" onclick="setTipoBiblio('Practica')">Práctica</button>
+      </div>
+      <span id="biblio-count" style="font-size:.72rem;color:var(--text3);font-weight:600;"></span>
+    </div>
+
+    <div id="textos-container">
+      <div style="padding:3rem 0;text-align:center;"><div class="spin"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CLASES ══ -->
+<section id="sec-clases" class="hidden sec fade">
+  <div class="page">
+    <div class="sec-title">Materia</div>
+    <div class="chips" id="chips-clases"></div>
+    <div class="filter-row">
+      <div class="filter-pills">
+        <button class="fpill active" id="ct-todos"    onclick="setTipoClase('todos')">Todas</button>
+        <button class="fpill"        id="ct-Teorica"  onclick="setTipoClase('Teorica')">Teóricas</button>
+        <button class="fpill"        id="ct-Practica" onclick="setTipoClase('Practica')">Prácticas</button>
+      </div>
+      <span id="clases-count" style="font-size:.72rem;color:var(--text3);font-weight:600;"></span>
+    </div>
+    <div id="clases-container">
+      <div style="padding:3rem 0;text-align:center;"><div class="spin"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CARGAR CLASE ══ -->
+<section id="sec-cargar" class="hidden sec form-wrap">
+  <div class="page">
+  <div class="form-card">
+    <p class="form-title">🎓 Nueva Clase</p>
+
+    <div class="field">
+      <label class="field-label">Materia</label>
+      <select id="form-materia" class="inp" onchange="onSelMat(this.value)">
+        <option value="">— Seleccioná —</option>
+      </select>
+      <div id="otra-mat-wrap" class="hidden" style="margin-top:.45rem;">
+        <input type="text" id="form-materia-otra" class="inp" placeholder="Nombre en MAYÚSCULAS..." oninput="updateClaseDD()"/>
+        <p style="font-size:.72rem;color:var(--text3);margin-top:.25rem;">Esta materia se sumará automáticamente.</p>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Tipo</label>
+      <div class="tipo-btns">
+        <button class="tipo-btn active t" id="ftype-Teorica"  onclick="setTipoForm('Teórica')">📖 Teórica</button>
+        <button class="tipo-btn p"        id="ftype-Practica" onclick="setTipoForm('Práctica')">✏️ Práctica</button>
+      </div>
+    </div>
+
+    <div class="inp-grid field">
+      <div>
+        <label class="field-label">Fecha</label>
+        <input type="date" id="form-fecha" class="inp"/>
+      </div>
+      <div>
+        <label class="field-label">N° Clase</label>
+        <input type="number" id="form-nro" class="inp" placeholder="1" min="1"/>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Título de la clase</label>
+      <select id="form-titulo-dd" class="inp" style="margin-bottom:.4rem;" onchange="onSelClase(this.value)">
+        <option value="">— Clases ya cargadas para esta materia —</option>
+        <option value="__nueva__">✏️  Nueva clase (escribir abajo)</option>
+      </select>
+      <div class="ac-wrap">
+        <input type="text" id="form-titulo" class="inp" placeholder="O escribí el título..."
+          oninput="onTituloInput(this.value)"
+          onblur="setTimeout(()=>document.getElementById('ac-list').classList.add('hidden'),180)"/>
+        <div id="ac-list" class="ac-list hidden"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Transcripción de la clase</label>
+      <textarea id="form-transc" class="inp" rows="5" placeholder="Pegá la transcripción..."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Contenido PPT <span style="font-weight:400;text-transform:none;font-size:.75rem;letter-spacing:0;">(opcional)</span></label>
+      <textarea id="form-ppt" class="inp" rows="3" placeholder="Pegá el contenido del PowerPoint..."></textarea>
+    </div>
+
+    <div class="inp-grid field">
+      <div>
+        <label class="field-label">Link Grabación</label>
+        <input type="url" id="form-grab" class="inp" placeholder="https://drive.google.com/..."/>
+      </div>
+      <div>
+        <label class="field-label">Link Resumen</label>
+        <input type="url" id="form-doc" class="inp" placeholder="https://docs.google.com/..."/>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <span>💾</span>
+      <p>Se guarda localmente primero. Sin internet no perdés nada.</p>
+    </div>
+
+    <button class="btn btn-v" id="btn-guardar" onclick="guardarClase()">Guardar en Sheets →</button>
+  </div>
+  </div>
+</section>
+
+<!-- ══ CARGAR BIBLIOGRAFÍA ══ -->
+<section id="sec-cargarbiblio" class="hidden sec form-wrap">
+  <div class="page">
+  <div class="form-card">
+    <p class="form-title">📚 Cargar Bibliografía</p>
+
+    <div class="step-box">
+      <div class="step-hdr">
+        <div style="display:flex;gap:.6rem;flex:1;">
+          <div class="step-num">1</div>
+          <div>
+            <p class="step-title">Copiá este prompt</p>
+            <p class="step-sub">Pegalo en Claude con el temario de la materia</p>
+          </div>
+        </div>
+        <button class="btn btn-out btn-sm" id="btn-copiar" onclick="copiarPrompt()">📋 Copiar</button>
+      </div>
+      <div class="code-box" id="prompt-ia">Organizá el temario de una materia universitaria en JSON para base de datos.
+
+Devolvé SOLO el JSON (sin texto extra, sin markdown):
+
+[
+  {
+    "id": "txt_MAT_001",
+    "materia": "NOMBRE EN MAYUSCULAS",
+    "unidad": "Unidad 1: Nombre",
+    "nro_texto": 1,
+    "titulo_texto": "Título completo",
+    "autores": "Apellido, N. (año)",
+    "estado": "Sin leer",
+    "link_resumen": "",
+    "tipo_clase": "Teórica",
+    "notas": "",
+    "fecha_actualizacion": "2026-04-19"
+  }
+]
+
+Reglas:
+- id: txt_[3letras]_[3digitos] (txt_SEM_001 para Semiosis)
+- materia: MAYÚSCULAS exactas
+- estado: siempre "Sin leer"
+- tipo_clase: "Teórica" o "Práctica"
+- Mismo texto en ambos tipos → 2 entradas con ids distintos
+- Un objeto por texto
+
+Temario:</div>
+    </div>
+
+    <div class="divider"><span>Paso 2 — Pegá la respuesta</span></div>
+    <textarea id="json-input" class="inp" rows="9" style="margin-top:.5rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;"
+      placeholder='[&#10;  {&#10;    "id": "txt_SEM_001",&#10;    "materia": "SEMIOSIS SOCIAL",&#10;    ...&#10;  }&#10;]'></textarea>
+
+    <div class="divider" style="margin-top:.75rem;"><span>Paso 3 — Revisar y subir</span></div>
+    <button class="btn btn-out" style="margin-top:.5rem;" onclick="previsualizarBiblio()">👁 Previsualizar antes de subir</button>
+  </div>
+
+  <!-- Preview -->
+  <div id="biblio-preview" class="hidden fade">
+    <div class="form-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.85rem;">
+        <div>
+          <p style="font-size:.95rem;font-weight:700;">Vista Previa</p>
+          <p style="font-size:.75rem;color:var(--text3);margin-top:.1rem;"><span id="prev-count">0</span> textos para subir</p>
+        </div>
+        <button class="btn btn-out btn-sm" onclick="limpiarPreview()">✕ Limpiar</button>
+      </div>
+
+      <div id="prev-errors" class="hidden err-box">
+        <p>⚠️ Errores — corregí antes de subir</p>
+        <ul id="err-list"></ul>
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Materia</th><th>Unidad</th><th>Título</th><th>Tipo</th></tr></thead>
+          <tbody id="prev-tbody"></tbody>
+        </table>
+      </div>
+
+      <button class="btn btn-v" id="btn-subir" onclick="subirBiblio()">↑ Subir todo a Google Sheets</button>
+    </div>
+  </div>
+  </div>
+</section>
+
+</div>
+
+<!-- ══ BOTTOM NAV ══ -->
+<nav id="bottom-nav">
+  <div class="nav-item active" id="bn-biblio" onclick="setSection('biblio')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+    Biblio
+  </div>
+  <div class="nav-item" id="bn-clases" onclick="setSection('clases')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    Clases
+  </div>
+  <div class="nav-item" id="bn-cargar" onclick="setSection('cargar')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+    Clase
+  </div>
+  <div class="nav-item" id="bn-cargarbiblio" onclick="setSection('cargarbiblio')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    Biblio+
+  </div>
+  <div class="nav-item" id="bn-drive" onclick="window.open('https://drive.google.com/drive/my-drive','_blank')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+    Drive
+  </div>
+</nav>
+
+<script src="app.js"></script>
+</body>
+</html>
