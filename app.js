@@ -1,5 +1,5 @@
 // EstudioPsi — app.js v6 (materias dinámicas, filtro correcto)
-const BASE = 'https://script.google.com/macros/s/AKfycbwnAGPF7wiFeo7TnA6DNqYi3jhmi207k9zgk34A9tD5XcJAiWSs0GaGl0ikPBGdiz3J/exec';
+const BASE = 'https://script.google.com/macros/s/AKfycbzGgwvN3y3xV-HQIbaOOnerxKebQovcjm7LW0KhQ0ocgXuIffHCZTmuxRZfg7pBrrMR/exec';
 const CFG  = { GB: BASE+'?hoja=Bibliografia', GC: BASE+'?hoja=Clases', P: BASE, HB:'Bibliografia', HC:'Clases' };
 
 // SIN materias hardcoded — todo viene del Sheets
