@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NEUROSCAN · APUNTES PDF</title>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@200;400;600;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --cyan:#00e5ff;--purple:#9d4edd;--green:#39ff7a;
+  --pink:#ff2d78;--gold:#ffc400;
+  --bg:#020510;--surface:rgba(0,229,255,.04);
+  --border:rgba(0,229,255,.14);--bh:rgba(0,229,255,.5);
+  --text:#c8f0ff;--dim:rgba(200,240,255,.38);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{font-family:'Exo 2',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.025) 1px,transparent 1px);background-size:44px 44px;z-index:0;animation:gs 30s linear infinite;}
+@keyframes gs{to{background-position:0 44px}}
+.orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0;}
+.o1{width:500px;height:500px;background:rgba(0,229,255,.05);top:-150px;right:-150px;animation:fo1 12s ease-in-out infinite;}
+.o2{width:400px;height:400px;background:rgba(157,78,221,.07);bottom:0;left:-150px;animation:fo2 14s ease-in-out infinite;}
+@keyframes fo1{0%,100%{transform:translateY(0)}50%{transform:translateY(-25px)}}
+@keyframes fo2{0%,100%{transform:translateY(0)}50%{transform:translateY(20px)}}
+
+.wrap{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:20px 16px 60px;}
+
+/* Header */
+.hdr{text-align:center;padding:20px 0 28px;}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,255,.07);border:1px solid var(--border);border-radius:100px;padding:5px 16px 5px 9px;margin-bottom:14px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--cyan);letter-spacing:2.5px;}
+.pdot{width:7px;height:7px;background:var(--cyan);border-radius:50%;box-shadow:0 0 8px var(--cyan);animation:pd 1.8s ease-in-out infinite;}
+@keyframes pd{0%,100%{opacity:1}50%{opacity:.22}}
+h1{font-size:clamp(2rem,7vw,3.6rem);font-weight:900;letter-spacing:-1.5px;line-height:1;background:linear-gradient(135deg,#fff 0%,var(--cyan) 40%,var(--purple) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+.sub{font-size:.72rem;color:var(--dim);letter-spacing:2.5px;font-family:'Share Tech Mono',monospace;}
+
+
+/* Engine pills */
+.engine-strip{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:24px;flex-wrap:wrap;}
+.ep{display:inline-flex;align-items:center;gap:5px;border-radius:100px;padding:5px 12px;font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:1px;}
+.ep1{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.25);color:var(--cyan);}
+.ep2{background:rgba(157,78,221,.08);border:1px solid rgba(157,78,221,.3);color:rgba(210,180,255,.9);}
+.ep3{background:rgba(57,255,122,.06);border:1px solid rgba(57,255,122,.2);color:var(--green);}
+.ea{color:var(--dim);font-size:.8rem;}
+
+/* Card */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:14px;backdrop-filter:blur(18px);transition:border-color .3s;}
+.card:focus-within{border-color:rgba(0,229,255,.28);}
+.ch{display:flex;align-items:center;gap:11px;margin-bottom:18px;}
+.sn{width:28px;height:28px;flex-shrink:0;background:linear-gradient(135deg,var(--cyan),var(--purple));border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;color:#000;}
+.ct{font-size:.9rem;font-weight:700;}
+.cs{font-size:.68rem;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-top:2px;}
+
+/* Form */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+@media(max-width:460px){.fg{grid-template-columns:1fr;}}
+.fi{display:flex;flex-direction:column;gap:5px;}
+.fi.fw{grid-column:1/-1;}
+label{font-size:.63rem;font-family:'Share Tech Mono',monospace;color:var(--cyan);letter-spacing:2px;text-transform:uppercase;}
+select,input[type=text]{background:rgba(0,229,255,.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:.85rem;font-weight:600;outline:none;-webkit-appearance:none;transition:border-color .2s,box-shadow .2s,background .2s;width:100%;}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2300e5ff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+select option{background:#080f22;}
+select:focus,input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.1);background:rgba(0,229,255,.05);}
+input::placeholder{color:var(--dim);font-weight:400;}
+
+/* Textarea */
+.ta-wrap{position:relative;margin-top:4px;}
+textarea{width:100%;min-height:320px;background:rgba(0,229,255,.02);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.76rem;line-height:1.75;outline:none;resize:vertical;transition:border-color .2s,background .2s;-webkit-appearance:none;}
+textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.09);background:rgba(0,229,255,.04);}
+textarea::placeholder{color:var(--dim);font-weight:400;}
+
+/* Syntax hint */
+.syn-hint{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
+@media(max-width:420px){.syn-hint{grid-template-columns:1fr;}}
+.sh{display:flex;align-items:center;gap:7px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:6px 10px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--dim);}
+.sh code{color:var(--cyan);font-size:.65rem;}
+.sh-val{color:var(--text);font-size:.63rem;margin-left:auto;}
+
+/* Upload file btn */
+.upload-row{display:flex;align-items:center;gap:9px;margin-top:10px;}
+.btn-upload{display:inline-flex;align-items:center;gap:6px;background:rgba(0,229,255,.05);border:1.5px dashed rgba(0,229,255,.22);border-radius:10px;padding:8px 15px;font-family:'Exo 2',sans-serif;font-size:.76rem;font-weight:700;color:var(--dim);cursor:pointer;transition:all .2s;}
+.btn-upload:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.08);}
+.upload-hint{font-size:.62rem;font-family:'Share Tech Mono',monospace;color:var(--dim);letter-spacing:.5px;}
+#mdFileInput{display:none!important;}
+
+/* Char counter */
+.char-row{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+.char-cnt{font-size:.62rem;font-family:'Share Tech Mono',monospace;color:var(--dim);}
+.char-cnt span{color:var(--cyan);}
+
+/* Preview pane */
+.prev-wrap{display:none;margin-top:12px;}
+.prev-wrap.on{display:block;}
+.prev-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.prev-title{font-size:.68rem;font-family:'Share Tech Mono',monospace;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;}
+.btn-prev-tog{background:transparent;border:1px solid var(--border);border-radius:7px;padding:4px 11px;color:var(--dim);font-size:.65rem;font-family:'Share Tech Mono',monospace;cursor:pointer;transition:all .2s;}
+.btn-prev-tog:hover{border-color:var(--bh);color:var(--text);}
+.prev-content{background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:11px;padding:14px;max-height:260px;overflow-y:auto;font-size:.78rem;line-height:1.65;color:var(--text);}
+.prev-content h1{font-size:1rem;font-weight:900;color:#fff;text-transform:uppercase;margin-bottom:10px;text-align:center;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.prev-content h2{font-size:.88rem;font-weight:800;color:var(--cyan);margin:12px 0 5px;padding-left:0;}
+.prev-content h3{font-size:.8rem;font-weight:700;color:rgba(200,180,255,.9);margin:8px 0 4px;padding-left:8px;border-left:2px solid var(--purple);}
+.prev-content p{margin-bottom:6px;color:var(--text);padding-left:4px;}
+.prev-content ul{padding-left:14px;margin-bottom:6px;}
+.prev-content li{margin-bottom:3px;color:var(--dim);}
+.prev-content li.lvl2{padding-left:12px;font-size:.74rem;}
+.prev-content hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
+.prev-content .formula{text-align:center;color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:.8rem;padding:6px 0;font-style:italic;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* Options */
+.opt-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:2px;}
+.toggle-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(0,229,255,.04);border:1px solid var(--border);border-radius:100px;padding:5px 12px;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--dim);cursor:pointer;transition:all .2s;user-select:none;}
+.toggle-pill.on{background:rgba(0,229,255,.1);border-color:var(--cyan);color:var(--cyan);}
+.toggle-pill .tk{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
+/* Progress */
+.prog-s{display:none;margin-bottom:14px;}
+.prog-s.on{display:block;}
+.plog{background:rgba(0,0,0,.55);border:1px solid var(--border);border-radius:11px;padding:12px 14px;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--dim);max-height:160px;overflow-y:auto;line-height:1.95;margin-bottom:10px;}
+.ll{display:flex;gap:7px;align-items:baseline;}
+.lts{color:rgba(0,229,255,.3);flex-shrink:0;font-size:.62rem;}
+.lm{word-break:break-word;}
+.lm.ok{color:var(--green);}
+.lm.act{color:var(--cyan);}
+.lm.warn{color:var(--gold);}
+.lm.err{color:var(--pink);}
+.bw{background:rgba(255,255,255,.05);border-radius:100px;height:5px;overflow:hidden;margin-bottom:6px;}
+.bf{height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:100px;transition:width .4s ease;box-shadow:0 0 10px rgba(0,229,255,.4);width:0%;}
+.bl{font-size:.66rem;font-family:'Share Tech Mono',monospace;color:var(--dim);text-align:center;margin-bottom:12px;}
+
+/* Stats */
+.stats-box{display:none;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:11px;padding:12px 14px;margin-bottom:12px;}
+.stats-box.on{display:block;}
+.sr{display:flex;align-items:center;justify-content:space-between;font-size:.69rem;font-family:'Share Tech Mono',monospace;color:var(--dim);padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.sr:last-child{border-bottom:none;}
+.sv{font-weight:700;}
+.sv.hi{color:var(--green);}
+.sv.def{color:var(--text);}
+
+/* CTA */
+.btn-proc{width:100%;padding:15px;border:none;border-radius:13px;background:linear-gradient(135deg,var(--cyan),var(--purple));color:#000;font-family:'Exo 2',sans-serif;font-size:.9rem;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;}
+.btn-proc::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);opacity:0;transition:opacity .3s;}
+.btn-proc:hover::after{opacity:1;}
+.btn-proc:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(0,229,255,.28);}
+.btn-proc:disabled{opacity:.32;cursor:not-allowed;transform:none;box-shadow:none;}
+.errb{background:rgba(255,45,120,.07);border:1px solid rgba(255,45,120,.3);border-radius:9px;padding:10px 14px;font-size:.74rem;color:#ff8cb0;margin-top:11px;display:none;font-family:'Share Tech Mono',monospace;line-height:1.6;}
+.errb.on{display:block;}
+
+/* Download */
+.dls{display:none;text-align:center;margin-top:6px;}
+.dls.on{display:block;}
+.sring{width:68px;height:68px;margin:0 auto 16px;background:linear-gradient(135deg,rgba(57,255,122,.14),rgba(0,229,255,.1));border:2px solid rgba(57,255,122,.5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;animation:rp .5s cubic-bezier(.34,1.56,.64,1);}
+@keyframes rp{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.dlt{font-size:1.1rem;font-weight:800;color:var(--green);margin-bottom:5px;}
+.dlf{font-size:.68rem;font-family:'Share Tech Mono',monospace;color:var(--dim);margin-bottom:18px;word-break:break-all;padding:0 10px;}
+.btn-dl{display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,var(--green),var(--cyan));border:none;border-radius:13px;padding:13px 26px;color:#000;font-family:'Exo 2',sans-serif;font-size:.9rem;font-weight:900;cursor:pointer;transition:all .3s;text-transform:uppercase;letter-spacing:1px;margin-bottom:11px;}
+.btn-dl:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(57,255,122,.28);}
+.btn-rst{display:block;width:100%;background:transparent;border:1px solid var(--border);border-radius:11px;padding:11px;color:var(--dim);font-family:'Exo 2',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;margin-top:8px;}
+.btn-rst:hover{border-color:var(--bh);color:var(--text);}
+.foot{text-align:center;padding:14px;font-size:.6rem;font-family:'Share Tech Mono',monospace;color:rgba(200,240,255,.09);letter-spacing:1.5px;}
+
+.nav-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 30px;
+  align-items: center;
+}
+
+.btn-capsule {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 229, 255, 0.03);
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  border-radius: 100px;
+  padding: 8px 18px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--dim);
+  text-decoration: none;
+  letter-spacing: 1.5px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+.btn-capsule:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: rgba(0, 229, 255, 0.08);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.1);
+}
+
+.btn-capsule.active {
+  color: var(--cyan);
+  border-color: rgba(0, 229, 255, 0.4);
+  background: rgba(0, 229, 255, 0.06);
+}
+
+.pdot-nav {
+  width: 7px;
+  height: 7px;
+  background: var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--cyan);
+}
+</style>
+</head>
+<body>
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+
+<div class="wrap">
+  <div class="nav-container">
+    <a href="index.html" class="btn-capsule">← VOLVER AL INICIO</a>
+    <div class="btn-capsule active">
+      <div class="pdot-nav"></div> NEUROSCAN · APUNTES · v2
+    </div>
+  </div>
+
+  <div class="engine-strip">
+    <div class="ep ep1">📝 Markdown input</div>
+    <span class="ea">→</span>
+    <div class="ep ep2">⚙️ Parser + layout A4</div>
+    <span class="ea">→</span>
+    <div class="ep ep3">📄 PDF descargable</div>
+  </div>
+
+  <!-- 00 Prompt -->
+  <div class="card" style="border-color: var(--purple);">
+    <div class="ch"><div class="sn" style="background: var(--purple);">0</div>
+        <div><div class="ct">Prompt de Configuración</div>
+        <div class="cs">Copia el prompt para usar en la IA</div></div>
+    </div>
+    <button class="btn-rst" style="border-color: var(--purple); color: var(--purple); margin-top: 0;" onclick="openPrompt()">👁️ VER PROMPT</button>
+  </div>
+
+  <div id="promptModal" style="display:none; position:fixed; inset:0; background:rgba(2,5,16,0.95); z-index:100; padding:20px; align-items:center; justify-content:center;">
+    <div class="card" style="max-width:600px; width:100%; max-height:80vh; overflow-y:auto; border-color:var(--cyan);">
+      <div class="prev-hdr">
+        <div class="prev-title">Instrucciones de la IA</div>
+        <button class="btn-prev-tog" onclick="closePrompt()">Cerrar</button>
+      </div>
+      <textarea id="promptText" readonly style="min-height:350px; margin-bottom:15px; background:rgba(0,0,0,0.4); font-size: 0.7rem; line-height: 1.5; color: #a5d8ff;"># INSTRUCCIONES PARA PROCESAMIENTO DE TEXTO ACADÉMICO
+
+Actúa como un experto en transcripción y análisis de textos universitarios. Tu objetivo es transformar el material proporcionado (PDF, Word o escaneado) en una guía de estudio de máxima densidad y fidelidad.
+
+## 1. INSTRUCCIONES DE CONTENIDO
+Empezá con una introducción desarrollada que explique cómo inicia el texto y cuál es la idea central. Cada vez que aparezca un título o subtítulo importante, ponelo igual que en el texto como encabezado. Debajo, escribí un resumen fiel de lo que desarrolla ese apartado, usando palabras textuales o lo más cercanas al original. Respetá el orden temático del texto, de principio a fin. No inventes, no interpretes ni agregues información externa: solo usá lo que esté en el texto. La idea es que el material final sea como una guía de estudio narrativa y ordenada, donde quede claro qué trata cada parte, con definiciones exactas para poder escribirlas en un examen.
+
+De esta forma, el resumen debe arrancar con:
+- Introducción (extensa, explicando de qué habla el texto en general).
+- Título/Subtítulo (tal cual aparece en el original).
+- Explicación fiel, desarrollada y extensa de cada punto.
+- Siguiente tema/subtema con su desarrollo detallado… y así hasta el final.
+
+## 2. REGLAS DE EXTENSIÓN Y LIMPIEZA
+- **PROHIBICIÓN DE CITAS:** No utilices etiquetas de citas, números de página ni corchetes del tipo. El texto debe ser limpio y fluido.
+- **MÁXIMA DENSIDAD:** Si el texto original es extenso, el resumen debe ser igualmente denso. No resumas conceptos clave en una sola oración; explica los fundamentos y los matices para que la guía sea autosuficiente para el estudio.
+- **FIDELIDAD TEXTUAL:** Mantén las definiciones técnicas y el vocabulario específico del autor.
+
+## 3. FORMATO DE SALIDA (JERARQUÍA MARKDOWN)
+Debes estructurar el contenido utilizando exclusivamente la siguiente jerarquía para asegurar la conversión posterior a PDF:
+
+- `#` → Título principal (Mayúsculas y Negrita).
+- `##` → Secciones principales / Introducción (Negrita).
+- `###` → Subtítulos (Negrita).
+- `**Negrita**` → Para resaltar conceptos clave dentro de los párrafos.
+- `*Texto en cursiva*` → Para definiciones exactas o citas textuales del autor.
+- `•` → Listas de primer nivel.
+- `◦` → Sublistas (manteniendo la sangría).
+
+## 4. RESTRICCIÓN DE ENTREGA
+- **SÓLO CÓDIGO:** Entrega el contenido EXCLUSIVAMENTE dentro de un bloque de código (Markdown/MD/TXT).
+- **SIN CHAT:** No incluyas saludos, introducciones ni comentarios por parte de la IA (prohibido frases como "Aquí tienes tu resumen"). El texto debe comenzar directamente con el primer encabezado.</textarea>
+      <button class="btn-proc" id="copyBtn" onclick="copyPrompt()" style="background: linear-gradient(135deg, var(--purple), #5a189a);">📋 COPIAR AL PORTAPAPELES</button>
+    </div>
+  </div>
+
+  <!-- 01 Identificación -->
+  <div class="card">
+    <div class="ch"><div class="sn">01</div>
+      <div><div class="ct">Identificación del Documento</div>
+        <div class="cs">Materia · Unidad · Título</div></div>
+    </div>
+    <div class="fg">
+      <div class="fi">
+        <label>Materia</label>
+        <select id="materia">
+          <option>Psicoanálisis</option>
+          <option>Psicología General</option>
+          <option>Epistemología</option>
+          <option>Salud Mental</option>
+          <option>Clínica I</option>
+          <option>Clínica II</option>
+          <option>Estadística</option>
+          <option>Neurociencias</option>
+          <option>Otra</option>
+        </select>
+      </div>
+      <div class="fi">
+        <label>Unidad</label>
+        <select id="unidad">
+          <option value="1">Unidad 1</option><option value="2">Unidad 2</option>
+          <option value="3">Unidad 3</option><option value="4">Unidad 4</option>
+          <option value="5">Unidad 5</option><option value="6">Unidad 6</option>
+          <option value="7">Unidad 7</option><option value="8">Unidad 8</option>
+          <option value="9">Unidad 9</option><option value="10">Unidad 10</option>
+        </select>
+      </div>
+      <div class="fi fw">
+        <label>Nombre del Texto / Teórico</label>
+        <input type="text" id="titulo" placeholder="Ej: El inconsciente y sus formaciones...">
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 Contenido -->
+  <div class="card">
+    <div class="ch"><div class="sn">02</div>
+      <div><div class="ct">Pegar o Cargar Apuntes</div>
+        <div class="cs">Formato Markdown académico</div></div>
+    </div>
+
+    <div class="syn-hint">
+      <div class="sh"><code>#</code> <span>Título principal</span></div>
+      <div class="sh"><code>##</code> <span>Sección</span></div>
+      <div class="sh"><code>###</code> <span>Subtítulo</span></div>
+      <div class="sh"><code>---</code> <span>Separador</span></div>
+      <div class="sh"><code>• texto</code> <span>Viñeta nivel 1</span></div>
+      <div class="sh"><code>◦ texto</code> <span>Viñeta nivel 2</span></div>
+      <div class="sh"><code>- texto</code> <span>Lista ("-")</span></div>
+      <div class="sh"><code>$$...$$</code> <span>Fórmula</span></div>
+    </div>
+
+    <div class="ta-wrap" style="margin-top:12px;">
+      <label style="display:block;margin-bottom:6px;">Contenido Markdown</label>
+      <textarea id="mdInput" placeholder="# Título del Teórico
+
+## Sección Principal
+
+### Subtítulo
+
+• Concepto clave uno
+◦ Detalle del concepto
+◦ Otro detalle
+
+• Segundo concepto
+
+---
+
+## Otra Sección
+
+$$índice = valor / total$$
+
+Texto de cuerpo normal aquí..."></textarea>
+    </div>
+
+    <div class="char-row">
+      <div class="char-cnt">Caracteres: <span id="charCnt">0</span></div>
+      <div class="char-cnt">Líneas: <span id="lineCnt">0</span></div>
+    </div>
+
+    <div class="upload-row">
+      <button class="btn-upload" onclick="document.getElementById('mdFileInput').click()">
+        📂 Cargar archivo .txt / .md
+      </button>
+      <div class="upload-hint">o pegá directamente arriba</div>
+    </div>
+    <input type="file" id="mdFileInput" accept=".txt,.md,text/plain">
+
+    <div class="prev-wrap" id="prevWrap">
+      <div class="prev-hdr">
+        <div class="prev-title">🔍 Vista previa</div>
+        <button class="btn-prev-tog" onclick="togglePreview()">Ocultar</button>
+      </div>
+      <div class="prev-content" id="prevContent"></div>
+    </div>
+  </div>
+
+  <!-- 03 Opciones -->
+  <div class="card">
+    <div class="ch"><div class="sn">03</div>
+      <div><div class="ct">Opciones de Formato</div>
+        <div class="cs">Configuración del PDF final</div></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div>
+        <label style="display:block;margin-bottom:7px;">Inclusiones</label>
+        <div class="opt-row">
+          <div class="toggle-pill on" id="tg-header" onclick="toggleOpt('header')">
+            <div class="tk"></div> Encabezado
+          </div>
+          <div class="toggle-pill on" id="tg-footer" onclick="toggleOpt('footer')">
+            <div class="tk"></div> Pie de página
+          </div>
+          <div class="toggle-pill on" id="tg-nums" onclick="toggleOpt('nums')">
+            <div class="tk"></div> Nros. de página
+          </div>
+          <div class="toggle-pill" id="tg-toc" onclick="toggleOpt('toc')">
+            <div class="tk"></div> Índice automático
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label style="display:block;margin-bottom:7px;">Tamaño de fuente cuerpo</label>
+        <div class="opt-row">
+          <div class="toggle-pill on" id="fs-9"  onclick="setFontSize(9)"><div class="tk"></div> 9 pt</div>
+          <div class="toggle-pill"   id="fs-10" onclick="setFontSize(10)"><div class="tk"></div> 10 pt</div>
+          <div class="toggle-pill"   id="fs-11" onclick="setFontSize(11)"><div class="tk"></div> 11 pt</div>
+          <div class="toggle-pill"   id="fs-12" onclick="setFontSize(12)"><div class="tk"></div> 12 pt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 Generar -->
+  <div class="card">
+    <div class="ch"><div class="sn">04</div>
+      <div><div class="ct">Generar PDF</div>
+        <div class="cs">Layout A4 · márgenes estrechos · Arial 9pt · interlineado 1</div></div>
+    </div>
+
+    <div class="prog-s" id="progS">
+      <div class="plog" id="plog"></div>
+      <div class="stats-box" id="statsBox">
+        <div class="sr"><span>Páginas generadas</span><span class="sv hi" id="stP">—</span></div>
+        <div class="sr"><span>Secciones detectadas</span><span class="sv hi" id="stS">—</span></div>
+        <div class="sr"><span>Palabras totales</span><span class="sv hi" id="stW">—</span></div>
+        <div class="sr"><span>Fórmulas</span><span class="sv def" id="stF">—</span></div>
+        <div class="sr"><span>Fuente cuerpo</span><span class="sv hi" id="stFnt">—</span></div>
+      </div>
+      <div class="bw"><div class="bf" id="bf"></div></div>
+      <div class="bl" id="bl">Esperando...</div>
+    </div>
+
+    <button class="btn-proc" id="procBtn" onclick="startProcess()">⚡ GENERAR PDF ACADÉMICO</button>
+    <div class="errb" id="errb"></div>
+
+    <div class="dls" id="dls">
+      <div class="sring">✓</div>
+      <div class="dlt">PDF Generado</div>
+      <div class="dlf" id="dlf"></div>
+      <button class="btn-dl" id="dlBtn">⬇ DESCARGAR PDF</button>
+      <button class="btn-rst" onclick="resetAll()">↩ Procesar nuevo texto</button>
+    </div>
+  </div>
+
+  <div class="foot">NEUROSCAN APUNTES v2 · PDF A4 · ARIAL 9pt · MÁRGENES ESTRECHOS · INTERLINEADO 1</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════
+var pdfBlob  = null;
+var pdfFname = '';
+var opts = { header: true, footer: true, nums: true, toc: false };
+var bodyFontSize = 9;   // ← Arial 9pt por defecto
+var prevVisible = false;
+
+// ═══════════════════════════════════════
+//  TOGGLE OPTS
+// ═══════════════════════════════════════
+function toggleOpt(key) {
+  opts[key] = !opts[key];
+  document.getElementById('tg-' + key).classList.toggle('on', opts[key]);
+}
+function setFontSize(sz) {
+  bodyFontSize = sz;
+  [9, 10, 11, 12].forEach(function(s) {
+    document.getElementById('fs-' + s).classList.toggle('on', s === sz);
+  });
+}
+
+// ═══════════════════════════════════════
+//  TEXTAREA COUNTER
+// ═══════════════════════════════════════
+document.getElementById('mdInput').addEventListener('input', function() {
+  var v = this.value;
+  document.getElementById('charCnt').textContent = v.length.toLocaleString('es');
+  document.getElementById('lineCnt').textContent = v.split('\n').length.toLocaleString('es');
+  if (v.trim().length > 10) renderPreview(v);
+  else { document.getElementById('prevWrap').classList.remove('on'); }
+});
+
+// ═══════════════════════════════════════
+//  FILE LOAD
+// ═══════════════════════════════════════
+document.getElementById('mdFileInput').onchange = function() {
+  var f = this.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function(e) {
+    document.getElementById('mdInput').value = e.target.result;
+    document.getElementById('mdInput').dispatchEvent(new Event('input'));
+  };
+  r.readAsText(f, 'UTF-8');
+};
+
+// ═══════════════════════════════════════
+//  PREVIEW
+// ═══════════════════════════════════════
+function togglePreview() {
+  prevVisible = !prevVisible;
+  var btn = document.querySelector('.btn-prev-tog');
+  if (!prevVisible) {
+    document.getElementById('prevWrap').classList.remove('on');
+    btn.textContent = 'Mostrar';
+  } else {
+    document.getElementById('prevWrap').classList.add('on');
+    btn.textContent = 'Ocultar';
+    renderPreview(document.getElementById('mdInput').value);
+  }
+}
+
+function renderPreview(text) {
+  var lines = text.split('\n');
+  var html = '';
+  lines.forEach(function(line) {
+    var t = line;
+    if (t.startsWith('# '))       html += '<h1>' + esc(t.slice(2)) + '</h1>';
+    else if (t.startsWith('## ')) html += '<h2>' + esc(t.slice(3)) + '</h2>';
+    else if (t.startsWith('### '))html += '<h3>' + esc(t.slice(4)) + '</h3>';
+    else if (t.trim() === '---')  html += '<hr>';
+    else if (t.startsWith('◦ '))  html += '<ul><li class="lvl2">' + esc(t.slice(2)) + '</li></ul>';
+    else if (t.startsWith('• '))  html += '<ul><li>' + esc(t.slice(2)) + '</li></ul>';
+    else if (/^[-*] /.test(t))    html += '<ul><li>' + esc(t.slice(2)) + '</li></ul>';
+    else if (t.startsWith('$$') && t.endsWith('$$')) html += '<div class="formula">' + esc(t.slice(2,-2)) + '</div>';
+    else if (t.trim()) html += '<p>' + esc(t) + '</p>';
+  });
+  document.getElementById('prevContent').innerHTML = html;
+  document.getElementById('prevWrap').classList.add('on');
+  prevVisible = true;
+  document.querySelector('.btn-prev-tog').textContent = 'Ocultar';
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Strip inline markers (para headings que ya son bold) ──────────
+function stripInline(s) {
+  return s.replace(/\*\*\*(.+?)\*\*\*/g,'$1')
+           .replace(/\*\*(.+?)\*\*/g,'$1')
+           .replace(/\*(.+?)\*/g,'$1');
+}
+
+// ── Parsea inline markdown en segmentos {text, bold, italic} ─────
+function parseInline(str) {
+  var segments = [];
+  // Match ***bold+italic***, **bold**, *italic*  — in that order
+  var re = /\*\*\*(.+?)\*\*\*|\*\*(.+?)\*\*|\*(.+?)\*/g;
+  var last = 0, m;
+  while ((m = re.exec(str)) !== null) {
+    if (m.index > last) {
+      segments.push({ text: str.slice(last, m.index), bold: false, italic: false });
+    }
+    if (m[1] !== undefined)      segments.push({ text: m[1], bold: true,  italic: true  });
+    else if (m[2] !== undefined) segments.push({ text: m[2], bold: true,  italic: false });
+    else if (m[3] !== undefined) segments.push({ text: m[3], bold: false, italic: true  });
+    last = m.index + m[0].length;
+  }
+  if (last < str.length) segments.push({ text: str.slice(last), bold: false, italic: false });
+  return segments.length ? segments : [{ text: str, bold: false, italic: false }];
+}
+
+// ═══════════════════════════════════════
+//  LOG / PROGRESS
+// ═══════════════════════════════════════
+function log(msg, type) {
+  var el = document.getElementById('plog');
+  var d = new Date();
+  var ts = p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds());
+  var div = document.createElement('div'); div.className = 'll';
+  div.innerHTML = '<span class="lts">[' + ts + ']</span><span class="lm ' + (type||'') + '">' + msg + '</span>';
+  el.appendChild(div); el.scrollTop = el.scrollHeight;
+}
+function p2(n) { return n < 10 ? '0' + n : n; }
+function setBar(pct, lbl) {
+  document.getElementById('bf').style.width = pct + '%';
+  document.getElementById('bl').textContent = lbl;
+}
+function showErr(m) { var e = document.getElementById('errb'); e.textContent = m; e.classList.add('on'); }
+function hideErr() { document.getElementById('errb').classList.remove('on'); }
+
+// ═══════════════════════════════════════
+//  MARKDOWN PARSER → Structured Tokens
+// ═══════════════════════════════════════
+function parseMarkdown(text) {
+  var lines = text.split('\n');
+  var tokens = [];
+  var secCount = 0, formulaCount = 0, wordCount = 0;
+
+  lines.forEach(function(rawLine) {
+    var line = rawLine.trimEnd();
+
+    if (/^# /.test(line)) {
+      tokens.push({ type: 'h1', text: stripInline(line.slice(2).trim()) });
+      wordCount += line.split(/\s+/).length;
+    } else if (/^## /.test(line)) {
+      tokens.push({ type: 'h2', text: stripInline(line.slice(3).trim()) });
+      secCount++;
+      wordCount += line.split(/\s+/).length;
+    } else if (/^### /.test(line)) {
+      tokens.push({ type: 'h3', text: stripInline(line.slice(4).trim()) });
+      wordCount += line.split(/\s+/).length;
+    } else if (/^---+$/.test(line.trim())) {
+      tokens.push({ type: 'hr' });
+    } else if (/^\$\$.*\$\$$/.test(line.trim())) {
+      var formula = line.trim().slice(2, -2).trim();
+      tokens.push({ type: 'formula', text: formula });
+      formulaCount++;
+    } else if (/^◦ /.test(line)) {
+      var t2 = line.slice(2).trim();
+      tokens.push({ type: 'li2', text: t2, segs: parseInline(t2) });
+      wordCount += line.split(/\s+/).length;
+    } else if (/^• /.test(line)) {
+      var t1 = line.slice(2).trim();
+      tokens.push({ type: 'li1', text: t1, segs: parseInline(t1) });
+      wordCount += line.split(/\s+/).length;
+    } else if (/^[-*] /.test(line)) {
+      var tl = line.slice(2).trim();
+      tokens.push({ type: 'li1', text: tl, segs: parseInline(tl) });
+      wordCount += line.split(/\s+/).length;
+    } else if (!line.trim()) {
+      tokens.push({ type: 'blank' });
+    } else {
+      tokens.push({ type: 'body', text: line, segs: parseInline(line) });
+      wordCount += line.split(/\s+/).length;
+    }
+  });
+
+  return { tokens: tokens, sections: secCount, formulas: formulaCount, words: wordCount };
+}
+
+// ═══════════════════════════════════════
+//  PDF BUILDER — Arial 9pt · Márgenes estrechos · Interlineado 1
+// ═══════════════════════════════════════
+function buildPDF(parsed, materia, unidad, titulo) {
+  var jspdf = window.jspdf;
+  var doc = new jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  // ── Layout A4 (mm) — márgenes estrechos ──────────────────
+  var PW = 210, PH = 297;
+  var ML = 15,   // margen izquierdo estrecho
+      MR = 15,   // margen derecho estrecho
+      MT = 20,   // margen superior
+      MB = 18;   // margen inferior
+  var TW = PW - ML - MR;  // ancho de texto: 180mm
+  var pageNum = 1;
+
+  // ── Colores ──────────────────────────────────────────────
+  var C_BLACK  = [0, 0, 0];
+  var C_DARK   = [20, 20, 20];
+  var C_ACCENT = [0, 70, 140];
+  var C_SUB    = [60, 40, 120];
+  var C_DIM    = [110, 110, 120];
+  var C_RULE   = [180, 190, 205];
+  var C_FORM   = [130, 90, 0];
+
+  // ── Tamaños de fuente ────────────────────────────────────
+  // H1: Arial Bold 12pt
+  // H2: Arial Bold 10pt
+  // H3: Arial Bold 10pt
+  // Cuerpo: Arial 9pt (bodyFontSize)
+  var FS_H1   = 12;
+  var FS_H2   = 10;
+  var FS_H3   = 10;
+  var FS_BODY = bodyFontSize;  // 9pt por defecto
+  var FS_LI   = bodyFontSize;
+  var FS_HDR  = 7;
+  var FS_FORM = bodyFontSize;
+
+  // ── Interlineado 1 ───────────────────────────────────────
+  // factor 1.0 = interlineado simple exacto
+  function lh(fs) { return fs * 0.353 * 1.0; }
+
+  var y = MT;
+
+  // ── Helpers ──────────────────────────────────────────────
+  function setColor(arr) { doc.setTextColor(arr[0], arr[1], arr[2]); }
+  function setDraw(arr)  { doc.setDrawColor(arr[0], arr[1], arr[2]); }
+
+  function needSpace(needed) {
+    if (y + needed > PH - MB) { addPage(); return true; }
+    return false;
+  }
+
+  function addPage() {
+    // Pie de página de la página actual
+    if (opts.nums) {
+      doc.setFontSize(FS_HDR);
+      doc.setFont('helvetica','normal');
+      setColor(C_DIM);
+      doc.text(String(pageNum), PW / 2, PH - 8, { align: 'center' });
+    }
+    if (opts.footer) {
+      doc.setFontSize(FS_HDR - 0.5);
+      doc.setFont('helvetica','italic');
+      setColor(C_DIM);
+      doc.text(materia + ' · Unidad ' + unidad, ML, PH - 8);
+      doc.text(titulo, PW - MR, PH - 8, { align: 'right' });
+    }
+    doc.addPage('a4', 'portrait');
+    pageNum++;
+    y = MT;
+    if (opts.header) drawPageHeader();
+  }
+
+  function drawPageHeader() {
+    doc.setFontSize(FS_HDR);
+    doc.setFont('helvetica','normal');
+    setColor(C_DIM);
+    doc.text(materia + ' · Unidad ' + unidad + ' · ' + titulo, ML, MT - 8);
+    setDraw(C_RULE);
+    doc.setLineWidth(0.18);
+    doc.line(ML, MT - 5, PW - MR, MT - 5);
+  }
+
+  // Escribe texto con wrap. Devuelve altura usada.
+  function writeWrapped(text, x, maxW, fontSize, fontStyle, color) {
+    doc.setFontSize(fontSize);
+    doc.setFont('helvetica', fontStyle || 'normal');
+    setColor(color || C_BLACK);
+    var lines = doc.splitTextToSize(text, maxW);
+    var lineH = lh(fontSize);
+    needSpace(lines.length * lineH + 1);
+    doc.text(lines, x, y);
+    y += lines.length * lineH;
+  }
+
+  // ── Renderiza segmentos inline (bold/italic) con word-wrap ──────
+  function renderInline(segs, startX, maxW, fs, baseColor, baseBold) {
+    // Convertir segmentos a lista de palabras con estilo
+    var words = [];
+    segs.forEach(function(seg) {
+      // Detectar espacios entre palabras del segmento
+      var parts = seg.text.split(/(\s+)/);
+      parts.forEach(function(p) {
+        if (p === '') return;
+        var isSpace = /^\s+$/.test(p);
+        words.push({ text: p, bold: seg.bold || baseBold, italic: seg.italic, isSpace: isSpace });
+      });
+    });
+
+    var lineH = lh(fs);
+
+    // Construir líneas respetando maxW
+    var lines = [];
+    var curr = [];
+    var currW = 0;
+
+    words.forEach(function(w) {
+      var style = (w.bold && w.italic) ? 'bolditalic' : w.bold ? 'bold' : w.italic ? 'italic' : 'normal';
+      doc.setFont('helvetica', style);
+      doc.setFontSize(fs);
+      var ww = doc.getTextWidth(w.text);
+
+      if (!w.isSpace && currW + ww > maxW && curr.length > 0) {
+        // Quitar espacio final de la línea si existe
+        if (curr.length && curr[curr.length-1].isSpace) curr.pop();
+        lines.push(curr);
+        curr = [{ text: w.text, bold: w.bold, italic: w.italic, isSpace: false, width: ww }];
+        currW = ww;
+      } else {
+        curr.push({ text: w.text, bold: w.bold, italic: w.italic, isSpace: w.isSpace, width: ww });
+        currW += ww;
+      }
+    });
+    if (curr.length) {
+      if (curr[curr.length-1].isSpace) curr.pop();
+      lines.push(curr);
+    }
+
+    lines.forEach(function(line) {
+      needSpace(lineH + 0.5);
+      var cx = startX;
+      line.forEach(function(w) {
+        var style = (w.bold && w.italic) ? 'bolditalic' : w.bold ? 'bold' : w.italic ? 'italic' : 'normal';
+        doc.setFont('helvetica', style);
+        doc.setFontSize(fs);
+        setColor(baseColor);
+        doc.text(w.text, cx, y);
+        cx += w.width;
+      });
+      y += lineH;
+    });
+    y += 0.3;
+  }
+
+  // ── Encabezado página 1 ──────────────────────────────────
+  if (opts.header) drawPageHeader();
+
+  // ── TOC ──────────────────────────────────────────────────
+  var h2Tokens = parsed.tokens.filter(function(t){ return t.type==='h2'; });
+  if (opts.toc && h2Tokens.length > 0) {
+    doc.setFontSize(11);
+    doc.setFont('helvetica','bold');
+    setColor(C_DARK);
+    doc.text('ÍNDICE', PW / 2, y, { align: 'center' });
+    y += lh(11) + 3;
+    setDraw(C_RULE);
+    doc.setLineWidth(0.25);
+    doc.line(ML, y, PW - MR, y);
+    y += 3;
+    h2Tokens.forEach(function(t, idx) {
+      doc.setFontSize(FS_BODY);
+      doc.setFont('helvetica','normal');
+      setColor(C_ACCENT);
+      doc.text((idx + 1) + '. ' + t.text, ML + 3, y);
+      y += lh(FS_BODY) + 0.5;
+      needSpace(lh(FS_BODY) + 1);
+    });
+    y += 4;
+    addPage();
+  }
+
+  // ── Renderizar tokens ─────────────────────────────────────
+  var prevType = '';
+
+  parsed.tokens.forEach(function(tok) {
+    switch (tok.type) {
+
+      // ── H1: Arial Bold 12pt, centrado, con líneas ────────
+      case 'h1': {
+        if (prevType && prevType !== 'blank') y += 2;
+        needSpace(lh(FS_H1) + 6);
+        setDraw(C_ACCENT);
+        doc.setLineWidth(0.4);
+        doc.line(ML, y - 1, PW - MR, y - 1);
+        doc.setFontSize(FS_H1);
+        doc.setFont('helvetica','bold');
+        setColor(C_DARK);
+        var h1lines = doc.splitTextToSize(tok.text.toUpperCase(), TW);
+        doc.text(h1lines, PW / 2, y + lh(FS_H1) - 0.5, { align: 'center' });
+        y += h1lines.length * lh(FS_H1) + 1;
+        doc.line(ML, y, PW - MR, y);
+        y += 2;
+        break;
+      }
+
+      // ── H2: Arial Bold 10pt, con subrayado ───────────────
+      case 'h2': {
+        y += 2;
+        needSpace(lh(FS_H2) + 6);
+        doc.setFontSize(FS_H2);
+        doc.setFont('helvetica','bold');
+        setColor(C_ACCENT);
+        var h2lines = doc.splitTextToSize(tok.text, TW);
+        doc.text(h2lines, ML, y);
+        y += h2lines.length * lh(FS_H2) + 0.5;
+        setDraw(C_ACCENT);
+        doc.setLineWidth(0.28);
+        doc.line(ML, y, ML + Math.min(TW, tok.text.length * 2.2), y);
+        y += 2;
+        break;
+      }
+
+      // ── H3: Arial Bold 10pt, barra izquierda ─────────────
+      case 'h3': {
+        y += 1.5;
+        needSpace(lh(FS_H3) + 4);
+        doc.setFillColor(C_SUB[0], C_SUB[1], C_SUB[2]);
+        doc.rect(ML, y - lh(FS_H3) + 0.5, 1.8, lh(FS_H3), 'F');
+        doc.setFontSize(FS_H3);
+        doc.setFont('helvetica','bold');
+        setColor(C_SUB);
+        var h3lines = doc.splitTextToSize(tok.text, TW - 5);
+        doc.text(h3lines, ML + 4, y);
+        y += h3lines.length * lh(FS_H3) + 1;
+        break;
+      }
+
+      // ── HR ────────────────────────────────────────────────
+      case 'hr': {
+        y += 1.5;
+        needSpace(4);
+        setDraw(C_RULE);
+        doc.setLineWidth(0.2);
+        doc.line(ML + 8, y, PW - MR - 8, y);
+        y += 2;
+        break;
+      }
+
+      // ── Fórmula ───────────────────────────────────────────
+      case 'formula': {
+        y += 1.5;
+        needSpace(lh(FS_FORM) + 5);
+        doc.setFillColor(255, 252, 235);
+        doc.roundedRect(ML + 4, y - lh(FS_FORM), TW - 8, lh(FS_FORM) + 3, 1.5, 1.5, 'F');
+        doc.setFontSize(FS_FORM);
+        doc.setFont('courier','bold');
+        setColor(C_FORM);
+        doc.text(tok.text, PW / 2, y, { align: 'center' });
+        y += lh(FS_FORM) + 2;
+        break;
+      }
+
+      // ── Lista nivel 1 ─────────────────────────────────────
+      case 'li1': {
+        needSpace(lh(FS_LI) + 1);
+        doc.setFontSize(FS_LI + 0.5);
+        doc.setFont('helvetica','normal');
+        setColor(C_ACCENT);
+        doc.text('•', ML + 4, y);
+        renderInline(tok.segs || [{ text: tok.text, bold: false, italic: false }], ML + 9, TW - 9, FS_LI, C_DARK, false);
+        break;
+      }
+
+      // ── Lista nivel 2 ─────────────────────────────────────
+      case 'li2': {
+        needSpace(lh(FS_LI) + 1);
+        doc.setFontSize(FS_LI - 0.5);
+        doc.setFont('helvetica','normal');
+        setColor(C_SUB);
+        doc.text('◦', ML + 10, y);
+        renderInline(tok.segs || [{ text: tok.text, bold: false, italic: false }], ML + 14, TW - 15, FS_LI - 0.5, C_DIM, false);
+        break;
+      }
+
+      // ── Párrafo cuerpo: inline bold/italic ────────────────
+      case 'body': {
+        needSpace(lh(FS_BODY) + 0.5);
+        renderInline(tok.segs || [{ text: tok.text, bold: false, italic: false }], ML, TW, FS_BODY, C_BLACK, false);
+        break;
+      }
+
+      // ── Línea en blanco ───────────────────────────────────
+      case 'blank': {
+        y += lh(FS_BODY) * 0.4;
+        break;
+      }
+    }
+    prevType = tok.type;
+  });
+
+  // ── Última página: pie + número ──────────────────────────
+  if (opts.nums) {
+    doc.setFontSize(FS_HDR);
+    doc.setFont('helvetica','normal');
+    setColor(C_DIM);
+    doc.text(String(pageNum), PW / 2, PH - 8, { align: 'center' });
+  }
+  if (opts.footer) {
+    doc.setFontSize(FS_HDR - 0.5);
+    doc.setFont('helvetica','italic');
+    setColor(C_DIM);
+    doc.text(materia + ' · Unidad ' + unidad, ML, PH - 8);
+    doc.text(titulo, PW - MR, PH - 8, { align: 'right' });
+  }
+
+  // ── Metadatos ────────────────────────────────────────────
+  doc.setProperties({
+    title:   materia + ' - Unidad ' + unidad + ' - ' + titulo,
+    subject: materia,
+    keywords: materia + ', Unidad ' + unidad + ', apuntes',
+    creator: 'NeuroscanApuntes v2',
+    author:  materia
+  });
+
+  return { blob: doc.output('blob'), pages: pageNum };
+}
+
+// ═══════════════════════════════════════
+//  MAIN PROCESS
+// ═══════════════════════════════════════
+function startProcess() {
+  var materia = document.getElementById('materia').value;
+  var unidad  = document.getElementById('unidad').value;
+  var titulo  = document.getElementById('titulo').value.trim();
+  var md      = document.getElementById('mdInput').value.trim();
+
+  hideErr();
+  if (!md)     { showErr('⚠ Pegá o cargá el contenido de tus apuntes (Paso 02).'); return; }
+  if (!titulo) { showErr('⚠ Ingresá el nombre del texto (Paso 01).'); document.getElementById('titulo').focus(); return; }
+
+  pdfFname = materia + '-Unidad N°' + unidad + '-' + titulo.replace(/[<>:"/\\|?*]/g,'').trim() + '.pdf';
+
+  document.getElementById('procBtn').disabled = true;
+  document.getElementById('progS').classList.add('on');
+  document.getElementById('plog').innerHTML = '';
+  document.getElementById('statsBox').classList.remove('on');
+  document.getElementById('dls').classList.remove('on');
+
+  log('Inicio · "' + titulo + '" · ' + materia, 'act');
+  log('Opciones: ' + Object.keys(opts).filter(function(k){return opts[k];}).join(', '));
+  setBar(10, 'Parseando Markdown...');
+  log('→ Parseando estructura Markdown...', 'act');
+
+  setTimeout(function() {
+    try {
+      var parsed = parseMarkdown(md);
+      log('✓ ' + parsed.tokens.length + ' tokens · ' + parsed.sections + ' secciones · ' + parsed.words + ' palabras', 'ok');
+      log('✓ ' + parsed.formulas + ' fórmulas detectadas', parsed.formulas > 0 ? 'ok' : '');
+
+      setBar(40, 'Construyendo layout A4...');
+      log('→ Generando PDF · Arial ' + bodyFontSize + 'pt · interlineado 1...', 'act');
+
+      setTimeout(function() {
+        try {
+          var result = buildPDF(parsed, materia, unidad, titulo);
+          pdfBlob = result.blob;
+
+          setBar(99, 'Compilando...');
+          log('→ Compilando archivo...', 'act');
+
+          setTimeout(function() {
+            setBar(100, '¡Completado!');
+
+            document.getElementById('stP').textContent  = result.pages + ' página' + (result.pages !== 1 ? 's' : '');
+            document.getElementById('stS').textContent  = parsed.sections + ' sección' + (parsed.sections !== 1 ? 'es' : '');
+            document.getElementById('stW').textContent  = parsed.words.toLocaleString('es') + ' palabras';
+            document.getElementById('stF').textContent  = parsed.formulas > 0 ? parsed.formulas + ' encontradas' : 'ninguna';
+            document.getElementById('stFnt').textContent = bodyFontSize + ' pt · Arial/Helvetica · interlineado 1';
+            document.getElementById('statsBox').classList.add('on');
+
+            log('✓ "' + pdfFname + '" · ' + result.pages + ' págs.', 'ok');
+            log('✓ Listo para descargar', 'ok');
+
+            document.getElementById('dlf').textContent = pdfFname;
+            document.getElementById('dls').classList.add('on');
+            document.getElementById('dlBtn').onclick = downloadPDF;
+          }, 200);
+
+        } catch(e) {
+          log('✗ Error generando PDF: ' + e.message, 'err');
+          showErr('Error generando PDF: ' + e.message);
+          document.getElementById('procBtn').disabled = false;
+          setBar(0, 'Error');
+        }
+      }, 80);
+
+    } catch(e) {
+      log('✗ Error parseando: ' + e.message, 'err');
+      showErr('Error parseando Markdown: ' + e.message);
+      document.getElementById('procBtn').disabled = false;
+      setBar(0, 'Error');
+    }
+  }, 80);
+}
+
+// ═══════════════════════════════════════
+//  DOWNLOAD / RESET
+// ═══════════════════════════════════════
+function downloadPDF() {
+  if (!pdfBlob) return;
+  var url = URL.createObjectURL(pdfBlob);
+  var a = document.createElement('a'); a.href = url; a.download = pdfFname;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+}
+
+function resetAll() {
+  pdfBlob = null; pdfFname = '';
+  document.getElementById('progS').classList.remove('on');
+  document.getElementById('dls').classList.remove('on');
+  document.getElementById('statsBox').classList.remove('on');
+  document.getElementById('plog').innerHTML = '';
+  document.getElementById('bf').style.width = '0%';
+  document.getElementById('procBtn').disabled = false;
+  hideErr();
+}
+
+// ═══════════════════════════════════════
+//  PROMPT MODAL & COPY
+// ═══════════════════════════════════════
+function openPrompt() {
+  document.getElementById('promptModal').style.display = 'flex';
+}
+function closePrompt() {
+  document.getElementById('promptModal').style.display = 'none';
+}
+function copyPrompt() {
+  var copyText = document.getElementById("promptText");
+  copyText.select();
+  copyText.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(copyText.value);
+  var btn = document.getElementById("copyBtn");
+  var originalText = btn.innerHTML;
+  btn.innerHTML = "✅ ¡COPIADO!";
+  btn.style.background = "var(--green)";
+  setTimeout(function() {
+    btn.innerHTML = originalText;
+    btn.style.background = "linear-gradient(135deg,var(--purple),#5a189a)";
+  }, 2000);
+}
+window.onclick = function(event) {
+  var modal = document.getElementById('promptModal');
+  if (event.target == modal) closePrompt();
+}
+</script>
+</body>
+</html>
