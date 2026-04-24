@@ -1,33 +1,46 @@
-// EstudioPsi — app.js v6 (materias dinámicas, filtro correcto)
-const BASE = 'https://script.google.com/macros/s/AKfycbzGgwvN3y3xV-HQIbaOOnerxKebQovcjm7LW0KhQ0ocgXuIffHCZTmuxRZfg7pBrrMR/exec';
-const CFG  = { GB: BASE+'?hoja=Bibliografia', GC: BASE+'?hoja=Clases', P: BASE, HB:'Bibliografia', HC:'Clases' };
+// EstudioPsi — app.js v8 (pendientes por materia, examen finalizado, próximo contador)
+const BASE = 'https://script.google.com/macros/s/AKfycbwQf3mhtBe3n3dMmtr31Zh_aq-xRUY2TebRKS8AJ0msrRJtvjcf2J7Wy7063iMmCzDl/exec';
+const CFG = { 
+  GB: BASE+'?hoja=Bibliografia', 
+  GC: BASE+'?hoja=Clases',
+  GE: BASE+'?hoja=Examenes',
+  P: BASE, HB:'Bibliografia', HC:'Clases' 
+};
 
-// SIN materias hardcoded — todo viene del Sheets
 const S = {
   biblio:[], clases:[],
-  mats_biblio:[],   // materias únicas en bibliografía
-  mats_clases:[],   // materias únicas en clases
+  mats_biblio:[],
+  mats_clases:[],
   sec:'biblio',
-  fmb:'todas', ftb:'todos',   // filtro materia biblio / tipo biblio
-  fmc:'todas', ftc:'todos',   // filtro materia clases / tipo clases
+  fmb:'todas', ftb:'todos', feb:'todos',
+  fmc:'todas', ftc:'todos',
   tipo:'Teórica', prev:null,
+  unidades_abiertas: new Set(),
+  examenes: JSON.parse(localStorage.getItem('ep_examenes')||'[]'),
+  _exEditId: null,
+  _mostrarFinalizados: false,   // ← nuevo
 };
 
 const $   = id => document.getElementById(id);
 const hoy = () => new Date().toISOString().split('T')[0];
-const fmtF= f => { try{return new Date(f+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'});}catch(e){return f||'';} };
-const bc  = e => ({'Leído':'b-ok','Salteado':'b-sk','No va':'b-nv'}[e]||'b-sl');
+const fmtF = f => {
+  if(!f) return '';
+  try{
+    const d = new Date(f.includes('T') ? f : f+'T12:00:00');
+    if(isNaN(d)) return f;
+    return d.toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'});
+  }catch(e){return f;}
+};
+const bc  = e => ({'Leído':'b-ok','Salteado':'b-sk','No va':'b-nv','Pendiente':'b-pe'}[e]||'b-sl');
 const C   = {
   set:(k,v)=>{try{sessionStorage.setItem(k,JSON.stringify(v));}catch(e){}},
   get:(k)=>{try{const d=sessionStorage.getItem(k);return d?JSON.parse(d):null;}catch(e){return null;}}
 };
 
-// Abreviación inteligente de materia
 function abr(m) {
   if (!m) return '';
   const words = m.trim().split(/\s+/);
   if (words.length <= 2) return m;
-  // Primeras 2 palabras significativas
   const stop = new Set(['Y','DE','DEL','LA','LAS','LOS','EL','EN','A','E']);
   const sig = words.filter(w => !stop.has(w.toUpperCase()));
   return sig.slice(0,2).join(' ');
@@ -47,7 +60,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(Array.isArray(cc)&&cc.length){ S.clases=cc; buildMatClases(); renderClases(); }
   else { const cc2=$('clases-container');if(cc2)cc2.innerHTML='<div style="padding:3rem 0;text-align:center;"><div class="spin"></div></div>'; }
   sync('s','Conectando...');
-  fetchB(); fetchC();
+  fetchB(); fetchC(); fetchExamenes();
   if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 });
 
@@ -86,7 +99,6 @@ function reloadData(){ toast('Actualizando...'); fetchB(); fetchC(); }
 window.addEventListener('online',()=>{ toast('Conexión restaurada'); reloadData(); });
 
 // ── MATERIAS DINÁMICAS ─────────────────────────────────────────
-// Solo las materias que existen en los datos — sin hardcodear nada
 function buildMats(){
   S.mats_biblio = [...new Set(S.biblio.map(t=>t.materia).filter(Boolean))].sort();
   renderChips('chips-biblio','biblio');
@@ -102,16 +114,16 @@ function renderChips(cid, sec){
   const el=$(cid); if(!el) return;
   const mats = sec==='biblio' ? S.mats_biblio : S.mats_clases;
   const activa = sec==='biblio' ? S.fmb : S.fmc;
-  // Si no hay materias, mostrar placeholder
   if(!mats.length){
     el.innerHTML=`<span style="font-size:.75rem;color:var(--text3);">Cargá bibliografía para ver las materias</span>`;
     return;
   }
   const fn = sec==='biblio' ? 'setMatB' : 'setMatC';
-  el.innerHTML = ['todas',...mats].map(m=>{
+  const btns = ['todas',...mats].map(m=>{
     const label = m==='todas' ? 'Todas' : abr(m)||m;
     return `<button class="chip${m===activa?' active':''}" onclick="${fn}('${m.replace(/'/g,"\\'")}') " title="${m}">${label}</button>`;
   }).join('');
+  el.innerHTML = `<div style="display:inline-flex;gap:.4rem;padding-right:1.5rem;">${btns}</div>`;
 }
 
 function setMatB(m){ S.fmb=m; renderChips('chips-biblio','biblio'); renderBiblio(); }
@@ -127,16 +139,33 @@ function setTipoClase(t){
   ['todos','Teorica','Practica'].forEach(x=>$('ct-'+x)?.classList.toggle('active',x===t));
   renderClases();
 }
+function setEstadoBiblio(e){
+  S.feb = e;
+  // Al filtrar por estado, resetear chips a "Todas" para ver todas las materias separadas
+  if(e !== 'todos') {
+    S.fmb = 'todas';
+    renderChips('chips-biblio', 'biblio');
+  }
+  ['todos','pendiente','sinleer','leido'].forEach(x=>{
+    const el=$('fe-'+x);
+    if(el){
+      el.classList.toggle('active',x===e);
+      el.classList.toggle('pend',x==='pendiente'&&x===e);
+    }
+  });
+  renderBiblio();
+}
 
 // ── STATS ───────────────────────────────────────────────────────
 function renderStats(){
   const el=$('stats-bar'); if(!el||!S.biblio.length) return;
-  const total  = S.biblio.length;
-  const leidos = S.biblio.filter(t=>t.estado==='Leído').length;
-  const salt   = S.biblio.filter(t=>t.estado==='Salteado').length;
-  const nova   = S.biblio.filter(t=>t.estado==='No va').length;
-  const pend   = total-leidos-salt-nova;
-  const pct    = total ? Math.round(((leidos+salt+nova)/total)*100) : 0;
+  const total   = S.biblio.length;
+  const leidos  = S.biblio.filter(t=>t.estado==='Leído').length;
+  const salt    = S.biblio.filter(t=>t.estado==='Salteado').length;
+  const nova    = S.biblio.filter(t=>t.estado==='No va').length;
+  const pend    = S.biblio.filter(t=>t.estado==='Pendiente').length;
+  const otros   = total-leidos-salt-nova-pend;
+  const pct     = total ? Math.round(((leidos+salt+nova)/total)*100) : 0;
   el.innerHTML=`
     <div class="stats-card">
       <div class="stats-row">
@@ -154,7 +183,8 @@ function renderStats(){
         <span class="spill">✓ ${leidos} leídos</span>
         <span class="spill">↷ ${salt} salt.</span>
         <span class="spill">✕ ${nova} no va</span>
-        <span class="spill">· ${pend} pendientes</span>
+        <span class="spill">⏳ ${pend} pend.</span>
+        <span class="spill">· ${otros} sin leer</span>
       </div>
     </div>`;
 }
@@ -163,17 +193,20 @@ function renderStats(){
 function renderBiblio(){
   const el=$('textos-container'); if(!el) return;
 
-  // Aplicar filtros — COMPARACIÓN EXACTA de string
   let items = S.biblio.filter(t => {
     const matchMat  = S.fmb==='todas' || String(t.materia||'').trim() === S.fmb;
     const tipoDato  = String(t.tipo_clase||'').trim();
     const matchTipo = S.ftb==='todos' ||
       (S.ftb==='Teorica'  && (tipoDato==='Teórica'  || tipoDato==='Teorica'))  ||
       (S.ftb==='Practica' && (tipoDato==='Práctica' || tipoDato==='Practica'));
-    return matchMat && matchTipo;
+    const estado    = String(t.estado||'').trim();
+    const matchEst  = S.feb==='todos' ||
+      (S.feb==='pendiente' && estado==='Pendiente') ||
+      (S.feb==='sinleer'   && (estado==='Sin leer'||!estado)) ||
+      (S.feb==='leido'     && estado==='Leído');
+    return matchMat && matchTipo && matchEst;
   });
 
-  // Contador
   const cc=$('biblio-count');
   if(cc) cc.textContent = items.length + ' textos';
 
@@ -182,7 +215,32 @@ function renderBiblio(){
     return;
   }
 
-  // Agrupar por unidad manteniendo orden
+  let html = '';
+
+  // ── CAMBIO CLAVE: agrupar por materia cuando hay filtro de estado activo ──
+  // Así "Pendientes" (y Sin leer / Leídos) siempre aparecen segmentados por materia
+  if(S.fmb === 'todas' || S.feb !== 'todos'){
+    const gMats = {};
+    const ordenMats = [];
+    items.forEach(t=>{
+      const m = String(t.materia||'Sin materia').trim();
+      if(!gMats[m]){gMats[m]=[];ordenMats.push(m);}
+      gMats[m].push(t);
+    });
+    ordenMats.forEach(m=>{
+      html += `<div class="mat-separador"><span class="mat-separador-label">${m}</span></div>`;
+      html += buildUnidadesHTML(gMats[m], m);
+    });
+  } else {
+    // Una sola materia seleccionada, sin filtro de estado → directo por unidad
+    html += buildUnidadesHTML(items, S.fmb);
+  }
+
+  el.innerHTML = html;
+  renderStats();
+}
+
+function buildUnidadesHTML(items, matKey){
   const grupos = {};
   const orden  = [];
   items.forEach(t=>{
@@ -196,18 +254,24 @@ function renderBiblio(){
     const txs = grupos[u];
     const leidos = txs.filter(t=>t.estado==='Leído').length;
     const pct    = txs.length ? Math.round((leidos/txs.length)*100) : 0;
+    const uid    = 'u_'+btoa(encodeURIComponent(matKey+'__'+u)).replace(/[^a-zA-Z0-9]/g,'').slice(0,20);
+    const colapsada = !S.unidades_abiertas.has(uid);
 
     html += `<div class="unidad-section">
-      <div class="unidad-header">
-        <span class="unidad-name">${u}</span>
+      <div class="unidad-header${colapsada?' collapsed':''}" onclick="toggleUnidad('${uid}')">
+        <div class="unidad-left">
+          <span class="unidad-toggle${colapsada?'':' open'}">▾</span>
+          <span class="unidad-name">${u}</span>
+        </div>
         <span class="unidad-prog">${leidos}/${txs.length} · ${pct}%</span>
       </div>
-      <div class="unidad-body">`;
+      <div class="unidad-body${colapsada?' collapsed':''}" id="${uid}">`;
 
     txs.forEach((t,i)=>{
       const e = String(t.estado||'Sin leer').trim();
-      const cls = e==='Leído'?'leido':e==='No va'?'nova':'';
+      const cls = e==='Leído'?'leido':e==='No va'?'nova':e==='Pendiente'?'pendiente':'';
       const nro = t.nro_texto || (i+1);
+      const resId = 'res_'+String(t.id).replace(/[^a-zA-Z0-9]/g,'');
       html += `
         <div class="texto-row ${cls}" id="txr-${t.id}">
           <div class="texto-num">${nro}</div>
@@ -217,8 +281,11 @@ function renderBiblio(){
             <div class="texto-meta">
               <span class="badge ${bc(e)}">${e}</span>
               ${t.tipo_clase?`<span class="badge ${String(t.tipo_clase).includes('Práctica')?'b-p':'b-t'}">${t.tipo_clase}</span>`:''}
-              ${t.link_resumen?`<a href="${t.link_resumen}" target="_blank" class="lc">📄 Resumen</a>`:''}
-              ${t.notas?`<span class="lc" title="${t.notas}">📝 Nota</span>`:''}
+              ${t.link_resumen
+                ? `<a href="${t.link_resumen}" target="_blank" class="lc">📄 Resumen</a>
+                   <button class="lc" onclick="toggleResumenForm('${t.id}','${resId}')" title="Editar link de resumen">✏️</button>`
+                : `<button class="lc add-res" onclick="toggleResumenForm('${t.id}','${resId}')">＋ Resumen</button>`
+              }
             </div>
           </div>
           <div class="pop-wrap">
@@ -227,16 +294,39 @@ function renderBiblio(){
               <button class="ep"    onclick="cambiarEstado('${t.id}','Sin leer')">⬜ Sin leer</button>
               <button class="ep ok" onclick="cambiarEstado('${t.id}','Leído')">✅ Leído</button>
               <button class="ep sk" onclick="cambiarEstado('${t.id}','Salteado')">⏭ Salteado</button>
+              <button class="ep pe" onclick="cambiarEstado('${t.id}','Pendiente')">⏳ Pendiente</button>
               <button class="ep nv" onclick="cambiarEstado('${t.id}','No va')">❌ No va</button>
             </div>
           </div>
+        </div>
+        <div class="resumen-form hidden" id="${resId}">
+          <input type="url" placeholder="https://docs.google.com/..." id="inp-${resId}" value="${t.link_resumen||''}" onkeydown="if(event.key==='Enter')guardarResumen('${t.id}','${resId}')"/>
+          <button class="resumen-save-btn" onclick="guardarResumen('${t.id}','${resId}')">Guardar</button>
+          <button class="resumen-cancel-btn" onclick="toggleResumenForm('${t.id}','${resId}')">✕</button>
         </div>`;
     });
     html += '</div></div>';
   });
+  return html;
+}
 
-  el.innerHTML = html;
-  renderStats();
+// ── TOGGLE UNIDAD ─────────────────────────────────────────────
+function toggleUnidad(uid){
+  const body=$(uid);
+  const header=body?.previousElementSibling;
+  if(!body) return;
+  const isAbierta = S.unidades_abiertas.has(uid);
+  if(isAbierta){
+    S.unidades_abiertas.delete(uid);
+    body.classList.add('collapsed');
+    header?.classList.add('collapsed');
+    header?.querySelector('.unidad-toggle')?.classList.remove('open');
+  } else {
+    S.unidades_abiertas.add(uid);
+    body.classList.remove('collapsed');
+    header?.classList.remove('collapsed');
+    header?.querySelector('.unidad-toggle')?.classList.add('open');
+  }
 }
 
 function togglePop(id){
@@ -244,6 +334,33 @@ function togglePop(id){
   $(id)?.classList.toggle('open');
 }
 document.addEventListener('click',e=>{ if(!e.target.closest('.texto-row,.pop-wrap')) document.querySelectorAll('.estado-popup.open').forEach(p=>p.classList.remove('open')); });
+
+// ── RESUMEN INLINE ─────────────────────────────────────────────
+function toggleResumenForm(id, resId){
+  document.querySelectorAll('.estado-popup.open').forEach(p=>p.classList.remove('open'));
+  const form=$(resId); if(!form) return;
+  const wasHidden = form.classList.contains('hidden');
+  document.querySelectorAll('.resumen-form:not(.hidden)').forEach(f=>{ if(f.id!==resId) f.classList.add('hidden'); });
+  form.classList.toggle('hidden', !wasHidden);
+  if(wasHidden){ setTimeout(()=>$('inp-'+resId)?.focus(), 50); }
+}
+
+async function guardarResumen(id, resId){
+  const inp=$('inp-'+resId); if(!inp) return;
+  const link = inp.value.trim();
+  const idx = S.biblio.findIndex(t=>String(t.id)===String(id));
+  if(idx===-1) return;
+  S.biblio[idx].link_resumen = link;
+  S.biblio[idx].fecha_actualizacion = hoy();
+  C.set('ep_biblio', S.biblio);
+  renderBiblio();
+  toast(link ? '✓ Resumen guardado' : '✓ Link eliminado');
+  try{
+    await fetch(CFG.P,{method:'POST',headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({accion:'actualizar_resumen',nombreHoja:CFG.HB,id:String(id),link_resumen:link,fecha:hoy()})});
+    sync('','Guardado');
+  }catch(e){ sync('e','Sin conexión'); }
+}
 
 async function cambiarEstado(id, nuevoEstado){
   document.querySelectorAll('.estado-popup.open').forEach(p=>p.classList.remove('open'));
@@ -271,7 +388,6 @@ function renderClases(){
   if(!items.length){ el.innerHTML=empt('🎓','Sin clases','Cargá la primera desde ＋ Clase.'); return; }
   items.sort((a,b)=>new Date(b.fecha||0)-new Date(a.fecha||0));
 
-  // Agrupar por materia
   const gmats={}, mordenC=[];
   items.forEach(c=>{
     const m=String(c.materia||'Sin materia').trim();
@@ -281,7 +397,7 @@ function renderClases(){
 
   let html='';
   mordenC.forEach(m=>{
-    html+=`<div class="sec-title">${m}</div>`;
+    html+=`<div class="mat-separador"><span class="mat-separador-label">${m}</span></div>`;
     gmats[m].forEach(c=>{
       const tipoBadge=String(c.tipo||'').includes('eórica')?'b-t':'b-p';
       html+=`
@@ -303,10 +419,113 @@ function renderClases(){
   el.innerHTML=html;
 }
 
+// ── PERFIL ──────────────────────────────────────────────────────
+function renderPerfil(){
+  if(!S.biblio.length) return;
+
+  const total   = S.biblio.length;
+  const leidos  = S.biblio.filter(t=>t.estado==='Leído').length;
+  const pend    = S.biblio.filter(t=>t.estado==='Pendiente').length;
+  const pct     = total ? Math.round((leidos/total)*100) : 0;
+
+  const pst = id => $(id);
+  if(pst('pst-total')) pst('pst-total').textContent = total;
+  if(pst('pst-leidos')) pst('pst-leidos').textContent = leidos;
+  if(pst('pst-pend')) pst('pst-pend').textContent = pend;
+  if(pst('pst-pct')) pst('pst-pct').textContent = pct+'%';
+
+  const matProg = $('perfil-mat-prog');
+  if(matProg){
+    const colores = ['#6d4af5','#9333ea','#d946a8','#2563eb','#059669','#d97706','#dc2626','#ea580c'];
+    let mpHtml = '';
+    S.mats_biblio.forEach((m, i)=>{
+      const txs = S.biblio.filter(t=>String(t.materia||'').trim()===m);
+      const leid = txs.filter(t=>t.estado==='Leído').length;
+      const salt = txs.filter(t=>t.estado==='Salteado').length;
+      const nova = txs.filter(t=>t.estado==='No va').length;
+      const p = txs.length ? Math.round(((leid+salt+nova)/txs.length)*100) : 0;
+      const color = colores[i % colores.length];
+      mpHtml += `
+        <div class="mat-prog-row">
+          <div class="mat-prog-name" title="${m}">${abr(m)||m}</div>
+          <div class="mat-prog-bar"><div class="mat-prog-fill" style="width:${p}%;background:${color}"></div></div>
+          <div class="mat-prog-pct">${p}%</div>
+        </div>`;
+    });
+    matProg.innerHTML = mpHtml || '<p style="font-size:.78rem;color:var(--text3);">Sin datos aún.</p>';
+  }
+
+  const pendEl = $('perfil-pendientes');
+  if(pendEl){
+    const pendList = S.biblio.filter(t=>t.estado==='Pendiente');
+    if(!pendList.length){
+      pendEl.innerHTML = '<p style="font-size:.78rem;color:var(--text3);">No hay textos marcados como pendientes. 🎉</p>';
+    } else {
+      if(!S._pendColapsadas) S._pendColapsadas = new Set();
+      const gMats = {}, ordenMats = [];
+      pendList.forEach(t=>{
+        const m = String(t.materia||'Sin materia').trim();
+        if(!gMats[m]){gMats[m]=[];ordenMats.push(m);}
+        gMats[m].push(t);
+      });
+      let html = '';
+      ordenMats.forEach(m=>{
+        const col = S._pendColapsadas.has(m);
+        const mid = 'pmat_'+m.replace(/[^a-zA-Z0-9]/g,'').slice(0,16);
+        html += `<div style="margin-bottom:.2rem;">
+          <button onclick="togglePendMat('${m.replace(/'/g,"\\'")}','${mid}')"
+            style="display:flex;align-items:center;gap:.4rem;font-family:inherit;cursor:pointer;
+            font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+            color:var(--v);background:var(--v-light);border:1px solid var(--v-mid);border-radius:100px;
+            padding:.25rem .75rem;margin:.55rem 0 .3rem;transition:all .15s;width:auto;"
+            onmouseover="this.style.background='var(--v);this.style.color=\\'#fff\\'"
+            onmouseout="this.style.background='var(--v-light)';this.style.color='var(--v)'">
+            <span id="${mid}_arrow" style="transition:transform .2s;display:inline-block;${col?'':'transform:rotate(0deg)'}">${col?'▶':'▾'}</span>
+            ${m}
+            <span style="background:rgba(109,74,245,.15);border-radius:100px;padding:.1rem .45rem;font-size:.6rem;">${gMats[m].length}</span>
+          </button>
+          <div id="${mid}" style="${col?'display:none':''}">`;
+        gMats[m].forEach(t=>{
+          html += `<div class="perfil-pend-item">
+            <div class="perfil-pend-dot"></div>
+            <div>
+              <div class="perfil-pend-title">${t.titulo_texto||'—'}</div>
+              <div class="perfil-pend-sub">${t.unidad||''}</div>
+            </div>
+          </div>`;
+        });
+        html += `</div></div>`;
+      });
+      pendEl.innerHTML = html;
+    }
+  }
+
+  const estEl = $('perfil-estadisticas');
+  if(estEl){
+    const salt = S.biblio.filter(t=>t.estado==='Salteado').length;
+    const nova = S.biblio.filter(t=>t.estado==='No va').length;
+    const sinleer = S.biblio.filter(t=>!t.estado||t.estado==='Sin leer').length;
+    const conResumen = S.biblio.filter(t=>t.link_resumen).length;
+    const stats = [
+      {l:'Sin leer',n:sinleer,c:'var(--text3)'},
+      {l:'Salteados',n:salt,c:'var(--y)'},
+      {l:'No va',n:nova,c:'var(--r)'},
+      {l:'Con resumen',n:conResumen,c:'var(--v)'},
+    ];
+    estEl.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;">
+      ${stats.map(s=>`
+        <div style="background:var(--bg);border-radius:var(--radius-sm);padding:.75rem .9rem;border:1px solid var(--border);">
+          <div style="font-size:1.35rem;font-weight:800;color:${s.c}">${s.n}</div>
+          <div style="font-size:.7rem;color:var(--text3);font-weight:600;margin-top:.1rem;">${s.l}</div>
+        </div>`).join('')}
+    </div>`;
+  }
+  renderExamenes();
+}
+
 // ── FORM CLASE ──────────────────────────────────────────────────
 function populateMatForm(){
   const sel=$('form-materia'); if(!sel) return;
-  // Solo materias que ya existen + opción para ingresar nueva
   const mats=[...new Set([...S.mats_biblio,...S.mats_clases])].sort();
   sel.innerHTML='<option value="">— Seleccioná una materia —</option>'+
     mats.map(m=>`<option value="${m}">${m}</option>`).join('')+
@@ -460,8 +679,9 @@ async function subirBiblio(){
 }
 
 // ── NAVEGACIÓN ───────────────────────────────────────────────────
+const SECS = ['biblio','clases','perfil','cargar','cargarbiblio'];
 function setSection(sec){
-  ['biblio','clases','cargar','cargarbiblio'].forEach(s=>{
+  SECS.forEach(s=>{
     $('sec-'+s)?.classList.toggle('hidden',s!==sec);
     $('bn-'+s)?.classList.toggle('active',s===sec);
     $('tab-'+s)?.classList.toggle('active',s===sec);
@@ -469,4 +689,368 @@ function setSection(sec){
   S.sec=sec;
   if(sec==='clases'){ renderChips('chips-clases','clases'); }
   if(sec==='cargar'){ populateMatForm(); updateClaseDD(); }
+  if(sec==='perfil'){ renderPerfil(); }
+}
+
+// ── EXÁMENES ────────────────────────────────────────────────────
+function saveLocalExamenes(){ 
+  localStorage.setItem('ep_examenes', JSON.stringify(S.examenes)); 
+}
+
+async function fetchExamenes(){
+  try{
+    const r = await fetch(CFG.GE);
+    const d = await r.json();
+    if(!Array.isArray(d)) return;
+    S.examenes = d;
+    localStorage.setItem('ep_examenes', JSON.stringify(d));
+    renderExamenes();
+  }catch(e){ console.warn('fetchExamenes:', e.message); }
+}
+
+async function syncExamenSheets(examen, accion='guardar_examen'){
+  try{
+    await fetch(CFG.P,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        accion,
+        id: examen.id,
+        nombre: examen.nombre||'',
+        materia: examen.materia||'',
+        fecha: examen.fecha||'',
+        finalizado: examen.finalizado||false,
+        textos: examen.textos||[]
+      })
+    });
+  }catch(e){ sync('e','Sin conexión'); }
+}
+
+function cerrarExamenForm(){
+  $('modal-examen').style.display = 'none';
+  S._exEditId = null;
+}
+
+function cargarTextosModal(selIds=[]){
+  const mat = $('ex-materia')?.value;
+  const lista = $('ex-textos-list');
+  const chips = $('ex-unidad-chips');
+  if(!lista||!chips) return;
+
+  if(!mat){ lista.innerHTML='<p style="padding:.75rem;font-size:.78rem;color:var(--text3);">Seleccioná una materia primero.</p>'; chips.innerHTML=''; return; }
+
+  const textos = S.biblio.filter(t=>String(t.materia||'').trim()===mat);
+  if(!textos.length){ lista.innerHTML='<p style="padding:.75rem;font-size:.78rem;color:var(--text3);">No hay textos para esta materia.</p>'; return; }
+
+  const yaSeleccionados = new Set(selIds.map(String));
+
+  const grupos={}, ordenU=[];
+  textos.forEach(t=>{
+    const u=String(t.unidad||'Sin unidad').trim();
+    if(!grupos[u]){grupos[u]=[];ordenU.push(u);}
+    grupos[u].push(t);
+  });
+
+  chips.innerHTML = ordenU.map((u,i)=>`
+    <button class="chip active" style="font-size:.65rem;padding:.2rem .6rem;"
+      onclick="filtrarUnidadModal('${u.replace(/'/g,"\\'")}',this)">${u.replace('Unidad ','U.')}</button>`).join('');
+
+  let html='';
+  ordenU.forEach(u=>{
+    html+=`<div class="ex-unidad-group" data-unidad="${u.replace(/"/g,'&quot;')}">
+      <div style="padding:.45rem .75rem;background:var(--v-light);border-bottom:1px solid var(--v-mid);font-size:.68rem;font-weight:800;color:var(--v);letter-spacing:.04em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;">
+        <span>${u}</span>
+        <button onclick="toggleUnidadExamen('${u.replace(/'/g,"\\'")}',true)" style="font-size:.65rem;padding:.1rem .4rem;border-radius:4px;border:1px solid var(--v-mid);background:var(--white);color:var(--v);cursor:pointer;">Todo</button>
+      </div>`;
+    grupos[u].forEach(t=>{
+      const checked = yaSeleccionados.has(String(t.id));
+      const estadoBadge = t.estado&&t.estado!=='Sin leer' ? `<span style="font-size:.6rem;color:var(--text3);">${t.estado}</span>` : '';
+      html+=`<label style="display:flex;align-items:flex-start;gap:.6rem;padding:.55rem .75rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+        <input type="checkbox" data-id="${t.id}" ${checked?'checked':''} onchange="updateSelCount()" style="margin-top:2px;accent-color:var(--v);flex-shrink:0;"/>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:.8rem;font-weight:600;line-height:1.3;color:var(--text);">${t.titulo_texto||'—'}</div>
+          <div style="font-size:.7rem;color:var(--text3);">${t.autores||''} ${estadoBadge}</div>
+        </div>
+      </label>`;
+    });
+    html+='</div>';
+  });
+  lista.innerHTML=html;
+  updateSelCount();
+}
+
+function filtrarUnidadModal(u, btn){
+  const activo = btn.classList.contains('active');
+  document.querySelectorAll('.ex-unidad-group').forEach(g=>{
+    if(g.dataset.unidad===u) g.style.display = activo?'none':'';
+  });
+  btn.classList.toggle('active',!activo);
+}
+
+function toggleUnidadExamen(u, sel){
+  document.querySelectorAll('.ex-unidad-group').forEach(g=>{
+    if(g.dataset.unidad===u){
+      g.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=sel);
+    }
+  });
+  updateSelCount();
+}
+
+function updateSelCount(){
+  const n = document.querySelectorAll('#ex-textos-list input[type=checkbox]:checked').length;
+  const el=$('ex-sel-count'); if(el) el.textContent=n+' textos seleccionados';
+}
+
+function guardarExamen(){
+  const nombre=$('ex-nombre')?.value?.trim();
+  const materia=$('ex-materia')?.value;
+  const fecha=$('ex-fecha')?.value;
+  if(!nombre){toast('⚠️ Poné un nombre al examen');return;}
+  if(!materia){toast('⚠️ Seleccioná una materia');return;}
+  if(!fecha){toast('⚠️ Poné la fecha del examen');return;}
+  const textos=[...(document.querySelectorAll('#ex-textos-list input[type=checkbox]:checked')||[])].map(cb=>cb.dataset.id);
+  if(!textos.length){toast('⚠️ Seleccioná al menos un texto');return;}
+
+  let examen;
+  if(S._exEditId){
+    const idx=S.examenes.findIndex(e=>e.id===S._exEditId);
+    if(idx!==-1){ 
+      S.examenes[idx]={...S.examenes[idx], nombre, materia, fecha, textos}; 
+      examen=S.examenes[idx]; 
+    }
+  } else {
+    examen={id:'ex_'+Date.now(), nombre, materia, fecha, textos, finalizado: false};
+    S.examenes.push(examen);
+  }
+  saveLocalExamenes();
+  syncExamenSheets(examen, 'guardar_examen');
+  cerrarExamenForm(); renderExamenes();
+  toast('✓ Examen guardado');
+}
+
+function eliminarExamen(id){
+  if(!confirm('¿Eliminar este examen?')) return;
+  S.examenes=S.examenes.filter(e=>e.id!==id);
+  saveLocalExamenes();
+  syncExamenSheets({id}, 'eliminar_examen');
+  renderExamenes(); toast('Examen eliminado');
+}
+
+function editarExamen(id){ abrirExamenForm(id); }
+
+// ── TOGGLE MATERIA PENDIENTES ─────────────────────────────────
+function togglePendMat(m, mid){
+  if(!S._pendColapsadas) S._pendColapsadas = new Set();
+  const body = document.getElementById(mid);
+  const arrow = document.getElementById(mid+'_arrow');
+  if(!body) return;
+  if(S._pendColapsadas.has(m)){
+    S._pendColapsadas.delete(m);
+    body.style.display = '';
+    if(arrow) arrow.textContent = '▾';
+  } else {
+    S._pendColapsadas.add(m);
+    body.style.display = 'none';
+    if(arrow) arrow.textContent = '▶';
+  }
+}
+
+// ── TOGGLE FINALIZADO ─────────────────────────────────────────
+function toggleFinalizadoExamen(id){
+  const idx = S.examenes.findIndex(e=>e.id===id);
+  if(idx===-1) return;
+  S.examenes[idx].finalizado = !S.examenes[idx].finalizado;
+  saveLocalExamenes();
+  syncExamenSheets(S.examenes[idx], 'guardar_examen');
+  renderExamenes();
+  toast(S.examenes[idx].finalizado ? '✅ Examen finalizado' : '↩ Examen reactivado');
+}
+
+// ── NUEVO: mostrar/ocultar finalizados ────────────────────────
+function toggleMostrarFinalizados(){
+  S._mostrarFinalizados = !S._mostrarFinalizados;
+  renderExamenes();
+}
+
+function abrirExamenForm(id=null){
+  S._exEditId = id;
+  const ex = id ? S.examenes.find(e=>e.id===id) : null;
+  $('modal-examen-title').textContent = id ? '✏️ Editar Examen' : '📅 Nuevo Examen';
+  $('ex-nombre').value  = ex?.nombre || '';
+  $('ex-fecha').value   = ex?.fecha  || '';
+
+  const sel = $('ex-materia');
+  sel.innerHTML = '<option value="">— Seleccioná —</option>' +
+    S.mats_biblio.map(m=>`<option value="${m}" ${ex?.materia===m?'selected':''}>${m}</option>`).join('');
+
+  $('modal-examen').style.display = 'block';
+  cargarTextosModal(ex?.textos||[]);
+}
+
+// ── RENDER EXÁMENES (reescrito) ───────────────────────────────
+function renderExamenes(){
+  const el=$('perfil-examenes'); if(!el) return;
+
+  const hoyMs = new Date().setHours(0,0,0,0);
+
+  // Próximo examen (no finalizado, en el futuro)
+  const proximos = S.examenes
+    .filter(e => !e.finalizado)
+    .filter(e => {
+      const d = new Date(e.fecha+'T00:00:00');
+      return !isNaN(d) && d >= hoyMs;
+    })
+    .sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+
+  const finalizadosCount = S.examenes.filter(e=>e.finalizado).length;
+
+  // ── Banner próximo examen ──
+  let bannerHtml = '';
+  if(proximos.length > 0){
+    const next = proximos[0];
+    const diasR = Math.ceil((new Date(next.fecha+'T00:00:00') - hoyMs) / 864e5);
+    const urgColor = diasR === 0 ? 'var(--r)' : diasR <= 7 ? 'var(--r)' : diasR <= 14 ? 'var(--o)' : 'var(--v)';
+    const urgBg    = diasR <= 7 ? 'var(--r-light)' : diasR <= 14 ? 'var(--o-light)' : 'var(--v-light)';
+    const diasLabel = diasR === 0 ? '¡HOY!' : diasR === 1 ? '1 día' : diasR + ' días';
+
+    bannerHtml = `
+      <div style="background:${urgBg};border:1.5px solid ${urgColor}55;border-radius:var(--radius-sm);
+        padding:.8rem 1rem;margin-bottom:.9rem;display:flex;align-items:center;gap:.9rem;">
+        <div style="text-align:center;min-width:52px;flex-shrink:0;">
+          <div style="font-size:${diasR===0?'1.3':'1.7'}rem;font-weight:800;color:${urgColor};line-height:1;">
+            ${diasR === 0 ? '🔥' : diasR}
+          </div>
+          <div style="font-size:.55rem;font-weight:800;color:${urgColor};text-transform:uppercase;letter-spacing:.05em;margin-top:.1rem;">
+            ${diasR === 0 ? 'hoy' : 'días'}
+          </div>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:.6rem;font-weight:800;color:${urgColor};text-transform:uppercase;letter-spacing:.07em;margin-bottom:.15rem;">
+            📅 Próximo examen
+          </div>
+          <div style="font-size:.92rem;font-weight:700;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            ${next.nombre}
+          </div>
+          <div style="font-size:.72rem;color:var(--text3);margin-top:.15rem;">
+            ${abr(next.materia)||next.materia} · ${fmtF(next.fecha)} · faltan ${diasLabel}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  if(!S.examenes.length){
+    el.innerHTML = bannerHtml + '<p style="font-size:.78rem;color:var(--text3);padding:.5rem 0;">No hay exámenes cargados. Tocá ＋ Nuevo para agregar uno.</p>';
+    return;
+  }
+
+  // Toggle mostrar finalizados
+  let toggleHtml = '';
+  if(finalizadosCount > 0){
+    toggleHtml = `
+      <div style="display:flex;justify-content:flex-end;margin-bottom:.55rem;">
+        <button onclick="toggleMostrarFinalizados()" class="btn-icon" style="font-size:.68rem;">
+          ${S._mostrarFinalizados
+            ? '🙈 Ocultar finalizados'
+            : `📁 Ver finalizados (${finalizadosCount})`
+          }
+        </button>
+      </div>`;
+  }
+
+  // Exámenes a mostrar
+  const shown = S._mostrarFinalizados
+    ? [...S.examenes].sort((a,b)=>new Date(a.fecha)-new Date(b.fecha))
+    : S.examenes.filter(e=>!e.finalizado).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
+
+  if(!shown.length){
+    el.innerHTML = bannerHtml + toggleHtml +
+      '<p style="font-size:.78rem;color:var(--g);font-weight:600;padding:.5rem 0;">🎉 Todos los exámenes finalizados.</p>';
+    return;
+  }
+
+  let html = bannerHtml + toggleHtml;
+
+  shown.forEach(ex=>{
+    const rawFecha = new Date(ex.fecha && ex.fecha.includes('T') ? ex.fecha : (ex.fecha||'')+'T00:00:00');
+    const diasR   = isNaN(rawFecha) ? 999 : Math.ceil((rawFecha - hoyMs) / 864e5);
+    const pasado  = diasR < 0;
+    const urgColor = ex.finalizado ? 'var(--g)'
+      : pasado ? 'var(--text3)'
+      : diasR <= 7 ? 'var(--r)'
+      : diasR <= 14 ? 'var(--o)'
+      : 'var(--v)';
+    const urgBg = ex.finalizado ? 'var(--g-light)'
+      : pasado ? 'var(--bg2)'
+      : diasR <= 7 ? 'var(--r-light)'
+      : diasR <= 14 ? 'var(--o-light)'
+      : 'var(--v-light)';
+    const diasLabel = ex.finalizado ? '✅ Listo'
+      : pasado ? 'Pasado'
+      : diasR === 0 ? '¡Hoy!'
+      : diasR === 1 ? 'Mañana'
+      : diasR + 'd';
+
+    const textos = S.biblio.filter(t=>ex.textos.includes(String(t.id)));
+    const total  = textos.length;
+    const ok     = textos.filter(t=>t.estado==='Leído'||t.estado==='Salteado').length;
+    const pend   = textos.filter(t=>!t.estado||t.estado==='Sin leer'||t.estado==='Pendiente');
+    const pct    = total ? Math.round((ok/total)*100) : 0;
+
+    const pendPorUnidad={};
+    pend.forEach(t=>{
+      const u=String(t.unidad||'Sin unidad').trim();
+      if(!pendPorUnidad[u])pendPorUnidad[u]=[];
+      pendPorUnidad[u].push(t);
+    });
+
+    html += `
+      <div class="examen-card${pasado && !ex.finalizado?' pasado':''}${ex.finalizado?' finalizado':''}">
+
+        <!-- Cabecera -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.65rem;">
+          <div style="flex:1;min-width:0;">
+            <div class="examen-nombre">${ex.finalizado ? '<span style="color:var(--g);">✅</span> ' : ''}${ex.nombre}</div>
+            <div class="examen-sub">${abr(ex.materia)||ex.materia} · ${fmtF(ex.fecha)}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:.3rem;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
+            <span style="font-size:.75rem;font-weight:700;color:${urgColor};background:${urgBg};padding:.22rem .65rem;border-radius:100px;white-space:nowrap;">${diasLabel}</span>
+            <button onclick="toggleFinalizadoExamen('${ex.id}')"
+              class="btn-icon" 
+              style="padding:.25rem .55rem;font-size:.68rem;${ex.finalizado?'color:var(--g);border-color:var(--g-light);':''}"
+              title="${ex.finalizado ? 'Reactivar examen' : 'Marcar como finalizado'}">
+              ${ex.finalizado ? '↩ Reactivar' : '✅ Finalizar'}
+            </button>
+            <button onclick="editarExamen('${ex.id}')" class="btn-icon" style="padding:.25rem .5rem;" title="Editar">✏️</button>
+            <button onclick="eliminarExamen('${ex.id}')" class="btn-icon" style="padding:.25rem .5rem;color:var(--r);" title="Eliminar">✕</button>
+          </div>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.65rem;">
+          <div style="flex:1;height:7px;border-radius:100px;background:var(--bg2);overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:${urgColor};border-radius:100px;transition:width .6s;"></div>
+          </div>
+          <span style="font-size:.72rem;font-weight:700;color:${urgColor};white-space:nowrap;min-width:70px;text-align:right;">${ok}/${total} · ${pct}%</span>
+        </div>
+
+        <!-- Estado de textos -->
+        ${ex.finalizado
+          ? `<div style="font-size:.8rem;color:var(--g);font-weight:600;padding:.3rem 0;">Examen completado · ${fmtF(ex.fecha)}</div>`
+          : pend.length === 0
+            ? `<div style="font-size:.8rem;color:var(--g);font-weight:700;padding:.35rem 0;">✅ ¡Todo listo para este examen!</div>`
+            : `<div class="examen-pend-list">
+                <div style="font-size:.65rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin-bottom:.35rem;">Falta leer (${pend.length})</div>
+                ${Object.entries(pendPorUnidad).map(([u,txs])=>`
+                  <div class="examen-pend-unidad">${u}</div>
+                  ${txs.map(t=>`
+                    <div class="examen-pend-item">
+                      <div class="examen-pend-dot"></div>
+                      <div class="examen-pend-txt">${t.titulo_texto||'—'}</div>
+                    </div>`).join('')}
+                `).join('')}
+              </div>`
+        }
+      </div>`;
+  });
+  el.innerHTML = html;
 }
