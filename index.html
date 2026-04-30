@@ -47,13 +47,17 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html { height: 100%; }
-    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; font-size: 15px; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh; overflow-x: hidden; font-size: 15px;
+    }
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-thumb { background: var(--v-mid); border-radius: 4px; }
 
     .hidden { display: none !important; }
     .fade { animation: fadeIn .22s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
 
     /* ── HEADER ── */
     #header {
@@ -68,16 +72,13 @@
       padding: .75rem 1rem .5rem;
       display: flex; align-items: center; justify-content: space-between;
     }
-    .logo {
-      font-size: 1.05rem; font-weight: 700; letter-spacing: -.02em;
-      color: var(--v);
-    }
+    .logo { font-size: 1.05rem; font-weight: 700; letter-spacing: -.02em; color: var(--v); }
     .logo span { color: var(--text3); font-weight: 400; font-size: .8rem; margin-left: 4px; }
     .header-actions { display: flex; align-items: center; gap: .4rem; }
     .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--g); box-shadow: 0 0 0 2px var(--g-light); }
     .sync-dot.s { background: var(--y); box-shadow: 0 0 0 2px var(--y-light); animation: blink 1s infinite; }
     .sync-dot.e { background: var(--r); box-shadow: 0 0 0 2px var(--r-light); }
-    @keyframes blink { 50% { opacity: .3; } }
+    @keyframes blink { 50% { opacity:.3; } }
     #syncLabel { font-size: .7rem; color: var(--text3); font-weight: 500; }
 
     .btn-icon {
@@ -85,14 +86,12 @@
       font-family: inherit; font-size: .72rem; font-weight: 600;
       padding: .32rem .75rem; border-radius: 100px;
       border: 1px solid var(--border2); background: var(--white);
-      color: var(--text2); cursor: pointer; transition: all .18s;
-      white-space: nowrap;
+      color: var(--text2); cursor: pointer; transition: all .18s; white-space: nowrap;
     }
     .btn-icon:hover { background: var(--v-light); border-color: var(--v-mid); color: var(--v); }
     .btn-icon.v { background: var(--v); border-color: var(--v); color: #fff; }
     .btn-icon.v:hover { background: #5a39d4; }
 
-    /* Quick actions bar */
     .quick-bar {
       max-width: 720px; margin: 0 auto;
       padding: .35rem 1rem .5rem;
@@ -118,29 +117,33 @@
     .tab:hover:not(.active) { border-color: var(--v-mid); color: var(--v); background: var(--v-light); }
 
     /* ── LAYOUT ── */
-    .page { max-width: 720px; margin: 0 auto; padding: 0 1rem; }
-    .sec { padding: .85rem 0 0; }
+    .page {
+      max-width: 720px; margin: 0 auto;
+      padding: 0 1rem;
+      width: 100%; box-sizing: border-box;
+    }
+    .sec { padding: .85rem 0 0; overflow: visible; }
 
     /* ── CHIPS SCROLL ── */
-    .chips { 
-  display: block;        /* ← cambiá flex por block */
-  overflow-x: auto; 
-  scrollbar-width: none; 
-  padding-bottom: 2px; 
-  margin-bottom: .65rem;
-  white-space: nowrap;   /* ← agregá esto */
-}
+    /* display:block + wrapper interno es la solución real al bug Chrome overflow-x+flex */
+    .chips {
+      display: block;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+      margin-bottom: .65rem;
+      white-space: nowrap;
+    }
     .chips::-webkit-scrollbar { display: none; }
     .chip {
       font-family: inherit; font-size: .72rem; font-weight: 600;
       padding: .3rem .8rem; border-radius: 100px;
       border: 1px solid var(--border); background: var(--white);
-      color: var(--text3); cursor: pointer; white-space: nowrap; flex-shrink: 0;
-      transition: all .18s;
+      color: var(--text3); cursor: pointer; white-space: nowrap;
+      transition: all .18s; display: inline-flex; align-items: center;
     }
     .chip.active { background: var(--v); border-color: var(--v); color: #fff; box-shadow: 0 2px 6px rgba(109,74,245,.25); }
     .chip:hover:not(.active) { border-color: var(--v-mid); color: var(--v); }
-
 
     /* ── FILTER TABS ── */
     .filter-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; gap: .5rem; flex-wrap: wrap; }
@@ -149,8 +152,7 @@
       font-family: inherit; font-size: .7rem; font-weight: 600;
       padding: .28rem .7rem; border-radius: 100px;
       border: none; background: transparent;
-      color: var(--text3); cursor: pointer; transition: all .18s;
-      white-space: nowrap;
+      color: var(--text3); cursor: pointer; transition: all .18s; white-space: nowrap;
     }
     .fpill.active { background: var(--white); color: var(--v); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
     .fpill.active.pend { color: var(--o); }
@@ -163,8 +165,7 @@
     }
     .stats-card::before {
       content: ''; position: absolute; top: -30px; right: -30px;
-      width: 120px; height: 120px; border-radius: 50%;
-      background: rgba(255,255,255,.08);
+      width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,.08);
     }
     .stats-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .7rem; }
     .stats-title { font-size: .78rem; font-weight: 600; opacity: .85; }
@@ -201,17 +202,20 @@
     .unidad-header.collapsed { border-radius: var(--radius-sm); border-bottom: 1px solid var(--v-mid); }
     .unidad-left { display: flex; align-items: center; gap: .5rem; }
     .unidad-name { font-size: .72rem; font-weight: 700; color: var(--v); text-transform: uppercase; letter-spacing: .05em; }
-    .unidad-prog { font-size: .7rem; font-weight: 700; color: var(--v); opacity: .7; }
+    .unidad-prog { font-size: .7rem; font-weight: 700; color: var(--v); opacity: .7; white-space: nowrap; }
     .unidad-toggle { font-size: .75rem; color: var(--v); opacity: .6; transition: transform .2s; }
     .unidad-toggle.open { transform: rotate(180deg); }
-    .unidad-body { background: var(--white); border: 1px solid var(--v-mid); border-radius: 0 0 var(--radius-sm) var(--radius-sm); overflow: hidden; transition: all .2s; }
+
+    /* SIN overflow:hidden — era lo que cortaba el popup del último texto */
+    .unidad-body {
+      background: var(--white);
+      border: 1px solid var(--v-mid);
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    }
     .unidad-body.collapsed { display: none; }
 
     /* ── MATERIA SEPARADOR ── */
-    .mat-separador {
-      margin: 1.2rem 0 .6rem;
-      display: flex; align-items: center; gap: .6rem;
-    }
+    .mat-separador { margin: 1.2rem 0 .6rem; display: flex; align-items: center; gap: .6rem; }
     .mat-separador-label {
       font-size: .78rem; font-weight: 800; color: var(--v);
       letter-spacing: .04em; text-transform: uppercase;
@@ -246,23 +250,26 @@
     .texto-row.pendiente { background: #fff8f3; border-left: 3px solid var(--o); }
     .texto-row.pendiente .texto-num { background: var(--o-light); color: var(--o); }
 
-    /* ── ESTADO POPUP ── */
+    /* ── ESTADO POPUP — position:fixed para escapar de contenedores ── */
     .pop-wrap { position: relative; flex-shrink: 0; }
     .edit-btn {
       padding: .22rem .45rem; border-radius: 6px; font-size: .72rem; cursor: pointer;
-      background: var(--bg2); border: 1px solid var(--border2);
-      color: var(--text3); transition: all .15s;
+      background: var(--bg2); border: 1px solid var(--border2); color: var(--text3); transition: all .15s;
     }
     .edit-btn:hover { background: var(--v-light); border-color: var(--v-mid); color: var(--v); }
+
     .estado-popup {
-      position: absolute; right: 0; top: calc(100% + 4px); z-index: 60;
+      position: fixed;           /* fixed = escapa de overflow:hidden */
+      z-index: 300;
       background: var(--white); border: 1px solid var(--border2);
       border-radius: var(--radius-sm); padding: 4px;
       display: flex; flex-direction: column; gap: 2px;
-      box-shadow: var(--shadow-lg); min-width: 145px;
-      opacity: 0; pointer-events: none; transform: translateY(-4px); transition: all .14s;
+      box-shadow: var(--shadow-lg); min-width: 155px;
+      opacity: 0; pointer-events: none;
+      transform: translateY(-4px); transition: all .14s;
     }
     .estado-popup.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+
     .ep {
       font-family: inherit; font-size: .78rem; font-weight: 500;
       padding: .45rem .7rem; border-radius: 6px; cursor: pointer;
@@ -275,14 +282,10 @@
     .ep.nv:hover { background: var(--r-light); color: var(--r); }
     .ep.pe:hover { background: var(--o-light); color: var(--o); }
 
-    /* Separador en popup */
-    .ep-sep { height: 1px; background: var(--border); margin: 3px 4px; }
-
-    /* ── RESUMEN INLINE FORM ── */
+    /* ── RESUMEN INLINE ── */
     .resumen-form {
       padding: .55rem .9rem .65rem 3.2rem;
-      background: var(--bg);
-      border-top: 1px dashed var(--border2);
+      background: var(--bg); border-top: 1px dashed var(--border2);
       display: flex; gap: .5rem; align-items: center;
     }
     .resumen-form input {
@@ -296,8 +299,7 @@
     .resumen-save-btn {
       font-family: inherit; font-size: .72rem; font-weight: 700;
       padding: .38rem .75rem; border-radius: 6px; cursor: pointer;
-      background: var(--v); border: none; color: #fff; transition: background .15s;
-      white-space: nowrap;
+      background: var(--v); border: none; color: #fff; transition: background .15s; white-space: nowrap;
     }
     .resumen-save-btn:hover { background: #5a39d4; }
     .resumen-cancel-btn {
@@ -313,13 +315,10 @@
       padding: .2rem .55rem; border-radius: 6px; text-decoration: none;
       display: inline-flex; align-items: center; gap: 3px;
       border: 1px solid var(--border2); color: var(--text3);
-      background: var(--white); transition: all .15s;
+      background: var(--white); transition: all .15s; cursor: pointer;
     }
     .lc:hover { border-color: var(--v-mid); color: var(--v); background: var(--v-light); }
-    .lc.add-res {
-      cursor: pointer; border-style: dashed; color: var(--v); border-color: var(--v-mid);
-      background: var(--v-light);
-    }
+    .lc.add-res { border-style: dashed; color: var(--v); border-color: var(--v-mid); background: var(--v-light); }
     .lc.add-res:hover { background: var(--v); color: #fff; }
 
     /* ── CLASES ── */
@@ -331,25 +330,19 @@
     .clase-card:hover { border-color: var(--v-mid); box-shadow: var(--shadow-lg); }
     .clase-meta { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; margin-bottom: .35rem; }
     .clase-title { font-size: .95rem; font-weight: 700; color: var(--text); margin-bottom: .15rem; }
-    .clase-sub { font-size: .78rem; color: var(--text3); }
     .clase-links { display: flex; gap: .35rem; flex-wrap: wrap; margin-top: .6rem; }
 
     /* ── FORM ── */
     .form-wrap { padding: .85rem 0; }
     .form-card {
       background: var(--white); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 1.25rem; margin-bottom: .75rem;
-      box-shadow: var(--shadow);
+      border-radius: var(--radius); padding: 1.25rem; margin-bottom: .75rem; box-shadow: var(--shadow);
     }
     .form-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 1.1rem; display: flex; align-items: center; gap: .5rem; }
     .field { margin-bottom: .85rem; }
-    .field-label {
-      display: block; font-size: .7rem; font-weight: 700; letter-spacing: .05em;
-      text-transform: uppercase; color: var(--text3); margin-bottom: .35rem;
-    }
+    .field-label { display: block; font-size: .7rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text3); margin-bottom: .35rem; }
     .inp {
-      width: 100%; background: var(--bg);
-      border: 1.5px solid var(--border2);
+      width: 100%; background: var(--bg); border: 1.5px solid var(--border2);
       border-radius: var(--radius-sm); padding: .65rem .85rem;
       color: var(--text); font-family: inherit; font-size: .875rem;
       outline: none; resize: none; transition: border-color .18s;
@@ -368,14 +361,12 @@
     }
     .tipo-btn.active.t { background: var(--v-light); border-color: var(--v); color: var(--v); }
     .tipo-btn.active.p { background: var(--p-light); border-color: var(--p); color: var(--p); }
-    .tipo-btn:hover:not(.active) { border-color: var(--border2); }
 
     .ac-wrap { position: relative; }
     .ac-list {
       position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 60;
       background: var(--white); border: 1.5px solid var(--v-mid);
-      border-radius: var(--radius-sm); max-height: 200px; overflow-y: auto;
-      box-shadow: var(--shadow-lg);
+      border-radius: var(--radius-sm); max-height: 200px; overflow-y: auto; box-shadow: var(--shadow-lg);
     }
     .ac-item { padding: .6rem .85rem; cursor: pointer; font-size: .85rem; border-bottom: 1px solid var(--border); transition: background .12s; }
     .ac-item:last-child { border-bottom: none; }
@@ -431,42 +422,18 @@
       border-radius: var(--radius); padding: 1.5rem 1.25rem 1.2rem; margin-bottom: 1rem;
       color: white; position: relative; overflow: hidden;
     }
-    .perfil-hero::before {
-      content: ''; position: absolute; top: -40px; right: -40px;
-      width: 160px; height: 160px; border-radius: 50%;
-      background: rgba(255,255,255,.07);
-    }
-    .perfil-hero::after {
-      content: ''; position: absolute; bottom: -20px; left: 30px;
-      width: 80px; height: 80px; border-radius: 50%;
-      background: rgba(255,255,255,.05);
-    }
-    .perfil-avatar {
-      width: 56px; height: 56px; border-radius: 50%;
-      background: rgba(255,255,255,.2); border: 2px solid rgba(255,255,255,.4);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.6rem; margin-bottom: .85rem;
-    }
+    .perfil-hero::before { content:''; position:absolute; top:-40px; right:-40px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,.07); }
+    .perfil-hero::after  { content:''; position:absolute; bottom:-20px; left:30px; width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,.05); }
+    .perfil-avatar { width:56px; height:56px; border-radius:50%; background:rgba(255,255,255,.2); border:2px solid rgba(255,255,255,.4); display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin-bottom:.85rem; overflow:hidden; }
     .perfil-name { font-size: 1.15rem; font-weight: 700; margin-bottom: .15rem; }
     .perfil-sub { font-size: .8rem; opacity: .8; }
     .perfil-stats-row { display: flex; gap: .75rem; margin-top: 1rem; flex-wrap: wrap; }
-    .perfil-stat {
-      background: rgba(255,255,255,.15); border-radius: var(--radius-sm);
-      padding: .55rem .75rem; flex: 1; min-width: 70px;
-    }
+    .perfil-stat { background: rgba(255,255,255,.15); border-radius: var(--radius-sm); padding: .55rem .75rem; flex: 1; min-width: 70px; }
     .perfil-stat-n { font-size: 1.3rem; font-weight: 700; }
     .perfil-stat-l { font-size: .65rem; opacity: .8; font-weight: 600; }
 
-    .perfil-card {
-      background: var(--white); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 1rem 1.1rem; margin-bottom: .75rem;
-      box-shadow: var(--shadow);
-    }
-    .perfil-card-title {
-      font-size: .72rem; font-weight: 800; letter-spacing: .07em;
-      text-transform: uppercase; color: var(--text3); margin-bottom: .85rem;
-      display: flex; align-items: center; gap: .4rem;
-    }
+    .perfil-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; margin-bottom: .75rem; box-shadow: var(--shadow); }
+    .perfil-card-title { font-size: .72rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--text3); margin-bottom: .85rem; display: flex; align-items: center; gap: .4rem; }
     .mat-prog-row { display: flex; align-items: center; gap: .65rem; margin-bottom: .75rem; }
     .mat-prog-row:last-child { margin-bottom: 0; }
     .mat-prog-name { font-size: .78rem; font-weight: 600; color: var(--text); min-width: 80px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -474,14 +441,28 @@
     .mat-prog-fill { height: 100%; border-radius: 100px; background: var(--v); transition: width .6s ease; }
     .mat-prog-pct { font-size: .72rem; font-weight: 700; color: var(--v); width: 32px; text-align: right; }
 
-    .perfil-pend-item {
-      display: flex; align-items: flex-start; gap: .6rem;
-      padding: .6rem 0; border-bottom: 1px solid var(--border);
-    }
+    .perfil-pend-item { display: flex; align-items: flex-start; gap: .6rem; padding: .6rem 0; border-bottom: 1px solid var(--border); }
     .perfil-pend-item:last-child { border-bottom: none; }
     .perfil-pend-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--o); margin-top: .35rem; flex-shrink: 0; }
     .perfil-pend-title { font-size: .8rem; font-weight: 600; color: var(--text); line-height: 1.35; }
     .perfil-pend-sub { font-size: .7rem; color: var(--text3); margin-top: .1rem; }
+
+    /* ── EXAMEN CARD ── */
+    .examen-card {
+      background: var(--white); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 1rem 1.1rem; margin-bottom: .75rem; box-shadow: var(--shadow); transition: all .18s;
+    }
+    .examen-card:hover { border-color: var(--v-mid); box-shadow: var(--shadow-lg); }
+    .examen-card.pasado { opacity: .55; }
+    .examen-card.finalizado { border-color: var(--g-light); background: #f9fef9; }
+    .examen-card.finalizado:hover { border-color: var(--g); }
+    .examen-nombre { font-size: .95rem; font-weight: 700; color: var(--text); }
+    .examen-sub { font-size: .72rem; color: var(--text3); margin-top: .1rem; }
+    .examen-pend-list { margin-top: .5rem; }
+    .examen-pend-unidad { font-size: .67rem; font-weight: 800; color: var(--v); text-transform: uppercase; letter-spacing: .04em; margin: .45rem 0 .2rem; }
+    .examen-pend-item { display: flex; align-items: flex-start; gap: .4rem; padding: .22rem 0; border-bottom: 1px solid var(--border); }
+    .examen-pend-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--o); margin-top: .38rem; flex-shrink: 0; }
+    .examen-pend-txt { font-size: .75rem; color: var(--text); line-height: 1.3; }
 
     /* ── BOTTOM NAV ── */
     #bottom-nav {
@@ -508,72 +489,9 @@
     .spin { width: 26px; height: 26px; border-radius: 50%; border: 2.5px solid var(--border2); border-top-color: var(--v); animation: sp .7s linear infinite; margin: 0 auto; }
     @keyframes sp { to { transform: rotate(360deg); } }
 
-    /* ── SECTION TITLE ── */
     .sec-title { font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: .6rem; display: flex; align-items: center; gap: .4rem; }
     .sec-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-    /* ── PROGRESS MINI ── */
-    .prog-mini { height: 3px; border-radius: 100px; background: var(--border); overflow: hidden; margin-top: .3rem; }
-    .prog-mini-fill { height: 100%; border-radius: 100px; background: var(--v); transition: width .4s ease; }
-
-    /* Materia selector heading */
-    .mat-heading {
-      padding: .5rem .9rem;
-      background: linear-gradient(135deg, var(--v), #9333ea);
-      color: white;
-      border-radius: var(--radius-sm);
-      margin-bottom: .65rem;
-      font-size: .82rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    /* Filter bar extras */
-    .filter-bar-extra {
-      display: flex; align-items: center; gap: .35rem;
-      flex-wrap: wrap; margin-bottom: .65rem;
-    }
-    .filter-label { font-size: .68rem; font-weight: 700; color: var(--text3); letter-spacing: .04em; text-transform: uppercase; margin-right: .15rem; }
-
-
-/* ── EXAMEN CARD ── */
-.examen-card {
-  background: var(--white);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem 1.1rem;
-  margin-bottom: .75rem;
-  box-shadow: var(--shadow);
-  transition: all .18s;
-}
-.examen-card:hover { border-color: var(--v-mid); box-shadow: var(--shadow-lg); }
-.examen-card.pasado { opacity: .5; }
-.examen-nombre { font-size: .95rem; font-weight: 700; color: var(--text); }
-.examen-sub { font-size: .72rem; color: var(--text3); margin-top: .1rem; }
-.examen-pend-list { margin-top: .5rem; }
-.examen-pend-unidad { font-size: .67rem; font-weight: 800; color: var(--v); text-transform: uppercase; letter-spacing: .04em; margin: .45rem 0 .2rem; }
-.examen-pend-item { display: flex; align-items: flex-start; gap: .4rem; padding: .22rem 0; border-bottom: 1px solid var(--border); }
-.examen-pend-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--o); margin-top: .38rem; flex-shrink: 0; }
-.examen-pend-txt { font-size: .75rem; color: var(--text); line-height: 1.3; }
-
-/* Chips en modal que no se corten */
-#ex-unidad-chips { flex-wrap: wrap; display: flex; gap: .3rem; }
-
-
-/* Examen finalizado */
-.examen-card.finalizado {
-  border-color: var(--g-light);
-  background: #f9fef9;
-  opacity: .85;
-}
-.examen-card.finalizado:hover {
-  border-color: var(--g);
-}
- 
-
-</style>
+  </style>
 </head>
 <body>
 
@@ -592,24 +510,16 @@
     </div>
   </div>
 
-  <!-- Quick access bar -->
   <div class="quick-bar">
-    <button class="btn-icon" onclick="window.open('https://drive.google.com/drive/my-drive','_blank')" title="Ir a Google Drive">
+    <button class="btn-icon" onclick="window.open('https://drive.google.com/drive/my-drive','_blank')">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.4 12a19.79 19.79 0 01-3.07-8.67A2 2 0 013.34 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.91 8.37a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 15.92z"/></svg>
       Drive
     </button>
-    <button class="btn-icon v" onclick="window.location.href='sccanerocr/index.html'" title="Ir a ScanOCR">
-      IR A SCANNER
-    </button>
-    <button class="btn-icon" onclick="setSection('cargarbiblio')" title="Cargar bibliografía">
-      📚 + Biblio
-    </button>
-    <button class="btn-icon" onclick="setSection('cargar')" title="Cargar clase">
-      🎓 + Clase
-    </button>
+    <button class="btn-icon v" onclick="window.location.href='sccanerocr/index.html'">IR A SCANNER</button>
+    <button class="btn-icon" onclick="setSection('cargarbiblio')">📚 + Biblio</button>
+    <button class="btn-icon" onclick="setSection('cargar')">🎓 + Clase</button>
   </div>
 
-  <!-- Tabs -->
   <div class="tabs">
     <button class="tab active" id="tab-biblio"       onclick="setSection('biblio')">📚 Bibliografía</button>
     <button class="tab"        id="tab-clases"       onclick="setSection('clases')">🎓 Clases</button>
@@ -625,12 +535,8 @@
 <section id="sec-biblio" class="sec fade">
   <div class="page">
     <div id="stats-bar"></div>
-
-    <!-- Materias dinámicas -->
     <div class="sec-title">Materia</div>
-    <div class="chips" id="chips-biblio" style="padding-right:1rem;"></div>
-
-    <!-- Tipo + estado + contador -->
+    <div class="chips" id="chips-biblio"></div>
     <div class="filter-row">
       <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;">
         <div class="filter-pills">
@@ -639,15 +545,14 @@
           <button class="fpill"        id="ft-Practica" onclick="setTipoBiblio('Practica')">Práctica</button>
         </div>
         <div class="filter-pills">
-          <button class="fpill active" id="fe-todos"    onclick="setEstadoBiblio('todos')">Estado</button>
+          <button class="fpill active" id="fe-todos"     onclick="setEstadoBiblio('todos')">Estado</button>
           <button class="fpill"        id="fe-pendiente" onclick="setEstadoBiblio('pendiente')">⏳ Pendientes</button>
-          <button class="fpill"        id="fe-sinleer"  onclick="setEstadoBiblio('sinleer')">Sin leer</button>
-          <button class="fpill"        id="fe-leido"    onclick="setEstadoBiblio('leido')">✓ Leídos</button>
+          <button class="fpill"        id="fe-sinleer"   onclick="setEstadoBiblio('sinleer')">Sin leer</button>
+          <button class="fpill"        id="fe-leido"     onclick="setEstadoBiblio('leido')">✓ Leídos</button>
         </div>
       </div>
       <span id="biblio-count" style="font-size:.72rem;color:var(--text3);font-weight:600;"></span>
     </div>
-
     <div id="textos-container">
       <div style="padding:3rem 0;text-align:center;"><div class="spin"></div></div>
     </div>
@@ -658,7 +563,7 @@
 <section id="sec-clases" class="hidden sec fade">
   <div class="page">
     <div class="sec-title">Materia</div>
-    <div class="chips" id="chips-clases" style="padding-right:1rem;"></div>
+    <div class="chips" id="chips-clases"></div>
     <div class="filter-row">
       <div class="filter-pills">
         <button class="fpill active" id="ct-todos"    onclick="setTipoClase('todos')">Todas</button>
@@ -673,15 +578,16 @@
   </div>
 </section>
 
+<!-- ══ PERFIL ══ -->
 <section id="sec-perfil" class="hidden sec fade">
   <div class="page" style="padding-bottom:1rem;">
     <div class="perfil-hero">
-<div class="perfil-avatar">
-  <img src="icons/Facundo.png" alt="Facundo" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-</div>
+      <div class="perfil-avatar">
+        <img src="icons/Facundo.png" alt="Facundo" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+      </div>
       <div class="perfil-name">EstudioPsi</div>
       <div class="perfil-sub">Psicología 4° año · Resumen de progreso</div>
-      <div class="perfil-stats-row" id="perfil-stats-row">
+      <div class="perfil-stats-row">
         <div class="perfil-stat"><div class="perfil-stat-n" id="pst-total">—</div><div class="perfil-stat-l">Textos</div></div>
         <div class="perfil-stat"><div class="perfil-stat-n" id="pst-leidos">—</div><div class="perfil-stat-l">Leídos</div></div>
         <div class="perfil-stat"><div class="perfil-stat-n" id="pst-pend">—</div><div class="perfil-stat-l">Pendientes</div></div>
@@ -699,8 +605,12 @@
       <div id="perfil-pendientes"></div>
     </div>
 
+    <div class="perfil-card">
+      <div class="perfil-card-title">📈 Estadísticas</div>
+      <div id="perfil-estadisticas"></div>
+    </div>
 
-        <div class="perfil-card">
+    <div class="perfil-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;">
         <div class="perfil-card-title" style="margin-bottom:0;">📅 Exámenes</div>
         <button class="btn-icon v" onclick="abrirExamenForm()">＋ Nuevo</button>
@@ -708,23 +618,14 @@
       <div id="perfil-examenes"></div>
     </div>
 
-<!-- ✅ CÓMO DEBE QUEDAR -->
-    <div class="perfil-card">
-      <div class="perfil-card-title">📈 Estadísticas</div>
-      <div id="perfil-estadisticas"></div>
-    </div>
-
-  </div> 
+  </div>
 </section>
-
-
 
 <!-- ══ CARGAR CLASE ══ -->
 <section id="sec-cargar" class="hidden sec form-wrap">
   <div class="page">
   <div class="form-card">
     <p class="form-title">🎓 Nueva Clase</p>
-
     <div class="field">
       <label class="field-label">Materia</label>
       <select id="form-materia" class="inp" onchange="onSelMat(this.value)">
@@ -735,7 +636,6 @@
         <p style="font-size:.72rem;color:var(--text3);margin-top:.25rem;">Esta materia se sumará automáticamente.</p>
       </div>
     </div>
-
     <div class="field">
       <label class="field-label">Tipo</label>
       <div class="tipo-btns">
@@ -743,7 +643,6 @@
         <button class="tipo-btn p"        id="ftype-Practica" onclick="setTipoForm('Práctica')">✏️ Práctica</button>
       </div>
     </div>
-
     <div class="inp-grid field">
       <div>
         <label class="field-label">Fecha</label>
@@ -754,7 +653,6 @@
         <input type="number" id="form-nro" class="inp" placeholder="1" min="1"/>
       </div>
     </div>
-
     <div class="field">
       <label class="field-label">Título de la clase</label>
       <select id="form-titulo-dd" class="inp" style="margin-bottom:.4rem;" onchange="onSelClase(this.value)">
@@ -768,17 +666,14 @@
         <div id="ac-list" class="ac-list hidden"></div>
       </div>
     </div>
-
     <div class="field">
       <label class="field-label">Transcripción de la clase</label>
       <textarea id="form-transc" class="inp" rows="5" placeholder="Pegá la transcripción..."></textarea>
     </div>
-
     <div class="field">
       <label class="field-label">Contenido PPT <span style="font-weight:400;text-transform:none;font-size:.75rem;letter-spacing:0;">(opcional)</span></label>
       <textarea id="form-ppt" class="inp" rows="3" placeholder="Pegá el contenido del PowerPoint..."></textarea>
     </div>
-
     <div class="inp-grid field">
       <div>
         <label class="field-label">Link Grabación</label>
@@ -789,12 +684,10 @@
         <input type="url" id="form-doc" class="inp" placeholder="https://docs.google.com/..."/>
       </div>
     </div>
-
     <div class="info-box">
       <span>💾</span>
       <p>Se guarda localmente primero. Sin internet no perdés nada.</p>
     </div>
-
     <button class="btn btn-v" id="btn-guardar" onclick="guardarClase()">Guardar en Sheets →</button>
   </div>
   </div>
@@ -805,7 +698,6 @@
   <div class="page">
   <div class="form-card">
     <p class="form-title">📚 Cargar Bibliografía</p>
-
     <div class="step-box">
       <div class="step-hdr">
         <div style="display:flex;gap:.6rem;flex:1;">
@@ -847,16 +739,13 @@ Reglas:
 
 Temario:</div>
     </div>
-
     <div class="divider"><span>Paso 2 — Pegá la respuesta</span></div>
     <textarea id="json-input" class="inp" rows="9" style="margin-top:.5rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;"
       placeholder='[&#10;  {&#10;    "id": "txt_SEM_001",&#10;    "materia": "SEMIOSIS SOCIAL",&#10;    ...&#10;  }&#10;]'></textarea>
-
     <div class="divider" style="margin-top:.75rem;"><span>Paso 3 — Revisar y subir</span></div>
     <button class="btn btn-out" style="margin-top:.5rem;" onclick="previsualizarBiblio()">👁 Previsualizar antes de subir</button>
   </div>
 
-  <!-- Preview -->
   <div id="biblio-preview" class="hidden fade">
     <div class="form-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.85rem;">
@@ -866,19 +755,16 @@ Temario:</div>
         </div>
         <button class="btn btn-out btn-sm" onclick="limpiarPreview()">✕ Limpiar</button>
       </div>
-
       <div id="prev-errors" class="hidden err-box">
         <p>⚠️ Errores — corregí antes de subir</p>
         <ul id="err-list"></ul>
       </div>
-
       <div class="tbl-wrap">
         <table>
           <thead><tr><th>ID</th><th>Materia</th><th>Unidad</th><th>Título</th><th>Tipo</th></tr></thead>
           <tbody id="prev-tbody"></tbody>
         </table>
       </div>
-
       <button class="btn btn-v" id="btn-subir" onclick="subirBiblio()">↑ Subir todo a Google Sheets</button>
     </div>
   </div>
@@ -912,7 +798,7 @@ Temario:</div>
 </nav>
 
 <!-- ══ MODAL EXAMEN ══ -->
-<div id="modal-examen" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);overflow-y:auto;padding:1rem;">
+<div id="modal-examen" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);overflow-y:auto;padding:1rem;">
   <div style="max-width:560px;margin:2rem auto;background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);overflow:hidden;">
     <div style="background:linear-gradient(135deg,var(--v),#9333ea);padding:1.1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;">
       <p style="font-size:1rem;font-weight:700;color:#fff;" id="modal-examen-title">📅 Nuevo Examen</p>
@@ -947,6 +833,6 @@ Temario:</div>
   </div>
 </div>
 
-<script src="app.js"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>

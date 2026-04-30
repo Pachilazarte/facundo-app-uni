@@ -1,10 +1,10 @@
-// EstudioPsi — app.js v8 (pendientes por materia, examen finalizado, próximo contador)
+// EstudioPsi — app.js v9 (popup fixed, unidades robustas, chips fix)
 const BASE = 'https://script.google.com/macros/s/AKfycbwQf3mhtBe3n3dMmtr31Zh_aq-xRUY2TebRKS8AJ0msrRJtvjcf2J7Wy7063iMmCzDl/exec';
-const CFG = { 
-  GB: BASE+'?hoja=Bibliografia', 
+const CFG = {
+  GB: BASE+'?hoja=Bibliografia',
   GC: BASE+'?hoja=Clases',
   GE: BASE+'?hoja=Examenes',
-  P: BASE, HB:'Bibliografia', HC:'Clases' 
+  P: BASE, HB:'Bibliografia', HC:'Clases'
 };
 
 const S = {
@@ -18,7 +18,8 @@ const S = {
   unidades_abiertas: new Set(),
   examenes: JSON.parse(localStorage.getItem('ep_examenes')||'[]'),
   _exEditId: null,
-  _mostrarFinalizados: false,   // ← nuevo
+  _mostrarFinalizados: false,
+  _pendColapsadas: new Set(),
 };
 
 const $   = id => document.getElementById(id);
@@ -31,8 +32,8 @@ const fmtF = f => {
     return d.toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'});
   }catch(e){return f;}
 };
-const bc  = e => ({'Leído':'b-ok','Salteado':'b-sk','No va':'b-nv','Pendiente':'b-pe'}[e]||'b-sl');
-const C   = {
+const bc = e => ({'Leído':'b-ok','Salteado':'b-sk','No va':'b-nv','Pendiente':'b-pe'}[e]||'b-sl');
+const C = {
   set:(k,v)=>{try{sessionStorage.setItem(k,JSON.stringify(v));}catch(e){}},
   get:(k)=>{try{const d=sessionStorage.getItem(k);return d?JSON.parse(d):null;}catch(e){return null;}}
 };
@@ -44,6 +45,14 @@ function abr(m) {
   const stop = new Set(['Y','DE','DEL','LA','LAS','LOS','EL','EN','A','E']);
   const sig = words.filter(w => !stop.has(w.toUpperCase()));
   return sig.slice(0,2).join(' ');
+}
+
+// UID robusto sin colisiones
+function makeUid(matKey, u) {
+  const str = matKey + '__' + u;
+  let hash = 0;
+  for(let i=0;i<str.length;i++) hash = ((hash<<5)-hash+str.charCodeAt(i))|0;
+  return 'u_' + Math.abs(hash).toString(36) + '_' + str.length;
 }
 
 let _tt;
@@ -72,14 +81,14 @@ async function fetchB(){
     const txt = await r.text();
     let d;
     try { d=JSON.parse(txt); } catch(e){ throw new Error('No JSON: '+txt.slice(0,80)); }
-    if(!Array.isArray(d)) throw new Error('No es array: '+JSON.stringify(d).slice(0,80));
+    if(!Array.isArray(d)) throw new Error('No es array');
     S.biblio=d; C.set('ep_biblio',d);
     buildMats(); renderBiblio();
     sync('', d.length+' textos');
   }catch(e){
     console.warn('fetchB:',e.message);
     sync('e', S.biblio.length ? S.biblio.length+' (caché)' : 'Sin conexión');
-    if(!S.biblio.length){ const tc=$('textos-container'); if(tc)tc.innerHTML=empt('📡','Sin datos','Verificá que el Apps Script esté publicado y la hoja "Bibliografia" tenga los encabezados correctos.'); }
+    if(!S.biblio.length){ const tc=$('textos-container'); if(tc)tc.innerHTML=empt('📡','Sin datos','Verificá que el Apps Script esté publicado.'); }
   }
 }
 async function fetchC(){
@@ -95,7 +104,7 @@ async function fetchC(){
     if(!S.clases.length){ const cc=$('clases-container');if(cc)cc.innerHTML=empt('🎓','Sin clases','Cargá la primera desde ＋ Clase.'); }
   }
 }
-function reloadData(){ toast('Actualizando...'); fetchB(); fetchC(); }
+function reloadData(){ toast('Actualizando...'); fetchB(); fetchC(); fetchExamenes(); }
 window.addEventListener('online',()=>{ toast('Conexión restaurada'); reloadData(); });
 
 // ── MATERIAS DINÁMICAS ─────────────────────────────────────────
@@ -123,6 +132,7 @@ function renderChips(cid, sec){
     const label = m==='todas' ? 'Todas' : abr(m)||m;
     return `<button class="chip${m===activa?' active':''}" onclick="${fn}('${m.replace(/'/g,"\\'")}') " title="${m}">${label}</button>`;
   }).join('');
+  // Wrapper interno con padding-right — solución real al bug de overflow-x + flex en Chrome
   el.innerHTML = `<div style="display:inline-flex;gap:.4rem;padding-right:1.5rem;">${btns}</div>`;
 }
 
@@ -141,11 +151,7 @@ function setTipoClase(t){
 }
 function setEstadoBiblio(e){
   S.feb = e;
-  // Al filtrar por estado, resetear chips a "Todas" para ver todas las materias separadas
-  if(e !== 'todos') {
-    S.fmb = 'todas';
-    renderChips('chips-biblio', 'biblio');
-  }
+  if(e !== 'todos'){ S.fmb = 'todas'; renderChips('chips-biblio','biblio'); }
   ['todos','pendiente','sinleer','leido'].forEach(x=>{
     const el=$('fe-'+x);
     if(el){
@@ -197,8 +203,8 @@ function renderBiblio(){
     const matchMat  = S.fmb==='todas' || String(t.materia||'').trim() === S.fmb;
     const tipoDato  = String(t.tipo_clase||'').trim();
     const matchTipo = S.ftb==='todos' ||
-      (S.ftb==='Teorica'  && (tipoDato==='Teórica'  || tipoDato==='Teorica'))  ||
-      (S.ftb==='Practica' && (tipoDato==='Práctica' || tipoDato==='Practica'));
+      (S.ftb==='Teorica'  && (tipoDato==='Teórica' || tipoDato==='Teorica'))  ||
+      (S.ftb==='Practica' && (tipoDato==='Práctica'|| tipoDato==='Practica'));
     const estado    = String(t.estado||'').trim();
     const matchEst  = S.feb==='todos' ||
       (S.feb==='pendiente' && estado==='Pendiente') ||
@@ -217,11 +223,8 @@ function renderBiblio(){
 
   let html = '';
 
-  // ── CAMBIO CLAVE: agrupar por materia cuando hay filtro de estado activo ──
-  // Así "Pendientes" (y Sin leer / Leídos) siempre aparecen segmentados por materia
   if(S.fmb === 'todas' || S.feb !== 'todos'){
-    const gMats = {};
-    const ordenMats = [];
+    const gMats = {}, ordenMats = [];
     items.forEach(t=>{
       const m = String(t.materia||'Sin materia').trim();
       if(!gMats[m]){gMats[m]=[];ordenMats.push(m);}
@@ -232,7 +235,6 @@ function renderBiblio(){
       html += buildUnidadesHTML(gMats[m], m);
     });
   } else {
-    // Una sola materia seleccionada, sin filtro de estado → directo por unidad
     html += buildUnidadesHTML(items, S.fmb);
   }
 
@@ -241,8 +243,7 @@ function renderBiblio(){
 }
 
 function buildUnidadesHTML(items, matKey){
-  const grupos = {};
-  const orden  = [];
+  const grupos = {}, orden = [];
   items.forEach(t=>{
     const u = String(t.unidad||'Sin unidad').trim();
     if(!grupos[u]){ grupos[u]=[]; orden.push(u); }
@@ -251,10 +252,10 @@ function buildUnidadesHTML(items, matKey){
 
   let html = '';
   orden.forEach(u=>{
-    const txs = grupos[u];
+    const txs    = grupos[u];
     const leidos = txs.filter(t=>t.estado==='Leído').length;
     const pct    = txs.length ? Math.round((leidos/txs.length)*100) : 0;
-    const uid    = 'u_'+btoa(encodeURIComponent(matKey+'__'+u)).replace(/[^a-zA-Z0-9]/g,'').slice(0,20);
+    const uid    = makeUid(matKey, u);
     const colapsada = !S.unidades_abiertas.has(uid);
 
     html += `<div class="unidad-section">
@@ -268,9 +269,9 @@ function buildUnidadesHTML(items, matKey){
       <div class="unidad-body${colapsada?' collapsed':''}" id="${uid}">`;
 
     txs.forEach((t,i)=>{
-      const e = String(t.estado||'Sin leer').trim();
-      const cls = e==='Leído'?'leido':e==='No va'?'nova':e==='Pendiente'?'pendiente':'';
-      const nro = t.nro_texto || (i+1);
+      const e     = String(t.estado||'Sin leer').trim();
+      const cls   = e==='Leído'?'leido':e==='No va'?'nova':e==='Pendiente'?'pendiente':'';
+      const nro   = t.nro_texto || (i+1);
       const resId = 'res_'+String(t.id).replace(/[^a-zA-Z0-9]/g,'');
       html += `
         <div class="texto-row ${cls}" id="txr-${t.id}">
@@ -283,13 +284,13 @@ function buildUnidadesHTML(items, matKey){
               ${t.tipo_clase?`<span class="badge ${String(t.tipo_clase).includes('Práctica')?'b-p':'b-t'}">${t.tipo_clase}</span>`:''}
               ${t.link_resumen
                 ? `<a href="${t.link_resumen}" target="_blank" class="lc">📄 Resumen</a>
-                   <button class="lc" onclick="toggleResumenForm('${t.id}','${resId}')" title="Editar link de resumen">✏️</button>`
+                   <button class="lc" onclick="toggleResumenForm('${t.id}','${resId}')" title="Editar resumen">✏️</button>`
                 : `<button class="lc add-res" onclick="toggleResumenForm('${t.id}','${resId}')">＋ Resumen</button>`
               }
             </div>
           </div>
           <div class="pop-wrap">
-            <button class="edit-btn" onclick="togglePop('pop-${t.id}')">✏️</button>
+            <button class="edit-btn" onclick="togglePop(event,'pop-${t.id}')">✏️</button>
             <div class="estado-popup" id="pop-${t.id}">
               <button class="ep"    onclick="cambiarEstado('${t.id}','Sin leer')">⬜ Sin leer</button>
               <button class="ep ok" onclick="cambiarEstado('${t.id}','Leído')">✅ Leído</button>
@@ -310,11 +311,14 @@ function buildUnidadesHTML(items, matKey){
   return html;
 }
 
-// ── TOGGLE UNIDAD ─────────────────────────────────────────────
+// ── TOGGLE UNIDAD (robusto) ────────────────────────────────────
 function toggleUnidad(uid){
-  const body=$(uid);
-  const header=body?.previousElementSibling;
+  const body = $(uid);
   if(!body) return;
+  // Buscar header dentro del mismo .unidad-section (no depende de DOM order)
+  const section = body.closest('.unidad-section');
+  const header  = section?.querySelector('.unidad-header');
+
   const isAbierta = S.unidades_abiertas.has(uid);
   if(isAbierta){
     S.unidades_abiertas.delete(uid);
@@ -329,11 +333,47 @@ function toggleUnidad(uid){
   }
 }
 
-function togglePop(id){
-  document.querySelectorAll('.estado-popup.open').forEach(p=>{ if(p.id!==id) p.classList.remove('open'); });
-  $(id)?.classList.toggle('open');
+// ── POPUP (position:fixed para escapar overflow:hidden) ────────
+function togglePop(event, id){
+  event.stopPropagation();
+  const popup = $(id);
+  if(!popup) return;
+
+  const wasOpen = popup.classList.contains('open');
+  document.querySelectorAll('.estado-popup.open').forEach(p=>p.classList.remove('open'));
+
+  if(!wasOpen){
+    const btn  = event.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const popH = 220; // altura estimada del popup
+
+    if(spaceBelow >= popH || spaceBelow >= spaceAbove){
+      popup.style.top    = (rect.bottom + window.scrollY + 4) + 'px';
+      popup.style.bottom = 'auto';
+    } else {
+      popup.style.top    = (rect.top + window.scrollY - popH - 4) + 'px';
+      popup.style.bottom = 'auto';
+    }
+    // Alinear a la derecha del botón sin salirse de la pantalla
+    const rightOffset = window.innerWidth - rect.right;
+    popup.style.right = Math.max(4, rightOffset) + 'px';
+    popup.style.left  = 'auto';
+
+    popup.classList.add('open');
+  }
 }
-document.addEventListener('click',e=>{ if(!e.target.closest('.texto-row,.pop-wrap')) document.querySelectorAll('.estado-popup.open').forEach(p=>p.classList.remove('open')); });
+
+// Cerrar popup al hacer scroll (porque es fixed)
+window.addEventListener('scroll', ()=>{
+  document.querySelectorAll('.estado-popup.open').forEach(p=>p.classList.remove('open'));
+}, {passive:true});
+
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.pop-wrap'))
+    document.querySelectorAll('.estado-popup.open').forEach(p=>p.classList.remove('open'));
+});
 
 // ── RESUMEN INLINE ─────────────────────────────────────────────
 function toggleResumenForm(id, resId){
@@ -348,7 +388,7 @@ function toggleResumenForm(id, resId){
 async function guardarResumen(id, resId){
   const inp=$('inp-'+resId); if(!inp) return;
   const link = inp.value.trim();
-  const idx = S.biblio.findIndex(t=>String(t.id)===String(id));
+  const idx  = S.biblio.findIndex(t=>String(t.id)===String(id));
   if(idx===-1) return;
   S.biblio[idx].link_resumen = link;
   S.biblio[idx].fecha_actualizacion = hoy();
@@ -384,7 +424,6 @@ function renderClases(){
   if(S.ftc==='Practica') items=items.filter(c=>String(c.tipo||'').includes('ráctica'));
 
   const cc=$('clases-count'); if(cc) cc.textContent=items.length+' clases';
-
   if(!items.length){ el.innerHTML=empt('🎓','Sin clases','Cargá la primera desde ＋ Clase.'); return; }
   items.sort((a,b)=>new Date(b.fecha||0)-new Date(a.fecha||0));
 
@@ -423,28 +462,28 @@ function renderClases(){
 function renderPerfil(){
   if(!S.biblio.length) return;
 
-  const total   = S.biblio.length;
-  const leidos  = S.biblio.filter(t=>t.estado==='Leído').length;
-  const pend    = S.biblio.filter(t=>t.estado==='Pendiente').length;
-  const pct     = total ? Math.round((leidos/total)*100) : 0;
+  const total  = S.biblio.length;
+  const leidos = S.biblio.filter(t=>t.estado==='Leído').length;
+  const pend   = S.biblio.filter(t=>t.estado==='Pendiente').length;
+  const pct    = total ? Math.round((leidos/total)*100) : 0;
 
-  const pst = id => $(id);
-  if(pst('pst-total')) pst('pst-total').textContent = total;
-  if(pst('pst-leidos')) pst('pst-leidos').textContent = leidos;
-  if(pst('pst-pend')) pst('pst-pend').textContent = pend;
-  if(pst('pst-pct')) pst('pst-pct').textContent = pct+'%';
+  if($('pst-total'))  $('pst-total').textContent  = total;
+  if($('pst-leidos')) $('pst-leidos').textContent = leidos;
+  if($('pst-pend'))   $('pst-pend').textContent   = pend;
+  if($('pst-pct'))    $('pst-pct').textContent    = pct+'%';
 
+  // Progreso por materia
   const matProg = $('perfil-mat-prog');
   if(matProg){
     const colores = ['#6d4af5','#9333ea','#d946a8','#2563eb','#059669','#d97706','#dc2626','#ea580c'];
     let mpHtml = '';
-    S.mats_biblio.forEach((m, i)=>{
-      const txs = S.biblio.filter(t=>String(t.materia||'').trim()===m);
+    S.mats_biblio.forEach((m,i)=>{
+      const txs  = S.biblio.filter(t=>String(t.materia||'').trim()===m);
       const leid = txs.filter(t=>t.estado==='Leído').length;
       const salt = txs.filter(t=>t.estado==='Salteado').length;
       const nova = txs.filter(t=>t.estado==='No va').length;
-      const p = txs.length ? Math.round(((leid+salt+nova)/txs.length)*100) : 0;
-      const color = colores[i % colores.length];
+      const p    = txs.length ? Math.round(((leid+salt+nova)/txs.length)*100) : 0;
+      const color= colores[i % colores.length];
       mpHtml += `
         <div class="mat-prog-row">
           <div class="mat-prog-name" title="${m}">${abr(m)||m}</div>
@@ -455,13 +494,13 @@ function renderPerfil(){
     matProg.innerHTML = mpHtml || '<p style="font-size:.78rem;color:var(--text3);">Sin datos aún.</p>';
   }
 
+  // Pendientes por materia
   const pendEl = $('perfil-pendientes');
   if(pendEl){
     const pendList = S.biblio.filter(t=>t.estado==='Pendiente');
     if(!pendList.length){
       pendEl.innerHTML = '<p style="font-size:.78rem;color:var(--text3);">No hay textos marcados como pendientes. 🎉</p>';
     } else {
-      if(!S._pendColapsadas) S._pendColapsadas = new Set();
       const gMats = {}, ordenMats = [];
       pendList.forEach(t=>{
         const m = String(t.materia||'Sin materia').trim();
@@ -477,10 +516,8 @@ function renderPerfil(){
             style="display:flex;align-items:center;gap:.4rem;font-family:inherit;cursor:pointer;
             font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
             color:var(--v);background:var(--v-light);border:1px solid var(--v-mid);border-radius:100px;
-            padding:.25rem .75rem;margin:.55rem 0 .3rem;transition:all .15s;width:auto;"
-            onmouseover="this.style.background='var(--v);this.style.color=\\'#fff\\'"
-            onmouseout="this.style.background='var(--v-light)';this.style.color='var(--v)'">
-            <span id="${mid}_arrow" style="transition:transform .2s;display:inline-block;${col?'':'transform:rotate(0deg)'}">${col?'▶':'▾'}</span>
+            padding:.25rem .75rem;margin:.55rem 0 .3rem;width:auto;">
+            <span id="${mid}_arrow">${col?'▶':'▾'}</span>
             ${m}
             <span style="background:rgba(109,74,245,.15);border-radius:100px;padding:.1rem .45rem;font-size:.6rem;">${gMats[m].length}</span>
           </button>
@@ -500,17 +537,18 @@ function renderPerfil(){
     }
   }
 
+  // Estadísticas
   const estEl = $('perfil-estadisticas');
   if(estEl){
-    const salt = S.biblio.filter(t=>t.estado==='Salteado').length;
-    const nova = S.biblio.filter(t=>t.estado==='No va').length;
-    const sinleer = S.biblio.filter(t=>!t.estado||t.estado==='Sin leer').length;
-    const conResumen = S.biblio.filter(t=>t.link_resumen).length;
+    const salt     = S.biblio.filter(t=>t.estado==='Salteado').length;
+    const nova     = S.biblio.filter(t=>t.estado==='No va').length;
+    const sinleer  = S.biblio.filter(t=>!t.estado||t.estado==='Sin leer').length;
+    const conRes   = S.biblio.filter(t=>t.link_resumen).length;
     const stats = [
-      {l:'Sin leer',n:sinleer,c:'var(--text3)'},
-      {l:'Salteados',n:salt,c:'var(--y)'},
-      {l:'No va',n:nova,c:'var(--r)'},
-      {l:'Con resumen',n:conResumen,c:'var(--v)'},
+      {l:'Sin leer',   n:sinleer, c:'var(--text3)'},
+      {l:'Salteados',  n:salt,    c:'var(--y)'},
+      {l:'No va',      n:nova,    c:'var(--r)'},
+      {l:'Con resumen',n:conRes,  c:'var(--v)'},
     ];
     estEl.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;">
       ${stats.map(s=>`
@@ -521,6 +559,21 @@ function renderPerfil(){
     </div>`;
   }
   renderExamenes();
+}
+
+function togglePendMat(m, mid){
+  const body  = document.getElementById(mid);
+  const arrow = document.getElementById(mid+'_arrow');
+  if(!body) return;
+  if(S._pendColapsadas.has(m)){
+    S._pendColapsadas.delete(m);
+    body.style.display = '';
+    if(arrow) arrow.textContent = '▾';
+  } else {
+    S._pendColapsadas.add(m);
+    body.style.display = 'none';
+    if(arrow) arrow.textContent = '▶';
+  }
 }
 
 // ── FORM CLASE ──────────────────────────────────────────────────
@@ -693,8 +746,8 @@ function setSection(sec){
 }
 
 // ── EXÁMENES ────────────────────────────────────────────────────
-function saveLocalExamenes(){ 
-  localStorage.setItem('ep_examenes', JSON.stringify(S.examenes)); 
+function saveLocalExamenes(){
+  localStorage.setItem('ep_examenes', JSON.stringify(S.examenes));
 }
 
 async function fetchExamenes(){
@@ -704,7 +757,7 @@ async function fetchExamenes(){
     if(!Array.isArray(d)) return;
     S.examenes = d;
     localStorage.setItem('ep_examenes', JSON.stringify(d));
-    renderExamenes();
+    if(S.sec==='perfil') renderExamenes();
   }catch(e){ console.warn('fetchExamenes:', e.message); }
 }
 
@@ -723,27 +776,56 @@ async function syncExamenSheets(examen, accion='guardar_examen'){
         textos: examen.textos||[]
       })
     });
+    sync('','Guardado');
   }catch(e){ sync('e','Sin conexión'); }
+}
+
+function abrirExamenForm(id=null){
+  S._exEditId = id;
+  const ex = id ? S.examenes.find(e=>e.id===id) : null;
+  $('modal-examen-title').textContent = id ? '✏️ Editar Examen' : '📅 Nuevo Examen';
+  $('ex-nombre').value = ex?.nombre || '';
+  $('ex-fecha').value  = ex?.fecha  || '';
+
+  const sel = $('ex-materia');
+  sel.innerHTML = '<option value="">— Seleccioná —</option>' +
+    S.mats_biblio.map(m=>`<option value="${m}" ${ex?.materia===m?'selected':''}>${m}</option>`).join('');
+
+  $('modal-examen').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  cargarTextosModal(ex?.textos||[]);
 }
 
 function cerrarExamenForm(){
   $('modal-examen').style.display = 'none';
+  document.body.style.overflow = '';
   S._exEditId = null;
 }
 
+// Cerrar modal al hacer clic fuera del contenido
+$('modal-examen')?.addEventListener('click', e=>{
+  if(e.target === $('modal-examen')) cerrarExamenForm();
+});
+
 function cargarTextosModal(selIds=[]){
-  const mat = $('ex-materia')?.value;
+  const mat   = $('ex-materia')?.value;
   const lista = $('ex-textos-list');
   const chips = $('ex-unidad-chips');
   if(!lista||!chips) return;
 
-  if(!mat){ lista.innerHTML='<p style="padding:.75rem;font-size:.78rem;color:var(--text3);">Seleccioná una materia primero.</p>'; chips.innerHTML=''; return; }
+  if(!mat){
+    lista.innerHTML='<p style="padding:.75rem;font-size:.78rem;color:var(--text3);">Seleccioná una materia primero.</p>';
+    chips.innerHTML='';
+    return;
+  }
 
   const textos = S.biblio.filter(t=>String(t.materia||'').trim()===mat);
-  if(!textos.length){ lista.innerHTML='<p style="padding:.75rem;font-size:.78rem;color:var(--text3);">No hay textos para esta materia.</p>'; return; }
+  if(!textos.length){
+    lista.innerHTML='<p style="padding:.75rem;font-size:.78rem;color:var(--text3);">No hay textos para esta materia.</p>';
+    return;
+  }
 
   const yaSeleccionados = new Set(selIds.map(String));
-
   const grupos={}, ordenU=[];
   textos.forEach(t=>{
     const u=String(t.unidad||'Sin unidad').trim();
@@ -751,22 +833,29 @@ function cargarTextosModal(selIds=[]){
     grupos[u].push(t);
   });
 
-  chips.innerHTML = ordenU.map((u,i)=>`
+  chips.innerHTML = ordenU.map(u=>`
     <button class="chip active" style="font-size:.65rem;padding:.2rem .6rem;"
       onclick="filtrarUnidadModal('${u.replace(/'/g,"\\'")}',this)">${u.replace('Unidad ','U.')}</button>`).join('');
 
   let html='';
   ordenU.forEach(u=>{
     html+=`<div class="ex-unidad-group" data-unidad="${u.replace(/"/g,'&quot;')}">
-      <div style="padding:.45rem .75rem;background:var(--v-light);border-bottom:1px solid var(--v-mid);font-size:.68rem;font-weight:800;color:var(--v);letter-spacing:.04em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;">
+      <div style="padding:.45rem .75rem;background:var(--v-light);border-bottom:1px solid var(--v-mid);
+        font-size:.68rem;font-weight:800;color:var(--v);letter-spacing:.04em;text-transform:uppercase;
+        display:flex;justify-content:space-between;align-items:center;">
         <span>${u}</span>
-        <button onclick="toggleUnidadExamen('${u.replace(/'/g,"\\'")}',true)" style="font-size:.65rem;padding:.1rem .4rem;border-radius:4px;border:1px solid var(--v-mid);background:var(--white);color:var(--v);cursor:pointer;">Todo</button>
+        <button onclick="toggleUnidadExamen('${u.replace(/'/g,"\\'")}',true)"
+          style="font-size:.65rem;padding:.1rem .4rem;border-radius:4px;border:1px solid var(--v-mid);
+          background:var(--white);color:var(--v);cursor:pointer;">Todo</button>
       </div>`;
     grupos[u].forEach(t=>{
       const checked = yaSeleccionados.has(String(t.id));
-      const estadoBadge = t.estado&&t.estado!=='Sin leer' ? `<span style="font-size:.6rem;color:var(--text3);">${t.estado}</span>` : '';
-      html+=`<label style="display:flex;align-items:flex-start;gap:.6rem;padding:.55rem .75rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
-        <input type="checkbox" data-id="${t.id}" ${checked?'checked':''} onchange="updateSelCount()" style="margin-top:2px;accent-color:var(--v);flex-shrink:0;"/>
+      const estadoBadge = t.estado&&t.estado!=='Sin leer'
+        ? `<span style="font-size:.6rem;color:var(--text3);">${t.estado}</span>` : '';
+      html+=`<label style="display:flex;align-items:flex-start;gap:.6rem;padding:.55rem .75rem;
+        border-bottom:1px solid var(--border);cursor:pointer;">
+        <input type="checkbox" data-id="${t.id}" ${checked?'checked':''} onchange="updateSelCount()"
+          style="margin-top:2px;accent-color:var(--v);flex-shrink:0;"/>
         <div style="flex:1;min-width:0;">
           <div style="font-size:.8rem;font-weight:600;line-height:1.3;color:var(--text);">${t.titulo_texto||'—'}</div>
           <div style="font-size:.7rem;color:var(--text3);">${t.autores||''} ${estadoBadge}</div>
@@ -802,29 +891,31 @@ function updateSelCount(){
 }
 
 function guardarExamen(){
-  const nombre=$('ex-nombre')?.value?.trim();
-  const materia=$('ex-materia')?.value;
-  const fecha=$('ex-fecha')?.value;
-  if(!nombre){toast('⚠️ Poné un nombre al examen');return;}
+  const nombre  = $('ex-nombre')?.value?.trim();
+  const materia = $('ex-materia')?.value;
+  const fecha   = $('ex-fecha')?.value;
+  if(!nombre) {toast('⚠️ Poné un nombre al examen');return;}
   if(!materia){toast('⚠️ Seleccioná una materia');return;}
-  if(!fecha){toast('⚠️ Poné la fecha del examen');return;}
-  const textos=[...(document.querySelectorAll('#ex-textos-list input[type=checkbox]:checked')||[])].map(cb=>cb.dataset.id);
+  if(!fecha)  {toast('⚠️ Poné la fecha del examen');return;}
+
+  const textos = [...(document.querySelectorAll('#ex-textos-list input[type=checkbox]:checked')||[])].map(cb=>cb.dataset.id);
   if(!textos.length){toast('⚠️ Seleccioná al menos un texto');return;}
 
   let examen;
   if(S._exEditId){
     const idx=S.examenes.findIndex(e=>e.id===S._exEditId);
-    if(idx!==-1){ 
-      S.examenes[idx]={...S.examenes[idx], nombre, materia, fecha, textos}; 
-      examen=S.examenes[idx]; 
+    if(idx!==-1){
+      S.examenes[idx]={...S.examenes[idx], nombre, materia, fecha, textos};
+      examen=S.examenes[idx];
     }
   } else {
-    examen={id:'ex_'+Date.now(), nombre, materia, fecha, textos, finalizado: false};
+    examen={id:'ex_'+Date.now(), nombre, materia, fecha, textos, finalizado:false};
     S.examenes.push(examen);
   }
   saveLocalExamenes();
   syncExamenSheets(examen, 'guardar_examen');
-  cerrarExamenForm(); renderExamenes();
+  cerrarExamenForm();
+  renderExamenes();
   toast('✓ Examen guardado');
 }
 
@@ -833,31 +924,14 @@ function eliminarExamen(id){
   S.examenes=S.examenes.filter(e=>e.id!==id);
   saveLocalExamenes();
   syncExamenSheets({id}, 'eliminar_examen');
-  renderExamenes(); toast('Examen eliminado');
+  renderExamenes();
+  toast('Examen eliminado');
 }
 
 function editarExamen(id){ abrirExamenForm(id); }
 
-// ── TOGGLE MATERIA PENDIENTES ─────────────────────────────────
-function togglePendMat(m, mid){
-  if(!S._pendColapsadas) S._pendColapsadas = new Set();
-  const body = document.getElementById(mid);
-  const arrow = document.getElementById(mid+'_arrow');
-  if(!body) return;
-  if(S._pendColapsadas.has(m)){
-    S._pendColapsadas.delete(m);
-    body.style.display = '';
-    if(arrow) arrow.textContent = '▾';
-  } else {
-    S._pendColapsadas.add(m);
-    body.style.display = 'none';
-    if(arrow) arrow.textContent = '▶';
-  }
-}
-
-// ── TOGGLE FINALIZADO ─────────────────────────────────────────
 function toggleFinalizadoExamen(id){
-  const idx = S.examenes.findIndex(e=>e.id===id);
+  const idx=S.examenes.findIndex(e=>e.id===id);
   if(idx===-1) return;
   S.examenes[idx].finalizado = !S.examenes[idx].finalizado;
   saveLocalExamenes();
@@ -866,74 +940,47 @@ function toggleFinalizadoExamen(id){
   toast(S.examenes[idx].finalizado ? '✅ Examen finalizado' : '↩ Examen reactivado');
 }
 
-// ── NUEVO: mostrar/ocultar finalizados ────────────────────────
 function toggleMostrarFinalizados(){
   S._mostrarFinalizados = !S._mostrarFinalizados;
   renderExamenes();
 }
 
-function abrirExamenForm(id=null){
-  S._exEditId = id;
-  const ex = id ? S.examenes.find(e=>e.id===id) : null;
-  $('modal-examen-title').textContent = id ? '✏️ Editar Examen' : '📅 Nuevo Examen';
-  $('ex-nombre').value  = ex?.nombre || '';
-  $('ex-fecha').value   = ex?.fecha  || '';
-
-  const sel = $('ex-materia');
-  sel.innerHTML = '<option value="">— Seleccioná —</option>' +
-    S.mats_biblio.map(m=>`<option value="${m}" ${ex?.materia===m?'selected':''}>${m}</option>`).join('');
-
-  $('modal-examen').style.display = 'block';
-  cargarTextosModal(ex?.textos||[]);
-}
-
-// ── RENDER EXÁMENES (reescrito) ───────────────────────────────
 function renderExamenes(){
   const el=$('perfil-examenes'); if(!el) return;
 
   const hoyMs = new Date().setHours(0,0,0,0);
 
-  // Próximo examen (no finalizado, en el futuro)
+  // Próximo examen no finalizado
   const proximos = S.examenes
-    .filter(e => !e.finalizado)
-    .filter(e => {
-      const d = new Date(e.fecha+'T00:00:00');
-      return !isNaN(d) && d >= hoyMs;
-    })
-    .sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+    .filter(e=>!e.finalizado)
+    .filter(e=>{ const d=new Date((e.fecha||'')+'T00:00:00'); return !isNaN(d)&&d>=hoyMs; })
+    .sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
 
   const finalizadosCount = S.examenes.filter(e=>e.finalizado).length;
 
-  // ── Banner próximo examen ──
+  // Banner próximo
   let bannerHtml = '';
   if(proximos.length > 0){
-    const next = proximos[0];
-    const diasR = Math.ceil((new Date(next.fecha+'T00:00:00') - hoyMs) / 864e5);
-    const urgColor = diasR === 0 ? 'var(--r)' : diasR <= 7 ? 'var(--r)' : diasR <= 14 ? 'var(--o)' : 'var(--v)';
-    const urgBg    = diasR <= 7 ? 'var(--r-light)' : diasR <= 14 ? 'var(--o-light)' : 'var(--v-light)';
-    const diasLabel = diasR === 0 ? '¡HOY!' : diasR === 1 ? '1 día' : diasR + ' días';
-
+    const next   = proximos[0];
+    const diasR  = Math.ceil((new Date(next.fecha+'T00:00:00') - hoyMs) / 864e5);
+    const urgC   = diasR<=7 ? 'var(--r)' : diasR<=14 ? 'var(--o)' : 'var(--v)';
+    const urgBg  = diasR<=7 ? 'var(--r-light)' : diasR<=14 ? 'var(--o-light)' : 'var(--v-light)';
+    const label  = diasR===0 ? '¡HOY!' : diasR===1 ? '1 día' : diasR+' días';
     bannerHtml = `
-      <div style="background:${urgBg};border:1.5px solid ${urgColor}55;border-radius:var(--radius-sm);
+      <div style="background:${urgBg};border:1.5px solid ${urgC}55;border-radius:var(--radius-sm);
         padding:.8rem 1rem;margin-bottom:.9rem;display:flex;align-items:center;gap:.9rem;">
-        <div style="text-align:center;min-width:52px;flex-shrink:0;">
-          <div style="font-size:${diasR===0?'1.3':'1.7'}rem;font-weight:800;color:${urgColor};line-height:1;">
-            ${diasR === 0 ? '🔥' : diasR}
+        <div style="text-align:center;min-width:48px;flex-shrink:0;">
+          <div style="font-size:${diasR===0?'1.4':'1.7'}rem;font-weight:800;color:${urgC};line-height:1;">
+            ${diasR===0?'🔥':diasR}
           </div>
-          <div style="font-size:.55rem;font-weight:800;color:${urgColor};text-transform:uppercase;letter-spacing:.05em;margin-top:.1rem;">
-            ${diasR === 0 ? 'hoy' : 'días'}
+          <div style="font-size:.55rem;font-weight:800;color:${urgC};text-transform:uppercase;letter-spacing:.05em;margin-top:.1rem;">
+            ${diasR===0?'hoy':'días'}
           </div>
         </div>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:.6rem;font-weight:800;color:${urgColor};text-transform:uppercase;letter-spacing:.07em;margin-bottom:.15rem;">
-            📅 Próximo examen
-          </div>
-          <div style="font-size:.92rem;font-weight:700;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-            ${next.nombre}
-          </div>
-          <div style="font-size:.72rem;color:var(--text3);margin-top:.15rem;">
-            ${abr(next.materia)||next.materia} · ${fmtF(next.fecha)} · faltan ${diasLabel}
-          </div>
+          <div style="font-size:.6rem;font-weight:800;color:${urgC};text-transform:uppercase;letter-spacing:.07em;margin-bottom:.15rem;">📅 Próximo examen</div>
+          <div style="font-size:.92rem;font-weight:700;color:var(--text);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${next.nombre}</div>
+          <div style="font-size:.72rem;color:var(--text3);margin-top:.15rem;">${abr(next.materia)||next.materia} · ${fmtF(next.fecha)} · faltan ${label}</div>
         </div>
       </div>`;
   }
@@ -943,21 +990,16 @@ function renderExamenes(){
     return;
   }
 
-  // Toggle mostrar finalizados
   let toggleHtml = '';
   if(finalizadosCount > 0){
     toggleHtml = `
       <div style="display:flex;justify-content:flex-end;margin-bottom:.55rem;">
         <button onclick="toggleMostrarFinalizados()" class="btn-icon" style="font-size:.68rem;">
-          ${S._mostrarFinalizados
-            ? '🙈 Ocultar finalizados'
-            : `📁 Ver finalizados (${finalizadosCount})`
-          }
+          ${S._mostrarFinalizados ? '🙈 Ocultar finalizados' : `📁 Ver finalizados (${finalizadosCount})`}
         </button>
       </div>`;
   }
 
-  // Exámenes a mostrar
   const shown = S._mostrarFinalizados
     ? [...S.examenes].sort((a,b)=>new Date(a.fecha)-new Date(b.fecha))
     : S.examenes.filter(e=>!e.finalizado).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
@@ -971,24 +1013,25 @@ function renderExamenes(){
   let html = bannerHtml + toggleHtml;
 
   shown.forEach(ex=>{
-    const rawFecha = new Date(ex.fecha && ex.fecha.includes('T') ? ex.fecha : (ex.fecha||'')+'T00:00:00');
-    const diasR   = isNaN(rawFecha) ? 999 : Math.ceil((rawFecha - hoyMs) / 864e5);
+    const rawDate = new Date((ex.fecha||'')+(ex.fecha&&ex.fecha.includes('T')?'':'T00:00:00'));
+    const diasR   = isNaN(rawDate) ? 999 : Math.ceil((rawDate - hoyMs) / 864e5);
     const pasado  = diasR < 0;
+
     const urgColor = ex.finalizado ? 'var(--g)'
-      : pasado ? 'var(--text3)'
-      : diasR <= 7 ? 'var(--r)'
+      : pasado      ? 'var(--text3)'
+      : diasR <= 7  ? 'var(--r)'
       : diasR <= 14 ? 'var(--o)'
       : 'var(--v)';
     const urgBg = ex.finalizado ? 'var(--g-light)'
-      : pasado ? 'var(--bg2)'
-      : diasR <= 7 ? 'var(--r-light)'
+      : pasado      ? 'var(--bg2)'
+      : diasR <= 7  ? 'var(--r-light)'
       : diasR <= 14 ? 'var(--o-light)'
       : 'var(--v-light)';
     const diasLabel = ex.finalizado ? '✅ Listo'
-      : pasado ? 'Pasado'
-      : diasR === 0 ? '¡Hoy!'
-      : diasR === 1 ? 'Mañana'
-      : diasR + 'd';
+      : pasado       ? 'Pasado'
+      : diasR === 0  ? '¡Hoy!'
+      : diasR === 1  ? 'Mañana'
+      : diasR+'d';
 
     const textos = S.biblio.filter(t=>ex.textos.includes(String(t.id)));
     const total  = textos.length;
@@ -1003,40 +1046,34 @@ function renderExamenes(){
       pendPorUnidad[u].push(t);
     });
 
-    html += `
-      <div class="examen-card${pasado && !ex.finalizado?' pasado':''}${ex.finalizado?' finalizado':''}">
-
-        <!-- Cabecera -->
+    html+=`
+      <div class="examen-card${pasado&&!ex.finalizado?' pasado':''}${ex.finalizado?' finalizado':''}">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.65rem;">
           <div style="flex:1;min-width:0;">
-            <div class="examen-nombre">${ex.finalizado ? '<span style="color:var(--g);">✅</span> ' : ''}${ex.nombre}</div>
+            <div class="examen-nombre">${ex.finalizado?'<span style="color:var(--g);">✅</span> ':''}${ex.nombre}</div>
             <div class="examen-sub">${abr(ex.materia)||ex.materia} · ${fmtF(ex.fecha)}</div>
           </div>
           <div style="display:flex;align-items:center;gap:.3rem;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
             <span style="font-size:.75rem;font-weight:700;color:${urgColor};background:${urgBg};padding:.22rem .65rem;border-radius:100px;white-space:nowrap;">${diasLabel}</span>
-            <button onclick="toggleFinalizadoExamen('${ex.id}')"
-              class="btn-icon" 
-              style="padding:.25rem .55rem;font-size:.68rem;${ex.finalizado?'color:var(--g);border-color:var(--g-light);':''}"
-              title="${ex.finalizado ? 'Reactivar examen' : 'Marcar como finalizado'}">
-              ${ex.finalizado ? '↩ Reactivar' : '✅ Finalizar'}
+            <button onclick="toggleFinalizadoExamen('${ex.id}')" class="btn-icon"
+              style="padding:.25rem .55rem;font-size:.68rem;${ex.finalizado?'color:var(--g);border-color:var(--g-light);':''}">
+              ${ex.finalizado ? '↩' : '✅'}
             </button>
-            <button onclick="editarExamen('${ex.id}')" class="btn-icon" style="padding:.25rem .5rem;" title="Editar">✏️</button>
-            <button onclick="eliminarExamen('${ex.id}')" class="btn-icon" style="padding:.25rem .5rem;color:var(--r);" title="Eliminar">✕</button>
+            <button onclick="editarExamen('${ex.id}')" class="btn-icon" style="padding:.25rem .5rem;">✏️</button>
+            <button onclick="eliminarExamen('${ex.id}')" class="btn-icon" style="padding:.25rem .5rem;color:var(--r);">✕</button>
           </div>
         </div>
 
-        <!-- Barra de progreso -->
         <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.65rem;">
           <div style="flex:1;height:7px;border-radius:100px;background:var(--bg2);overflow:hidden;">
             <div style="height:100%;width:${pct}%;background:${urgColor};border-radius:100px;transition:width .6s;"></div>
           </div>
-          <span style="font-size:.72rem;font-weight:700;color:${urgColor};white-space:nowrap;min-width:70px;text-align:right;">${ok}/${total} · ${pct}%</span>
+          <span style="font-size:.72rem;font-weight:700;color:${urgColor};white-space:nowrap;min-width:60px;text-align:right;">${ok}/${total} · ${pct}%</span>
         </div>
 
-        <!-- Estado de textos -->
         ${ex.finalizado
-          ? `<div style="font-size:.8rem;color:var(--g);font-weight:600;padding:.3rem 0;">Examen completado · ${fmtF(ex.fecha)}</div>`
-          : pend.length === 0
+          ? `<div style="font-size:.8rem;color:var(--g);font-weight:600;padding:.3rem 0;">Completado · ${fmtF(ex.fecha)}</div>`
+          : pend.length===0
             ? `<div style="font-size:.8rem;color:var(--g);font-weight:700;padding:.35rem 0;">✅ ¡Todo listo para este examen!</div>`
             : `<div class="examen-pend-list">
                 <div style="font-size:.65rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin-bottom:.35rem;">Falta leer (${pend.length})</div>
