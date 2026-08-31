@@ -6,6 +6,7 @@
 <title>NEUROSCAN · APUNTES PDF</title>
 <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@200;400;600;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <style>
 :root{
   --cyan:#00e5ff;--purple:#9d4edd;--green:#39ff7a;
@@ -28,16 +29,15 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 
 /* Header */
 .hdr{text-align:center;padding:20px 0 28px;}
-.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,255,.07);border:1px solid var(--border);border-radius:100px;padding:5px 16px 5px 9px;margin-bottom:14px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--cyan);letter-spacing:2.5px;}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,255,.07);border:1px solid var(--border);border-radius:100px;padding:5px 16px 5px 9px;margin-bottom:14px;font-family:"Share Tech Mono",monospace;font-size:10px;color:var(--cyan);letter-spacing:2.5px;}
 .pdot{width:7px;height:7px;background:var(--cyan);border-radius:50%;box-shadow:0 0 8px var(--cyan);animation:pd 1.8s ease-in-out infinite;}
 @keyframes pd{0%,100%{opacity:1}50%{opacity:.22}}
 h1{font-size:clamp(2rem,7vw,3.6rem);font-weight:900;letter-spacing:-1.5px;line-height:1;background:linear-gradient(135deg,#fff 0%,var(--cyan) 40%,var(--purple) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
-.sub{font-size:.72rem;color:var(--dim);letter-spacing:2.5px;font-family:'Share Tech Mono',monospace;}
-
+.sub{font-size:.72rem;color:var(--dim);letter-spacing:2.5px;font-family:"Share Tech Mono",monospace;}
 
 /* Engine pills */
 .engine-strip{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:24px;flex-wrap:wrap;}
-.ep{display:inline-flex;align-items:center;gap:5px;border-radius:100px;padding:5px 12px;font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:1px;}
+.ep{display:inline-flex;align-items:center;gap:5px;border-radius:100px;padding:5px 12px;font-family:"Share Tech Mono",monospace;font-size:.65rem;letter-spacing:1px;}
 .ep1{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.25);color:var(--cyan);}
 .ep2{background:rgba(157,78,221,.08);border:1px solid rgba(157,78,221,.3);color:rgba(210,180,255,.9);}
 .ep3{background:rgba(57,255,122,.06);border:1px solid rgba(57,255,122,.2);color:var(--green);}
@@ -49,467 +49,677 @@ h1{font-size:clamp(2rem,7vw,3.6rem);font-weight:900;letter-spacing:-1.5px;line-h
 .ch{display:flex;align-items:center;gap:11px;margin-bottom:18px;}
 .sn{width:28px;height:28px;flex-shrink:0;background:linear-gradient(135deg,var(--cyan),var(--purple));border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;color:#000;}
 .ct{font-size:.9rem;font-weight:700;}
-.cs{font-size:.68rem;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-top:2px;}
+.cs{font-size:.68rem;color:var(--dim);font-family:"Share Tech Mono",monospace;margin-top:2px;}
 
 /* Form */
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
 @media(max-width:460px){.fg{grid-template-columns:1fr;}}
 .fi{display:flex;flex-direction:column;gap:5px;}
 .fi.fw{grid-column:1/-1;}
-label{font-size:.63rem;font-family:'Share Tech Mono',monospace;color:var(--cyan);letter-spacing:2px;text-transform:uppercase;}
+label{font-size:.63rem;font-family:"Share Tech Mono",monospace;color:var(--cyan);letter-spacing:2px;text-transform:uppercase;}
 select,input[type=text]{background:rgba(0,229,255,.03);border:1px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:.85rem;font-weight:600;outline:none;-webkit-appearance:none;transition:border-color .2s,box-shadow .2s,background .2s;width:100%;}
-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2300e5ff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
-select option{background:#080f22;}
-select:focus,input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.1);background:rgba(0,229,255,.05);}
-input::placeholder{color:var(--dim);font-weight:400;}
+select:focus,input[type=text]:focus{border-color:var(--cyan);background:rgba(0,229,255,.07);box-shadow:0 0 16px rgba(0,229,255,.12);}
+select option{background:#0a1226;color:var(--text);}
+textarea{background:rgba(0,229,255,.025);border:1px solid var(--border);border-radius:12px;padding:12px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:.82rem;line-height:1.55;outline:none;resize:vertical;width:100%;min-height:180px;transition:border-color .2s,background .2s;}
+textarea:focus{border-color:var(--cyan);background:rgba(0,229,255,.05);box-shadow:0 0 16px rgba(0,229,255,.12);}
 
-/* Textarea */
-.ta-wrap{position:relative;margin-top:4px;}
-textarea{width:100%;min-height:320px;background:rgba(0,229,255,.02);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.76rem;line-height:1.75;outline:none;resize:vertical;transition:border-color .2s,background .2s;-webkit-appearance:none;}
-textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.09);background:rgba(0,229,255,.04);}
-textarea::placeholder{color:var(--dim);font-weight:400;}
-
-/* Syntax hint */
-.syn-hint{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
-@media(max-width:420px){.syn-hint{grid-template-columns:1fr;}}
-.sh{display:flex;align-items:center;gap:7px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:6px 10px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--dim);}
-.sh code{color:var(--cyan);font-size:.65rem;}
-.sh-val{color:var(--text);font-size:.63rem;margin-left:auto;}
-
-/* Upload file btn */
-.upload-row{display:flex;align-items:center;gap:9px;margin-top:10px;}
-.btn-upload{display:inline-flex;align-items:center;gap:6px;background:rgba(0,229,255,.05);border:1.5px dashed rgba(0,229,255,.22);border-radius:10px;padding:8px 15px;font-family:'Exo 2',sans-serif;font-size:.76rem;font-weight:700;color:var(--dim);cursor:pointer;transition:all .2s;}
+/* Buttons */
+.btn-upload{display:inline-flex;align-items:center;gap:6px;background:rgba(0,229,255,.05);border:1.5px dashed var(--border);border-radius:10px;padding:9px 16px;color:var(--dim);font-family:"Share Tech Mono",monospace;font-size:.73rem;letter-spacing:1px;cursor:pointer;transition:all .2s;width:100%;justify-content:center;}
 .btn-upload:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.08);}
-.upload-hint{font-size:.62rem;font-family:'Share Tech Mono',monospace;color:var(--dim);letter-spacing:.5px;}
-#mdFileInput{display:none!important;}
 
-/* Char counter */
-.char-row{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
-.char-cnt{font-size:.62rem;font-family:'Share Tech Mono',monospace;color:var(--dim);}
-.char-cnt span{color:var(--cyan);}
-
-/* Preview pane */
-.prev-wrap{display:none;margin-top:12px;}
-.prev-wrap.on{display:block;}
-.prev-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.prev-title{font-size:.68rem;font-family:'Share Tech Mono',monospace;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;}
-.btn-prev-tog{background:transparent;border:1px solid var(--border);border-radius:7px;padding:4px 11px;color:var(--dim);font-size:.65rem;font-family:'Share Tech Mono',monospace;cursor:pointer;transition:all .2s;}
+.btn-prev-tog{background:transparent;border:1px solid var(--border);border-radius:7px;padding:4px 11px;color:var(--dim);font-family:"Share Tech Mono",monospace;font-size:.67rem;letter-spacing:1px;cursor:pointer;transition:all .2s;}
 .btn-prev-tog:hover{border-color:var(--bh);color:var(--text);}
-.prev-content{background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:11px;padding:14px;max-height:260px;overflow-y:auto;font-size:.78rem;line-height:1.65;color:var(--text);}
-.prev-content h1{font-size:1rem;font-weight:900;color:#fff;text-transform:uppercase;margin-bottom:10px;text-align:center;padding-bottom:8px;border-bottom:1px solid var(--border);}
-.prev-content h2{font-size:.88rem;font-weight:800;color:var(--cyan);margin:12px 0 5px;padding-left:0;}
-.prev-content h3{font-size:.8rem;font-weight:700;color:rgba(200,180,255,.9);margin:8px 0 4px;padding-left:8px;border-left:2px solid var(--purple);}
-.prev-content p{margin-bottom:6px;color:var(--text);padding-left:4px;}
-.prev-content ul{padding-left:14px;margin-bottom:6px;}
-.prev-content li{margin-bottom:3px;color:var(--dim);}
-.prev-content li.lvl2{padding-left:12px;font-size:.74rem;}
-.prev-content hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
-.prev-content .formula{text-align:center;color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:.8rem;padding:6px 0;font-style:italic;}
-::-webkit-scrollbar{width:3px;}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 
-/* Options */
-.opt-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:2px;}
-.toggle-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(0,229,255,.04);border:1px solid var(--border);border-radius:100px;padding:5px 12px;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--dim);cursor:pointer;transition:all .2s;user-select:none;}
-.toggle-pill.on{background:rgba(0,229,255,.1);border-color:var(--cyan);color:var(--cyan);}
-.toggle-pill .tk{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
-
-/* Progress */
-.prog-s{display:none;margin-bottom:14px;}
-.prog-s.on{display:block;}
-.plog{background:rgba(0,0,0,.55);border:1px solid var(--border);border-radius:11px;padding:12px 14px;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--dim);max-height:160px;overflow-y:auto;line-height:1.95;margin-bottom:10px;}
-.ll{display:flex;gap:7px;align-items:baseline;}
-.lts{color:rgba(0,229,255,.3);flex-shrink:0;font-size:.62rem;}
-.lm{word-break:break-word;}
-.lm.ok{color:var(--green);}
-.lm.act{color:var(--cyan);}
-.lm.warn{color:var(--gold);}
-.lm.err{color:var(--pink);}
-.bw{background:rgba(255,255,255,.05);border-radius:100px;height:5px;overflow:hidden;margin-bottom:6px;}
-.bf{height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:100px;transition:width .4s ease;box-shadow:0 0 10px rgba(0,229,255,.4);width:0%;}
-.bl{font-size:.66rem;font-family:'Share Tech Mono',monospace;color:var(--dim);text-align:center;margin-bottom:12px;}
-
-/* Stats */
-.stats-box{display:none;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:11px;padding:12px 14px;margin-bottom:12px;}
-.stats-box.on{display:block;}
-.sr{display:flex;align-items:center;justify-content:space-between;font-size:.69rem;font-family:'Share Tech Mono',monospace;color:var(--dim);padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);}
-.sr:last-child{border-bottom:none;}
-.sv{font-weight:700;}
-.sv.hi{color:var(--green);}
-.sv.def{color:var(--text);}
-
-/* CTA */
-.btn-proc{width:100%;padding:15px;border:none;border-radius:13px;background:linear-gradient(135deg,var(--cyan),var(--purple));color:#000;font-family:'Exo 2',sans-serif;font-size:.9rem;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;}
-.btn-proc::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);opacity:0;transition:opacity .3s;}
-.btn-proc:hover::after{opacity:1;}
+.btn-proc{width:100%;padding:15px;border:none;border-radius:13px;background:linear-gradient(135deg,var(--cyan),var(--purple));color:#000;font-family:'Exo 2',sans-serif;font-weight:900;font-size:.95rem;letter-spacing:2px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;margin-top:4px;}
 .btn-proc:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(0,229,255,.28);}
-.btn-proc:disabled{opacity:.32;cursor:not-allowed;transform:none;box-shadow:none;}
-.errb{background:rgba(255,45,120,.07);border:1px solid rgba(255,45,120,.3);border-radius:9px;padding:10px 14px;font-size:.74rem;color:#ff8cb0;margin-top:11px;display:none;font-family:'Share Tech Mono',monospace;line-height:1.6;}
-.errb.on{display:block;}
 
-/* Download */
-.dls{display:none;text-align:center;margin-top:6px;}
-.dls.on{display:block;}
-.sring{width:68px;height:68px;margin:0 auto 16px;background:linear-gradient(135deg,rgba(57,255,122,.14),rgba(0,229,255,.1));border:2px solid rgba(57,255,122,.5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;animation:rp .5s cubic-bezier(.34,1.56,.64,1);}
-@keyframes rp{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
-.dlt{font-size:1.1rem;font-weight:800;color:var(--green);margin-bottom:5px;}
-.dlf{font-size:.68rem;font-family:'Share Tech Mono',monospace;color:var(--dim);margin-bottom:18px;word-break:break-all;padding:0 10px;}
-.btn-dl{display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,var(--green),var(--cyan));border:none;border-radius:13px;padding:13px 26px;color:#000;font-family:'Exo 2',sans-serif;font-size:.9rem;font-weight:900;cursor:pointer;transition:all .3s;text-transform:uppercase;letter-spacing:1px;margin-bottom:11px;}
+.btn-dl{display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,var(--green),#00b894);color:#000;font-family:'Exo 2',sans-serif;font-weight:900;font-size:.88rem;letter-spacing:1.5px;padding:12px 22px;border-radius:11px;border:none;cursor:pointer;transition:all .25s;text-decoration:none;}
 .btn-dl:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(57,255,122,.28);}
-.btn-rst{display:block;width:100%;background:transparent;border:1px solid var(--border);border-radius:11px;padding:11px;color:var(--dim);font-family:'Exo 2',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;margin-top:8px;}
-.btn-rst:hover{border-color:var(--bh);color:var(--text);}
-.foot{text-align:center;padding:14px;font-size:.6rem;font-family:'Share Tech Mono',monospace;color:rgba(200,240,255,.09);letter-spacing:1.5px;}
 
-.nav-container {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 30px;
-  align-items: center;
-}
+.btn-rst{display:block;width:100%;background:transparent;border:1px solid var(--border);border-radius:9px;padding:9px;color:var(--dim);font-family:"Share Tech Mono",monospace;font-size:.7rem;letter-spacing:1.5px;cursor:pointer;transition:all .2s;text-align:center;margin-top:8px;}
+.btn-rst:hover{border-color:var(--bh);color:var(--text);}
 
 .btn-capsule {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(0, 229, 255, 0.03);
-  border: 1px solid rgba(0, 229, 255, 0.15);
+  background: rgba(0,229,255,.05);
+  border: 1px solid rgba(0,229,255,.2);
   border-radius: 100px;
-  padding: 8px 18px;
-  font-family: 'Share Tech Mono', monospace;
+  padding: 6px 16px;
   font-size: 11px;
   color: var(--dim);
   text-decoration: none;
-  letter-spacing: 1.5px;
-  transition: all 0.3s ease;
+  letter-spacing: 2px;
+  transition: all .3s;
   text-transform: uppercase;
+  font-family: 'Share Tech Mono', monospace;
+  cursor: pointer;
 }
-
 .btn-capsule:hover {
   border-color: var(--cyan);
   color: var(--cyan);
-  background: rgba(0, 229, 255, 0.08);
-  box-shadow: 0 0 15px rgba(0, 229, 255, 0.1);
+  background: rgba(0,229,255,.1);
 }
-
 .btn-capsule.active {
   color: var(--cyan);
-  border-color: rgba(0, 229, 255, 0.4);
-  background: rgba(0, 229, 255, 0.06);
+  border-color: rgba(0,229,255,.4);
+  background: rgba(0,229,255,.08);
 }
 
-.pdot-nav {
-  width: 7px;
-  height: 7px;
-  background: var(--cyan);
-  border-radius: 50%;
-  box-shadow: 0 0 8px var(--cyan);
-}
+/* Modals & Overlays */
+.modal-overlay { position: fixed; inset: 0; background: rgba(2, 5, 16, 0.88); backdrop-filter: blur(12px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 16px; }
+.modal-overlay.active { display: flex; }
+.modal-box { background: #060b1e; border: 1px solid var(--border); border-radius: 20px; max-width: 620px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 22px; position: relative; }
+
+/* Image paster dropzone & controls */
+.paster-dropzone { border: 2px dashed var(--cyan); background: rgba(0,229,255,.04); border-radius: 14px; padding: 24px 16px; text-align: center; cursor: pointer; margin: 12px 0; transition: all .25s; }
+.paster-dropzone:hover { background: rgba(0,229,255,.1); border-color: var(--green); }
+.paster-preview-wrap { text-align: center; margin: 12px 0; }
+.paster-preview-img { max-width: 100%; max-height: 240px; border-radius: 8px; border: 1px solid var(--border); transition: transform .3s ease; }
 </style>
 </head>
 <body>
+
 <div class="orb o1"></div>
 <div class="orb o2"></div>
 
 <div class="wrap">
-  <div class="nav-container">
-    <a href="index.html" class="btn-capsule">← VOLVER AL INICIO</a>
+  <div style="display:flex; gap:10px; margin-bottom:20px; align-items:center; flex-wrap:wrap;">
+    <a href="../index.html" class="btn-capsule">← VOLVER AL INICIO</a>
     <div class="btn-capsule active">
-      <div class="pdot-nav"></div> NEUROSCAN · APUNTES · v2
+      <div class="pdot"></div> NEUROSCAN · APUNTES PDF
     </div>
+  </div>
+
+  <div class="hdr">
+    <div class="badge"><div class="pdot"></div> NEUROSCAN ENGINE v2.4</div>
+    <h1>APUNTES PDF</h1>
+    <div class="sub">CONVERTIDOR DE TEXTO A FORMATO ACADÉMICO DEFINITIVO CON IMÁGENES</div>
   </div>
 
   <div class="engine-strip">
-    <div class="ep ep1">📝 Markdown input</div>
-    <span class="ea">→</span>
-    <div class="ep ep2">⚙️ Parser + layout A4</div>
-    <span class="ea">→</span>
-    <div class="ep ep3">📄 PDF descargable</div>
+    <div class="ep ep1">📄 MARKDOWN PARSER</div>
+    <div class="ea">+</div>
+    <div class="ep ep2">🖼️ CLIPBOARD IMAGES</div>
+    <div class="ea">+</div>
+    <div class="ep ep3">⚡ JSPDF RENDERER</div>
   </div>
 
-  <!-- 00 Prompt -->
+  <!-- CARD 1: PROMPT -->
   <div class="card" style="border-color: var(--purple);">
-    <div class="ch"><div class="sn" style="background: var(--purple);">0</div>
-        <div><div class="ct">Prompt de Configuración</div>
-        <div class="cs">Copia el prompt para usar en la IA</div></div>
-    </div>
-    <button class="btn-rst" style="border-color: var(--purple); color: var(--purple); margin-top: 0;" onclick="openPrompt()">👁️ VER PROMPT</button>
-  </div>
-
-  <div id="promptModal" style="display:none; position:fixed; inset:0; background:rgba(2,5,16,0.95); z-index:100; padding:20px; align-items:center; justify-content:center;">
-    <div class="card" style="max-width:600px; width:100%; max-height:80vh; overflow-y:auto; border-color:var(--cyan);">
-      <div class="prev-hdr">
-        <div class="prev-title">Instrucciones de la IA</div>
-        <button class="btn-prev-tog" onclick="closePrompt()">Cerrar</button>
+    <div class="ch">
+      <div class="sn" style="background: linear-gradient(135deg, var(--purple), var(--pink));">🤖</div>
+      <div>
+        <div class="ct">Prompt de Configuración</div>
+        <div class="cs">Copiá el prompt para pedir los apuntes a la IA con marcadores de imagen</div>
       </div>
-      <textarea id="promptText" readonly style="min-height:350px; margin-bottom:15px; background:rgba(0,0,0,0.4); font-size: 0.7rem; line-height: 1.5; color: #a5d8ff;"># INSTRUCCIONES PARA PROCESAMIENTO DE TEXTO ACADÉMICO
-
-Actúa como un experto en transcripción y análisis de textos universitarios. Tu objetivo es transformar el material proporcionado (PDF, Word o escaneado) en una guía de estudio de máxima densidad y fidelidad.
-
-## 1. INSTRUCCIONES DE CONTENIDO
-Empezá con una introducción desarrollada que explique cómo inicia el texto y cuál es la idea central. Cada vez que aparezca un título o subtítulo importante, ponelo igual que en el texto como encabezado. Debajo, escribí un resumen fiel de lo que desarrolla ese apartado, usando palabras textuales o lo más cercanas al original. Respetá el orden temático del texto, de principio a fin. No inventes, no interpretes ni agregues información externa: solo usá lo que esté en el texto. La idea es que el material final sea como una guía de estudio narrativa y ordenada, donde quede claro qué trata cada parte, con definiciones exactas para poder escribirlas en un examen.
-
-De esta forma, el resumen debe arrancar con:
-- Introducción (extensa, explicando de qué habla el texto en general).
-- Título/Subtítulo (tal cual aparece en el original).
-- Explicación fiel, desarrollada y extensa de cada punto.
-- Siguiente tema/subtema con su desarrollo detallado… y así hasta el final.
-
-## 2. REGLAS DE EXTENSIÓN Y LIMPIEZA
-- **PROHIBICIÓN DE CITAS:** No utilices etiquetas de citas, números de página ni corchetes del tipo. El texto debe ser limpio y fluido.
-- **MÁXIMA DENSIDAD:** Si el texto original es extenso, el resumen debe ser igualmente denso. No resumas conceptos clave en una sola oración; explica los fundamentos y los matices para que la guía sea autosuficiente para el estudio.
-- **FIDELIDAD TEXTUAL:** Mantén las definiciones técnicas y el vocabulario específico del autor.
-
-## 3. FORMATO DE SALIDA (JERARQUÍA MARKDOWN)
-Debes estructurar el contenido utilizando exclusivamente la siguiente jerarquía para asegurar la conversión posterior a PDF:
-
-- `#` → Título principal (Mayúsculas y Negrita).
-- `##` → Secciones principales / Introducción (Negrita).
-- `###` → Subtítulos (Negrita).
-- `**Negrita**` → Para resaltar conceptos clave dentro de los párrafos.
-- `*Texto en cursiva*` → Para definiciones exactas o citas textuales del autor.
-- `•` → Listas de primer nivel.
-- `◦` → Sublistas (manteniendo la sangría).
-
-## 4. RESTRICCIÓN DE ENTREGA
-- **SÓLO CÓDIGO:** Entrega el contenido EXCLUSIVAMENTE dentro de un bloque de código (Markdown/MD/TXT).
-- **SIN CHAT:** No incluyas saludos, introducciones ni comentarios por parte de la IA (prohibido frases como "Aquí tienes tu resumen"). El texto debe comenzar directamente con el primer encabezado.</textarea>
-      <button class="btn-proc" id="copyBtn" onclick="copyPrompt()" style="background: linear-gradient(135deg, var(--purple), #5a189a);">📋 COPIAR AL PORTAPAPELES</button>
     </div>
+    <button class="btn-rst" style="border-color: var(--purple); color: var(--purple); margin-top: 0;" onclick="openPrompt()">👁 VER PROMPT DEFINITIVO DE APUNTES</button>
   </div>
 
-  <!-- 01 Identificación -->
+  <!-- CARD 2: METADATOS -->
   <div class="card">
-    <div class="ch"><div class="sn">01</div>
-      <div><div class="ct">Identificación del Documento</div>
-        <div class="cs">Materia · Unidad · Título</div></div>
+    <div class="ch">
+      <div class="sn">1</div>
+      <div>
+        <div class="ct">Identificación del Documento</div>
+        <div class="cs">Materia, unidad y título del texto</div>
+      </div>
     </div>
     <div class="fg">
       <div class="fi">
         <label>Materia</label>
-        <select id="materia">
-          <option>Psicoanálisis</option>
-          <option>Psicología General</option>
-          <option>Epistemología</option>
-          <option>Salud Mental</option>
-          <option>Clínica I</option>
-          <option>Clínica II</option>
-          <option>Estadística</option>
-          <option>Neurociencias</option>
-          <option>Otra</option>
-        </select>
+        <input type="text" id="materia" value="EVALUACIÓN Y DIAGNÓSTICO INFANTO-JUVENIL">
       </div>
       <div class="fi">
         <label>Unidad</label>
         <select id="unidad">
-          <option value="1">Unidad 1</option><option value="2">Unidad 2</option>
-          <option value="3">Unidad 3</option><option value="4">Unidad 4</option>
-          <option value="5">Unidad 5</option><option value="6">Unidad 6</option>
-          <option value="7">Unidad 7</option><option value="8">Unidad 8</option>
-          <option value="9">Unidad 9</option><option value="10">Unidad 10</option>
+          <option value="Unidad 1">Unidad 1</option>
+          <option value="Unidad 2" selected>Unidad 2</option>
+          <option value="Unidad 3">Unidad 3</option>
+          <option value="Unidad 4">Unidad 4</option>
+          <option value="Unidad 5">Unidad 5</option>
         </select>
       </div>
       <div class="fi fw">
-        <label>Nombre del Texto / Teórico</label>
-        <input type="text" id="titulo" placeholder="Ej: El inconsciente y sus formaciones...">
+        <label>Nombre del Texto / Apunte</label>
+        <input type="text" id="titulo" value="RESUMEN COMPLETO DE LA UNIDAD: TÉCNICAS PROYECTIVAS GRÁFICAS">
       </div>
     </div>
   </div>
 
-  <!-- 02 Contenido -->
+  <!-- CARD 3: INGRESAR TEXTO -->
   <div class="card">
-    <div class="ch"><div class="sn">02</div>
-      <div><div class="ct">Pegar o Cargar Apuntes</div>
-        <div class="cs">Formato Markdown académico</div></div>
+    <div class="ch">
+      <div class="sn">2</div>
+      <div>
+        <div class="ct">Pegar o Cargar Apuntes</div>
+        <div class="cs">Formato Markdown académico</div>
+      </div>
     </div>
 
-    <div class="syn-hint">
-      <div class="sh"><code>#</code> <span>Título principal</span></div>
-      <div class="sh"><code>##</code> <span>Sección</span></div>
-      <div class="sh"><code>###</code> <span>Subtítulo</span></div>
-      <div class="sh"><code>---</code> <span>Separador</span></div>
-      <div class="sh"><code>• texto</code> <span>Viñeta nivel 1</span></div>
-      <div class="sh"><code>◦ texto</code> <span>Viñeta nivel 2</span></div>
-      <div class="sh"><code>- texto</code> <span>Lista ("-")</span></div>
-      <div class="sh"><code>$$...$$</code> <span>Fórmula</span></div>
-    </div>
-
-    <div class="ta-wrap" style="margin-top:12px;">
-      <label style="display:block;margin-bottom:6px;">Contenido Markdown</label>
-      <textarea id="mdInput" placeholder="# Título del Teórico
-
-## Sección Principal
-
-### Subtítulo
-
-• Concepto clave uno
-◦ Detalle del concepto
-◦ Otro detalle
-
-• Segundo concepto
-
----
-
-## Otra Sección
-
-$$índice = valor / total$$
-
-Texto de cuerpo normal aquí..."></textarea>
-    </div>
-
-    <div class="char-row">
-      <div class="char-cnt">Caracteres: <span id="charCnt">0</span></div>
-      <div class="char-cnt">Líneas: <span id="lineCnt">0</span></div>
-    </div>
-
-    <div class="upload-row">
-      <button class="btn-upload" onclick="document.getElementById('mdFileInput').click()">
-        📂 Cargar archivo .txt / .md
+    <input type="file" id="mdFileInput" accept=".txt,.md" style="display:none" onchange="loadMDFile(event)">
+    <div style="display:flex; gap:10px; margin-bottom:12px;">
+      <button class="btn-upload" onclick="document.getElementById('mdFileInput').click()" style="flex:1;">
+        📁 CARGAR ARCHIVO .TXT / .MD
       </button>
-      <div class="upload-hint">o pegá directamente arriba</div>
-    </div>
-    <input type="file" id="mdFileInput" accept=".txt,.md,text/plain">
-
-    <div class="prev-wrap" id="prevWrap">
-      <div class="prev-hdr">
-        <div class="prev-title">🔍 Vista previa</div>
-        <button class="btn-prev-tog" onclick="togglePreview()">Ocultar</button>
-      </div>
-      <div class="prev-content" id="prevContent"></div>
-    </div>
-  </div>
-
-  <!-- 03 Opciones -->
-  <div class="card">
-    <div class="ch"><div class="sn">03</div>
-      <div><div class="ct">Opciones de Formato</div>
-        <div class="cs">Configuración del PDF final</div></div>
+      <button class="btn-upload" onclick="restoreLastSession()" style="flex:1; border-color:var(--green); color:var(--green); font-weight:bold;">
+        💾 RESTAURAR ÚLTIMO TEXTO E IMÁGENES
+      </button>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <div>
-        <label style="display:block;margin-bottom:7px;">Inclusiones</label>
-        <div class="opt-row">
-          <div class="toggle-pill on" id="tg-header" onclick="toggleOpt('header')">
-            <div class="tk"></div> Encabezado
-          </div>
-          <div class="toggle-pill on" id="tg-footer" onclick="toggleOpt('footer')">
-            <div class="tk"></div> Pie de página
-          </div>
-          <div class="toggle-pill on" id="tg-nums" onclick="toggleOpt('nums')">
-            <div class="tk"></div> Nros. de página
-          </div>
-          <div class="toggle-pill" id="tg-toc" onclick="toggleOpt('toc')">
-            <div class="tk"></div> Índice automático
-          </div>
-        </div>
-      </div>
+    <textarea id="mdInput" placeholder="# Título del Teórico..."></textarea>
 
-      <div>
-        <label style="display:block;margin-bottom:7px;">Tamaño de fuente cuerpo</label>
-        <div class="opt-row">
-          <div class="toggle-pill on" id="fs-9"  onclick="setFontSize(9)"><div class="tk"></div> 9 pt</div>
-          <div class="toggle-pill"   id="fs-10" onclick="setFontSize(10)"><div class="tk"></div> 10 pt</div>
-          <div class="toggle-pill"   id="fs-11" onclick="setFontSize(11)"><div class="tk"></div> 11 pt</div>
-          <div class="toggle-pill"   id="fs-12" onclick="setFontSize(12)"><div class="tk"></div> 12 pt</div>
-        </div>
-      </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+      <span style="font-family:"Share Tech Mono",monospace; font-size:.7rem; color:var(--dim);">VISTA PREVIA</span>
+      <button class="btn-prev-tog" onclick="togglePreview()">Ocultar</button>
+    </div>
+
+    <div id="prevWrap" style="display:none; margin-top:10px; background:rgba(0,0,0,.4); padding:12px; border-radius:10px; border:1px solid var(--border); font-size:.85rem;">
+      <div id="prevContent"></div>
     </div>
   </div>
 
-  <!-- 04 Generar -->
-  <div class="card">
-    <div class="ch"><div class="sn">04</div>
-      <div><div class="ct">Generar PDF</div>
-        <div class="cs">Layout A4 · márgenes estrechos · Arial 9pt · interlineado 1</div></div>
+  <!-- CARD 4: INSERCIÓN DINÁMICA DE IMÁGENES Y ROTACIÓN -->
+  <div class="card" style="border-color: var(--cyan);" id="imagePasterCard">
+    <div class="ch">
+      <div class="sn" style="background: linear-gradient(135deg, var(--green), var(--cyan));">🖼️</div>
+      <div>
+        <div class="ct">INSERCIÓN Y ROTACIÓN DE IMÁGENES POR PORTAPAPELES</div>
+        <div class="cs">Pega capturas con Ctrl + V y rota 90° las imágenes cargadas</div>
+      </div>
     </div>
 
-    <div class="prog-s" id="progS">
-      <div class="plog" id="plog"></div>
-      <div class="stats-box" id="statsBox">
-        <div class="sr"><span>Páginas generadas</span><span class="sv hi" id="stP">—</span></div>
-        <div class="sr"><span>Secciones detectadas</span><span class="sv hi" id="stS">—</span></div>
-        <div class="sr"><span>Palabras totales</span><span class="sv hi" id="stW">—</span></div>
-        <div class="sr"><span>Fórmulas</span><span class="sv def" id="stF">—</span></div>
-        <div class="sr"><span>Fuente cuerpo</span><span class="sv hi" id="stFnt">—</span></div>
+    <div id="imageDetectionStatus" style="font-family:"Share Tech Mono",monospace; font-size:.82rem; color:var(--cyan); margin-bottom:12px;">
+      Esperando texto con variables (ej. [imagen 1: familia cinética])...
+    </div>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+      <button class="btn-upload" id="openPasterBtn" onclick="openImagePasterModal()" style="border-color:var(--green); color:var(--green); display:none; font-weight:bold; width:auto;">
+        📋 ASISTENTE PASO A PASO (CTRL+V)
+      </button>
+    </div>
+
+    <!-- GALERÍA DIRECTA DE IMÁGENES Y ROTACIÓN -->
+    <div id="imageVariablesList"></div>
+  </div>
+
+  <!-- CARD 5: OPCIONES DE FORMATO ORIGINALES -->
+  <div class="card">
+    <div class="ch">
+      <div class="sn">3</div>
+      <div>
+        <div class="ct">Opciones de Formato Originales</div>
+        <div class="cs">Configuración del PDF final</div>
       </div>
-      <div class="bw"><div class="bf" id="bf"></div></div>
-      <div class="bl" id="bl">Esperando...</div>
+    </div>
+    <div class="fg">
+      <div class="fi">
+        <label>Tipografía</label>
+        <select id="fontSelect">
+          <option value="helvetica" selected>Helvetica / Arial</option>
+          <option value="times">Times New Roman</option>
+          <option value="courier">Courier Mono</option>
+        </select>
+      </div>
+      <div class="fi">
+        <label>Tamaño Texto</label>
+        <select id="fontSizeSelect">
+          <option value="8.5">8.5 pt (Compacto)</option>
+          <option value="9" selected>9 pt (Estándar Cátedra)</option>
+          <option value="9.5">9.5 pt (Lectura fácil)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 6: GENERAR PDF -->
+  <div class="card">
+    <div class="ch">
+      <div class="sn">4</div>
+      <div>
+        <div class="ct">Generar PDF</div>
+        <div class="cs">Compilación en tiempo real</div>
+      </div>
     </div>
 
     <button class="btn-proc" id="procBtn" onclick="startProcess()">⚡ GENERAR PDF ACADÉMICO</button>
-    <div class="errb" id="errb"></div>
 
-    <div class="dls" id="dls">
-      <div class="sring">✓</div>
-      <div class="dlt">PDF Generado</div>
-      <div class="dlf" id="dlf"></div>
-      <button class="btn-dl" id="dlBtn">⬇ DESCARGAR PDF</button>
-      <button class="btn-rst" onclick="resetAll()">↩ Procesar nuevo texto</button>
+    <div id="plog" style="margin-top:14px; max-height:120px; overflow-y:auto; font-family:"Share Tech Mono",monospace; font-size:.7rem; color:var(--dim);"></div>
+
+    <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+      <button class="btn-dl" id="dlBtn" style="display:none; flex:1; justify-content:center; font-size:.8rem;">⬇ NORMAL</button>
+      <button class="btn-dl" id="dlBtn2Col" style="display:none; flex:1; justify-content:center; background: linear-gradient(135deg,var(--purple),#5a189a); color:#fff; font-size:.8rem;" onclick="download2Columns()">📖 2 PÁGS / HOJA</button>
     </div>
+    <button class="btn-rst" onclick="resetAll()">↩ Limpiar pantalla</button>
   </div>
 
-  <div class="foot">NEUROSCAN APUNTES v2 · PDF A4 · ARIAL 9pt · MÁRGENES ESTRECHOS · INTERLINEADO 1</div>
+</div>
+
+<!-- MODAL PROMPT -->
+<div class="modal-overlay" id="promptModal" onclick="closePromptOutside(event)">
+  <div class="modal-box">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <div style="font-weight:800; color:var(--purple);">PROMPT ACADÉMICO PARA IA</div>
+      <button class="btn-prev-tog" onclick="closePrompt()">Cerrar</button>
+    </div>
+    <p style="font-size:.8rem; color:var(--dim); margin-bottom:12px;">Copiá este prompt para solicitar resúmenes densos e incluir marcadores del tipo <code>[imagen 1: descripción]</code>.</p>
+    <button class="btn-proc" id="copyBtn" onclick="copyPrompt()" style="background: linear-gradient(135deg,var(--purple),#5a189a); margin-bottom:12px;">📋 COPIAR PROMPT AL PORTAPAPELES</button>
+  </div>
+</div>
+
+<!-- MODAL ASISTENTE DE IMÁGENES Y ROTACIÓN -->
+<div class="modal-overlay" id="pasterModalBackdrop" onclick="closePasterModalOutside(event)">
+  <div class="modal-box" style="border-color:var(--cyan); max-width:680px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:10px;">
+      <div style="font-weight:900; color:var(--cyan); font-size:1.05rem;">📋 GESTOR DE IMÁGENES Y ROTACIÓN</div>
+      <button class="btn-prev-tog" onclick="closeImagePasterModal()">✕ Cerrar</button>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <span style="background:rgba(57,255,122,.1); border:1px solid var(--green); color:var(--green); padding:3px 10px; border-radius:6px; font-family:"Share Tech Mono",monospace; font-size:.8rem;" id="pasterStepBadge">Imagen 1 de 1</span>
+      <span style="font-family:"Share Tech Mono",monospace; font-size:.8rem; color:var(--dim);" id="pasterProgressText">0 / 0 Pegadas</span>
+    </div>
+
+    <div style="font-weight:800; font-size:1.05rem; color:#fff; background:rgba(0,229,255,.08); padding:10px; border-radius:8px; margin:8px 0;" id="pasterVarLabel">
+      [imagen 1: ...]
+    </div>
+
+    <!-- Dropzone Ctrl+V -->
+    <div class="paster-dropzone" id="pasterDropzone" onclick="triggerClipboardRead()">
+      <div style="font-size:2.2rem; margin-bottom:6px;">📋</div>
+      <div style="font-weight:800; font-size:1rem; color:#fff;">PRESIONÁ CTRL + V AQUÍ PARA PEGAR RECORTE</div>
+      <div style="font-family:"Share Tech Mono",monospace; font-size:.78rem; color:var(--cyan); margin-top:4px;">o hacé clic para pegar desde el portapapeles</div>
+    </div>
+
+    <!-- Vista previa con controles de rotación -->
+    <div id="pasterPreviewWrap" class="paster-preview-wrap" style="display:none;">
+      <img id="pasterPreviewImg" class="paster-preview-img" src="" alt="Vista Previa" />
+      <div style="margin-top:10px; display:flex; justify-content:center; gap:10px; align-items:center;">
+        <button class="btn-prev-tog" onclick="rotateCurrentImg(90)" style="border-color:var(--cyan); color:var(--cyan); font-weight:bold; padding:6px 14px;">🔄 ROTAR 90°</button>
+        <span id="rotationDegreeLabel" style="font-family:"Share Tech Mono",monospace; font-size:0.8rem; color:var(--dim);">Rotación: 0°</span>
+      </div>
+    </div>
+
+    <!-- Navegación del modal -->
+    <div style="display:flex; justify-content:space-between; gap:10px; margin-top:16px;">
+      <button class="btn-prev-tog" id="pasterPrevBtn" onclick="navPaster(-1)">◄ Anterior</button>
+      <button class="btn-prev-tog" id="pasterDeleteBtn" onclick="deletePastedCurrent()" style="color:var(--pink); border-color:rgba(255,45,120,.4); display:none;">🗑️ Eliminar</button>
+      <button class="btn-upload" id="pasterNextBtn" onclick="navPaster(1)" style="border-color:var(--cyan); color:var(--cyan); width:auto;">Siguiente ►</button>
+    </div>
+  </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════
-var pdfBlob  = null;
-var pdfFname = '';
-var opts = { header: true, footer: true, nums: true, toc: false };
-var bodyFontSize = 9;   // ← Arial 9pt por defecto
+// ═════════════════════════════════════════════════════════════════
+//  ESTADO Y PERSISTENCIA (LOCALSTORAGE DE MANTENIMIENTO MÁXIMO)
+// ═════════════════════════════════════════════════════════════════
+var detectedImageVars = [];
+var imageStore = {};        // { rawKey: base64Data }
+var imageRotations = {};    // { rawKey: degrees (0, 90, 180, 270) }
+var currentPasterIdx = 0;
+var isPasterModalOpen = false;
+var bodyFontSize = 9;
 var prevVisible = false;
+var pdfBlob = null;
 
-// ═══════════════════════════════════════
-//  TOGGLE OPTS
-// ═══════════════════════════════════════
-function toggleOpt(key) {
-  opts[key] = !opts[key];
-  document.getElementById('tg-' + key).classList.toggle('on', opts[key]);
+// Cargar imágenes guardadas previamente en LocalStorage (SE CONSERVAN LAS CORTADAS)
+try {
+  var savedStore = localStorage.getItem('ep_pdf_image_store');
+  if (savedStore) imageStore = JSON.parse(savedStore);
+
+  var savedRots = localStorage.getItem('ep_pdf_image_rotations');
+  if (savedRots) imageRotations = JSON.parse(savedRots);
+} catch(e) { console.warn('Error LocalStorage:', e); }
+
+function saveStore() {
+  try {
+    localStorage.setItem('ep_pdf_image_store', JSON.stringify(imageStore));
+    localStorage.setItem('ep_pdf_image_rotations', JSON.stringify(imageRotations));
+  } catch(e) { console.warn('Error al guardar LocalStorage:', e); }
 }
-function setFontSize(sz) {
-  bodyFontSize = sz;
-  [9, 10, 11, 12].forEach(function(s) {
-    document.getElementById('fs-' + s).classList.toggle('on', s === sz);
+
+// ── Detección de variables ────────────────────────────────────────
+
+// Normalizador robusto de claves de variables (ej. 'imagen 1', 'imagen 2', etc.)
+function normKey(k) {
+  if (!k) return '';
+  return k.toLowerCase().replace(/[\s\[\]:_]+/g, ' ').trim();
+}
+
+function extractVarNumber(k) {
+  var m = k.match(/imagen\s*(\d+)/i);
+  return m ? m[1] : null;
+}
+
+// Búsqueda flexible de imágenes en imageStore
+function getStoredImageData(rawKey) {
+  if (!imageStore) return null;
+  // 1. Coincidencia exacta
+  if (imageStore[rawKey]) return imageStore[rawKey];
+
+  // 2. Coincidencia normalizada
+  var targetNorm = normKey(rawKey);
+  var targetNum = extractVarNumber(rawKey);
+
+  for (var k in imageStore) {
+    if (normKey(k) === targetNorm) return imageStore[k];
+    if (targetNum && extractVarNumber(k) === targetNum) return imageStore[k];
+  }
+  return null;
+}
+
+function getStoredImageRotation(rawKey) {
+  if (!imageRotations) return 0;
+  if (imageRotations[rawKey] !== undefined) return imageRotations[rawKey];
+
+  var targetNorm = normKey(rawKey);
+  var targetNum = extractVarNumber(rawKey);
+
+  for (var k in imageRotations) {
+    if (normKey(k) === targetNorm) return imageRotations[k];
+    if (targetNum && extractVarNumber(k) === targetNum) return imageRotations[k];
+  }
+  return 0;
+}
+
+
+function detectImageVariables(text) {
+  detectedImageVars = [];
+  if (!text) { updateImageDetectionStatus(); return; }
+
+  var regex = /\[(?:imagen|FIGURA|IMAGEN|grafico)\s*\d*:?\s*([^\]]+)\]|!\[(.*?)\]\((.*?)\)/gi;
+  var m;
+  var seen = new Set();
+
+  while ((m = regex.exec(text)) !== null) {
+    var rawKey = m[0];
+    var label = m[1] || m[2] || rawKey;
+    if (!seen.has(rawKey)) {
+      seen.add(rawKey);
+      detectedImageVars.push({ rawKey: rawKey, label: label.trim() });
+    }
+  }
+  updateImageDetectionStatus();
+}
+
+
+function escJsString(str) {
+  return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function rotateSpecificImg(rawKey, degAdd) {
+  var currDeg = imageRotations[rawKey] || 0;
+  var nextDeg = (currDeg + degAdd) % 360;
+  imageRotations[rawKey] = nextDeg;
+  saveStore();
+  updateImageDetectionStatus();
+}
+
+function deleteSpecificImg(rawKey) {
+  if (confirm('¿Borrar imagen cargada de esta variable?')) {
+    delete imageStore[rawKey];
+    delete imageRotations[rawKey];
+    saveStore();
+    updateImageDetectionStatus();
+  }
+}
+
+function openSpecificPaster(idx) {
+  currentPasterIdx = idx;
+  openImagePasterModal();
+}
+
+function updateImageDetectionStatus() {
+  var statusEl = document.getElementById('imageDetectionStatus');
+  var openBtn = document.getElementById('openPasterBtn');
+  var listEl = document.getElementById('imageVariablesList');
+  if (!statusEl) return;
+
+  var total = detectedImageVars.length;
+  var pasted = 0;
+  detectedImageVars.forEach(v => { if (imageStore[v.rawKey]) pasted++; });
+
+  if (total === 0) {
+    statusEl.innerHTML = 'Esperando texto con variables (ej: <code>[imagen 1: familia cinética]</code>)...';
+    openBtn.style.display = 'none';
+    if (listEl) listEl.innerHTML = '';
+  } else {
+    statusEl.innerHTML = '✓ <strong>' + total + ' variables detectadas</strong> (' + pasted + '/' + total + ' imágenes cargadas de LocalStorage)';
+    openBtn.style.display = 'inline-flex';
+    openBtn.textContent = '📋 ASISTENTE PASO A PASO (' + pasted + '/' + total + ')';
+
+    if (listEl) {
+      var h = '<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:12px; margin-top:14px;">';
+      detectedImageVars.forEach(function(v, idx) {
+        var imgData = getStoredImageData(v.rawKey); var hasImg = !!imgData;
+        var deg = getStoredImageRotation(v.rawKey);
+        var safeKey = escJsString(v.rawKey);
+
+        h += '<div style="background:rgba(0,0,0,0.4); border:1px solid ' + (hasImg ? 'var(--green)' : 'var(--border)') + '; border-radius:12px; padding:12px; display:flex; flex-direction:column; justify-content:space-between;">';
+        h += '<div style="font-size:0.78rem; font-weight:bold; color:var(--cyan); margin-bottom:6px; word-break:break-all;">' + v.rawKey + '</div>';
+
+        if (hasImg) {
+          h += '<div style="text-align:center; margin:8px 0; background:#000; border-radius:8px; padding:6px; height:120px; display:flex; align-items:center; justify-content:center; overflow:hidden;">';
+          h += '<img src="' + imageStore[v.rawKey] + '" style="max-height:110px; max-width:100%; object-fit:contain; transform:rotate(' + deg + 'deg); transition:transform 0.3s;" />';
+          h += '</div>';
+          h += '<div style="font-size:0.72rem; color:var(--green); margin-bottom:8px; font-family:"Share Tech Mono",monospace;">✓ Cargada (' + deg + '°)</div>';
+          h += '<div style="display:flex; gap:6px;">';
+          h += '<button class="btn-prev-tog" onclick="rotateSpecificImg(&quot;' + safeKey + '&quot;, 90)" style="border-color:var(--cyan); color:var(--cyan); flex:1; font-weight:bold; padding:5px;">🔄 ROTAR 90°</button>';
+          h += '<button class="btn-prev-tog" onclick="deleteSpecificImg(&quot;' + safeKey + '&quot;)" style="color:var(--pink); border-color:rgba(255,45,120,0.4); padding:5px 8px;">🗑️</button>';
+          h += '</div>';
+        } else {
+          h += '<div style="padding:24px 10px; text-align:center; font-size:0.75rem; color:var(--dim); border:1px dashed var(--border); border-radius:8px; margin:8px 0; font-family:"Share Tech Mono",monospace;">📷 Pendiente de pegar</div>';
+          h += '<button class="btn-prev-tog" onclick="openSpecificPaster(' + idx + ')" style="border-color:var(--green); color:var(--green); font-weight:bold; width:100%; padding:6px;">📋 PEGAR (CTRL+V)</button>';
+        }
+
+        h += '</div>';
+      });
+      h += '</div>';
+      listEl.innerHTML = h;
+    }
+  }
+}
+
+function openImagePasterModal() {
+  if (detectedImageVars.length === 0) return;
+  isPasterModalOpen = true;
+  document.getElementById('pasterModalBackdrop').classList.add('active');
+  renderPasterStep();
+}
+
+function closeImagePasterModal() {
+  isPasterModalOpen = false;
+  document.getElementById('pasterModalBackdrop').classList.remove('active');
+  updateImageDetectionStatus();
+}
+
+function closePasterModalOutside(e) {
+  if (e.target.id === 'pasterModalBackdrop') closeImagePasterModal();
+}
+
+function renderPasterStep() {
+  if (currentPasterIdx < 0) currentPasterIdx = 0;
+  if (currentPasterIdx >= detectedImageVars.length) currentPasterIdx = detectedImageVars.length - 1;
+
+  var item = detectedImageVars[currentPasterIdx];
+  if (!item) return;
+
+  var total = detectedImageVars.length;
+  var pasted = 0;
+  detectedImageVars.forEach(v => { if (imageStore[v.rawKey]) pasted++; });
+
+  document.getElementById('pasterStepBadge').textContent = 'Imagen ' + (currentPasterIdx + 1) + ' de ' + total;
+  document.getElementById('pasterProgressText').textContent = pasted + ' / ' + total + ' Cargadas';
+  document.getElementById('pasterVarLabel').textContent = item.rawKey;
+
+  var hasImg = !!imageStore[item.rawKey];
+  var previewWrap = document.getElementById('pasterPreviewWrap');
+  var previewImg = document.getElementById('pasterPreviewImg');
+  var dropzone = document.getElementById('pasterDropzone');
+  var delBtn = document.getElementById('pasterDeleteBtn');
+  var rotLabel = document.getElementById('rotationDegreeLabel');
+
+  if (hasImg) {
+    var deg = imageRotations[item.rawKey] || 0;
+    previewImg.src = imageStore[item.rawKey];
+    previewImg.style.transform = 'rotate(' + deg + 'deg)';
+    rotLabel.textContent = 'Rotación: ' + deg + '°';
+    previewWrap.style.display = 'block';
+    dropzone.style.display = 'none';
+    delBtn.style.display = 'inline-flex';
+  } else {
+    previewWrap.style.display = 'none';
+    dropzone.style.display = 'block';
+    delBtn.style.display = 'none';
+  }
+
+  document.getElementById('pasterPrevBtn').disabled = (currentPasterIdx === 0);
+  document.getElementById('pasterNextBtn').disabled = (currentPasterIdx === total - 1);
+}
+
+function rotateCurrentImg(degAdd) {
+  var item = detectedImageVars[currentPasterIdx];
+  if (!item || !imageStore[item.rawKey]) return;
+
+  var currDeg = imageRotations[item.rawKey] || 0;
+  var nextDeg = (currDeg + degAdd) % 360;
+  imageRotations[item.rawKey] = nextDeg;
+  saveStore();
+  renderPasterStep();
+}
+
+function navPaster(dir) {
+  currentPasterIdx += dir;
+  renderPasterStep();
+}
+
+function deletePastedCurrent() {
+  var item = detectedImageVars[currentPasterIdx];
+  if (item && imageStore[item.rawKey]) {
+    delete imageStore[item.rawKey];
+    delete imageRotations[item.rawKey];
+    saveStore();
+    renderPasterStep();
+    updateImageDetectionStatus();
+  }
+}
+
+// ── Listener Clipboard (Ctrl + V) ──────────────────────────────────
+window.addEventListener('paste', function(e) {
+  if (!isPasterModalOpen) return;
+  var items = (e.clipboardData || e.originalEvent.clipboardData).items;
+  if (!items) return;
+
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].type.indexOf('image') !== -1) {
+      var blob = items[i].getAsFile();
+      var reader = new FileReader();
+      reader.onload = function(evt) {
+        savePastedImage(evt.target.result);
+      };
+      reader.readAsDataURL(blob);
+      e.preventDefault();
+      break;
+    }
+  }
+});
+
+function triggerClipboardRead() {
+  if (navigator.clipboard && navigator.clipboard.read) {
+    navigator.clipboard.read().then(items => {
+      items.forEach(item => {
+        item.types.forEach(t => {
+          if (t.indexOf('image') !== -1) {
+            item.getType(t).then(blob => {
+              var reader = new FileReader();
+              reader.onload = evt => savePastedImage(evt.target.result);
+              reader.readAsDataURL(blob);
+            });
+          }
+        });
+      });
+    }).catch(err => {});
+  }
+}
+
+function savePastedImage(base64) {
+  var item = detectedImageVars[currentPasterIdx];
+  if (!item) return;
+  imageStore[item.rawKey] = base64;
+  imageRotations[item.rawKey] = 0;
+  saveStore();
+  renderPasterStep();
+  updateImageDetectionStatus();
+}
+
+// Rotación en Canvas para mantener 100% fidelidad de color e imprimir exacto en PDF
+function getRotatedBase64Sync(base64, degrees) {
+  if (!degrees || degrees % 360 === 0) return base64;
+  try {
+    var img = new Image();
+    img.src = base64;
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+    var rad = (degrees % 360) * Math.PI / 180;
+    var w = img.naturalWidth || img.width || 800;
+    var h = img.naturalHeight || img.height || 600;
+
+    if (degrees === 90 || degrees === 270) {
+      canvas.width = h;
+      canvas.height = w;
+    } else {
+      canvas.width = w;
+      canvas.height = h;
+    }
+
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(rad);
+    ctx.drawImage(img, -w / 2, -h / 2);
+    return canvas.toDataURL('image/png');
+  } catch(e) {
+    return base64;
+  }
+}
+
+// ── PROMPT MODAL ───────────────────────────────────────────────────
+function openPrompt() { document.getElementById('promptModal').classList.add('active'); }
+function closePrompt() { document.getElementById('promptModal').classList.remove('active'); }
+function closePromptOutside(e) { if(e.target.id === 'promptModal') closePrompt(); }
+
+function copyPrompt() {
+  var promptText = "Actúa como un experto en crear apuntes académicos densos y completos en formato Markdown.\n" +
+    "Por favor resume el siguiente texto sin perder ningún detalle clínico, teórico o técnico importante.\n\n" +
+    "REGLA CRÍTICA PARA IMÁGENES: Si el texto original hace referencia a figuras, cuadros, dibujos o gráficos, " +
+    "debes incluir un marcador de imagen para que yo pueda insertarla luego.\n" +
+    "El marcador DEBE tener exactamente este formato: [imagen 1: breve descripcion]\n\n" +
+    "⚠️ IMPORTANTE: El marcador debe estar COMPLETAMENTE SOLO EN SU PROPIA LÍNEA, separado por una línea " +
+    "en blanco arriba y otra abajo. NUNCA lo pongas entre paréntesis ni al lado de otro texto.\n\n" +
+    "Ejemplo correcto:\n" +
+    "El macrografismo indica impulsividad.\n\n" +
+    "[imagen 1: dibujo grande]\n\n" +
+    "Esto se observa en niños con problemas de control.";
+    
+  navigator.clipboard.writeText(promptText).then(function() {
+    var btn = document.getElementById('copyBtn');
+    var oldText = btn.textContent;
+    btn.textContent = '✅ PROMPT COPIADO';
+    setTimeout(function(){ btn.textContent = oldText; }, 2000);
+  }).catch(function(err) {
+    alert("Error al copiar: " + err);
   });
 }
 
-// ═══════════════════════════════════════
-//  TEXTAREA COUNTER
-// ═══════════════════════════════════════
-document.getElementById('mdInput').addEventListener('input', function() {
-  var v = this.value;
-  document.getElementById('charCnt').textContent = v.length.toLocaleString('es');
-  document.getElementById('lineCnt').textContent = v.split('\n').length.toLocaleString('es');
-  if (v.trim().length > 10) renderPreview(v);
-  else { document.getElementById('prevWrap').classList.remove('on'); }
-});
-
-// ═══════════════════════════════════════
-//  FILE LOAD
-// ═══════════════════════════════════════
-document.getElementById('mdFileInput').onchange = function() {
-  var f = this.files[0]; if (!f) return;
-  var r = new FileReader();
-  r.onload = function(e) {
-    document.getElementById('mdInput').value = e.target.result;
-    document.getElementById('mdInput').dispatchEvent(new Event('input'));
-  };
-  r.readAsText(f, 'UTF-8');
-};
-
-// ═══════════════════════════════════════
-//  PREVIEW
-// ═══════════════════════════════════════
+// ── PREVIEW ────────────────────────────────────────────────────────
 function togglePreview() {
   prevVisible = !prevVisible;
   var btn = document.querySelector('.btn-prev-tog');
   if (!prevVisible) {
-    document.getElementById('prevWrap').classList.remove('on');
+    document.getElementById('prevWrap').style.display = 'none';
     btn.textContent = 'Mostrar';
   } else {
-    document.getElementById('prevWrap').classList.add('on');
+    document.getElementById('prevWrap').style.display = 'block';
     btn.textContent = 'Ocultar';
     renderPreview(document.getElementById('mdInput').value);
   }
@@ -524,33 +734,24 @@ function renderPreview(text) {
     else if (t.startsWith('## ')) html += '<h2>' + esc(t.slice(3)) + '</h2>';
     else if (t.startsWith('### '))html += '<h3>' + esc(t.slice(4)) + '</h3>';
     else if (t.trim() === '---')  html += '<hr>';
-    else if (t.startsWith('◦ '))  html += '<ul><li class="lvl2">' + esc(t.slice(2)) + '</li></ul>';
+    else if (t.startsWith('◦ '))  html += '<ul><li style="margin-left:15px;">' + esc(t.slice(2)) + '</li></ul>';
     else if (t.startsWith('• '))  html += '<ul><li>' + esc(t.slice(2)) + '</li></ul>';
     else if (/^[-*] /.test(t))    html += '<ul><li>' + esc(t.slice(2)) + '</li></ul>';
-    else if (t.startsWith('$$') && t.endsWith('$$')) html += '<div class="formula">' + esc(t.slice(2,-2)) + '</div>';
     else if (t.trim()) html += '<p>' + esc(t) + '</p>';
   });
   document.getElementById('prevContent').innerHTML = html;
-  document.getElementById('prevWrap').classList.add('on');
-  prevVisible = true;
-  document.querySelector('.btn-prev-tog').textContent = 'Ocultar';
 }
 
-function esc(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ── Strip inline markers (para headings que ya son bold) ──────────
 function stripInline(s) {
   return s.replace(/\*\*\*(.+?)\*\*\*/g,'$1')
            .replace(/\*\*(.+?)\*\*/g,'$1')
            .replace(/\*(.+?)\*/g,'$1');
 }
 
-// ── Parsea inline markdown en segmentos {text, bold, italic} ─────
 function parseInline(str) {
   var segments = [];
-  // Match ***bold+italic***, **bold**, *italic*  — in that order
   var re = /\*\*\*(.+?)\*\*\*|\*\*(.+?)\*\*|\*(.+?)\*/g;
   var last = 0, m;
   while ((m = re.exec(str)) !== null) {
@@ -566,28 +767,9 @@ function parseInline(str) {
   return segments.length ? segments : [{ text: str, bold: false, italic: false }];
 }
 
-// ═══════════════════════════════════════
-//  LOG / PROGRESS
-// ═══════════════════════════════════════
-function log(msg, type) {
-  var el = document.getElementById('plog');
-  var d = new Date();
-  var ts = p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds());
-  var div = document.createElement('div'); div.className = 'll';
-  div.innerHTML = '<span class="lts">[' + ts + ']</span><span class="lm ' + (type||'') + '">' + msg + '</span>';
-  el.appendChild(div); el.scrollTop = el.scrollHeight;
-}
-function p2(n) { return n < 10 ? '0' + n : n; }
-function setBar(pct, lbl) {
-  document.getElementById('bf').style.width = pct + '%';
-  document.getElementById('bl').textContent = lbl;
-}
-function showErr(m) { var e = document.getElementById('errb'); e.textContent = m; e.classList.add('on'); }
-function hideErr() { document.getElementById('errb').classList.remove('on'); }
-
-// ═══════════════════════════════════════
-//  MARKDOWN PARSER → Structured Tokens
-// ═══════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════
+//  MARKDOWN PARSER ESTRUCTURADO ORIGINAL + IMÁGENES
+// ═════════════════════════════════════════════════════════════════
 function parseMarkdown(text) {
   var lines = text.split('\n');
   var tokens = [];
@@ -596,7 +778,12 @@ function parseMarkdown(text) {
   lines.forEach(function(rawLine) {
     var line = rawLine.trimEnd();
 
-    if (/^# /.test(line)) {
+    var imgMatch = line.match(/^\s*(\[(?:imagen|FIGURA|IMAGEN|grafico)\s*\d*:?\s*([^\]]+)\]|!\[(.*?)\]\((.*?)\))\s*$/i);
+    if (imgMatch) {
+      var rawKey = imgMatch[1];
+      var label = imgMatch[2] || imgMatch[3] || rawKey;
+      tokens.push({ type: 'image_var', rawKey: rawKey, label: label });
+    } else if (/^# /.test(line)) {
       tokens.push({ type: 'h1', text: stripInline(line.slice(2).trim()) });
       wordCount += line.split(/\s+/).length;
     } else if (/^## /.test(line)) {
@@ -635,23 +822,20 @@ function parseMarkdown(text) {
   return { tokens: tokens, sections: secCount, formulas: formulaCount, words: wordCount };
 }
 
-// ═══════════════════════════════════════
-//  PDF BUILDER — Arial 9pt · Márgenes estrechos · Interlineado 1
-// ═══════════════════════════════════════
-function buildPDF(parsed, materia, unidad, titulo) {
+// ═════════════════════════════════════════════════════════════════
+//  PDF BUILDER ORIGINAL DE NEUROSCAN + FIDELIDAD Y ROTACIÓN DE IMÁGENES
+// ═════════════════════════════════════════════════════════════════
+function buildPDF(parsed, materia, unidad, titulo, opts) {
+  opts = opts || { nums: true, footer: true, header: true, toc: false };
   var jspdf = window.jspdf;
+  var fontSel = document.getElementById('fontSelect').value || 'helvetica';
   var doc = new jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-  // ── Layout A4 (mm) — márgenes estrechos ──────────────────
   var PW = 210, PH = 297;
-  var ML = 15,   // margen izquierdo estrecho
-      MR = 15,   // margen derecho estrecho
-      MT = 20,   // margen superior
-      MB = 18;   // margen inferior
-  var TW = PW - ML - MR;  // ancho de texto: 180mm
+  var ML = 15, MR = 15, MT = 20, MB = 18;
+  var TW = PW - ML - MR;
   var pageNum = 1;
 
-  // ── Colores ──────────────────────────────────────────────
   var C_BLACK  = [0, 0, 0];
   var C_DARK   = [20, 20, 20];
   var C_ACCENT = [0, 70, 140];
@@ -660,26 +844,17 @@ function buildPDF(parsed, materia, unidad, titulo) {
   var C_RULE   = [180, 190, 205];
   var C_FORM   = [130, 90, 0];
 
-  // ── Tamaños de fuente ────────────────────────────────────
-  // H1: Arial Bold 12pt
-  // H2: Arial Bold 10pt
-  // H3: Arial Bold 10pt
-  // Cuerpo: Arial 9pt (bodyFontSize)
   var FS_H1   = 12;
   var FS_H2   = 10;
   var FS_H3   = 10;
-  var FS_BODY = bodyFontSize;  // 9pt por defecto
-  var FS_LI   = bodyFontSize;
+  var FS_BODY = parseFloat(document.getElementById('fontSizeSelect').value || '9');
+  var FS_LI   = FS_BODY;
   var FS_HDR  = 7;
-  var FS_FORM = bodyFontSize;
 
-  // ── Interlineado 1 ───────────────────────────────────────
-  // factor 1.0 = interlineado simple exacto
   function lh(fs) { return fs * 0.353 * 1.0; }
 
   var y = MT;
 
-  // ── Helpers ──────────────────────────────────────────────
   function setColor(arr) { doc.setTextColor(arr[0], arr[1], arr[2]); }
   function setDraw(arr)  { doc.setDrawColor(arr[0], arr[1], arr[2]); }
 
@@ -689,54 +864,36 @@ function buildPDF(parsed, materia, unidad, titulo) {
   }
 
   function addPage() {
-    // Pie de página de la página actual
-    if (opts.nums) {
-      doc.setFontSize(FS_HDR);
-      doc.setFont('helvetica','normal');
-      setColor(C_DIM);
-      doc.text(String(pageNum), PW / 2, PH - 8, { align: 'center' });
-    }
-    if (opts.footer) {
-      doc.setFontSize(FS_HDR - 0.5);
-      doc.setFont('helvetica','italic');
-      setColor(C_DIM);
-      doc.text(materia + ' · Unidad ' + unidad, ML, PH - 8);
-      doc.text(titulo, PW - MR, PH - 8, { align: 'right' });
-    }
+    doc.setFontSize(FS_HDR);
+    doc.setFont(fontSel, 'normal');
+    setColor(C_DIM);
+    doc.text(String(pageNum), PW / 2, PH - 8, { align: 'center' });
+
+    doc.setFontSize(FS_HDR - 0.5);
+    doc.setFont(fontSel, 'italic');
+    setColor(C_DIM);
+    doc.text(materia + ' · ' + unidad, ML, PH - 8);
+    doc.text(titulo, PW - MR, PH - 8, { align: 'right' });
+
     doc.addPage('a4', 'portrait');
     pageNum++;
     y = MT;
-    if (opts.header) drawPageHeader();
+    drawPageHeader();
   }
 
   function drawPageHeader() {
     doc.setFontSize(FS_HDR);
-    doc.setFont('helvetica','normal');
+    doc.setFont(fontSel, 'normal');
     setColor(C_DIM);
-    doc.text(materia + ' · Unidad ' + unidad + ' · ' + titulo, ML, MT - 8);
+    doc.text(materia + ' · ' + unidad + ' · ' + titulo, ML, MT - 8);
     setDraw(C_RULE);
     doc.setLineWidth(0.18);
     doc.line(ML, MT - 5, PW - MR, MT - 5);
   }
 
-  // Escribe texto con wrap. Devuelve altura usada.
-  function writeWrapped(text, x, maxW, fontSize, fontStyle, color) {
-    doc.setFontSize(fontSize);
-    doc.setFont('helvetica', fontStyle || 'normal');
-    setColor(color || C_BLACK);
-    var lines = doc.splitTextToSize(text, maxW);
-    var lineH = lh(fontSize);
-    needSpace(lines.length * lineH + 1);
-    doc.text(lines, x, y);
-    y += lines.length * lineH;
-  }
-
-  // ── Renderiza segmentos inline (bold/italic) con word-wrap ──────
   function renderInline(segs, startX, maxW, fs, baseColor, baseBold) {
-    // Convertir segmentos a lista de palabras con estilo
     var words = [];
     segs.forEach(function(seg) {
-      // Detectar espacios entre palabras del segmento
       var parts = seg.text.split(/(\s+)/);
       parts.forEach(function(p) {
         if (p === '') return;
@@ -746,20 +903,17 @@ function buildPDF(parsed, materia, unidad, titulo) {
     });
 
     var lineH = lh(fs);
-
-    // Construir líneas respetando maxW
     var lines = [];
     var curr = [];
     var currW = 0;
 
     words.forEach(function(w) {
       var style = (w.bold && w.italic) ? 'bolditalic' : w.bold ? 'bold' : w.italic ? 'italic' : 'normal';
-      doc.setFont('helvetica', style);
+      doc.setFont(fontSel, style);
       doc.setFontSize(fs);
       var ww = doc.getTextWidth(w.text);
 
       if (!w.isSpace && currW + ww > maxW && curr.length > 0) {
-        // Quitar espacio final de la línea si existe
         if (curr.length && curr[curr.length-1].isSpace) curr.pop();
         lines.push(curr);
         curr = [{ text: w.text, bold: w.bold, italic: w.italic, isSpace: false, width: ww }];
@@ -779,7 +933,7 @@ function buildPDF(parsed, materia, unidad, titulo) {
       var cx = startX;
       line.forEach(function(w) {
         var style = (w.bold && w.italic) ? 'bolditalic' : w.bold ? 'bold' : w.italic ? 'italic' : 'normal';
-        doc.setFont('helvetica', style);
+        doc.setFont(fontSel, style);
         doc.setFontSize(fs);
         setColor(baseColor);
         doc.text(w.text, cx, y);
@@ -790,40 +944,14 @@ function buildPDF(parsed, materia, unidad, titulo) {
     y += 0.3;
   }
 
-  // ── Encabezado página 1 ──────────────────────────────────
-  if (opts.header) drawPageHeader();
+  // Header Página 1
+  drawPageHeader();
 
-  // ── TOC ──────────────────────────────────────────────────
-  var h2Tokens = parsed.tokens.filter(function(t){ return t.type==='h2'; });
-  if (opts.toc && h2Tokens.length > 0) {
-    doc.setFontSize(11);
-    doc.setFont('helvetica','bold');
-    setColor(C_DARK);
-    doc.text('ÍNDICE', PW / 2, y, { align: 'center' });
-    y += lh(11) + 3;
-    setDraw(C_RULE);
-    doc.setLineWidth(0.25);
-    doc.line(ML, y, PW - MR, y);
-    y += 3;
-    h2Tokens.forEach(function(t, idx) {
-      doc.setFontSize(FS_BODY);
-      doc.setFont('helvetica','normal');
-      setColor(C_ACCENT);
-      doc.text((idx + 1) + '. ' + t.text, ML + 3, y);
-      y += lh(FS_BODY) + 0.5;
-      needSpace(lh(FS_BODY) + 1);
-    });
-    y += 4;
-    addPage();
-  }
-
-  // ── Renderizar tokens ─────────────────────────────────────
   var prevType = '';
 
   parsed.tokens.forEach(function(tok) {
     switch (tok.type) {
 
-      // ── H1: Arial Bold 12pt, centrado, con líneas ────────
       case 'h1': {
         if (prevType && prevType !== 'blank') y += 2;
         needSpace(lh(FS_H1) + 6);
@@ -831,7 +959,7 @@ function buildPDF(parsed, materia, unidad, titulo) {
         doc.setLineWidth(0.4);
         doc.line(ML, y - 1, PW - MR, y - 1);
         doc.setFontSize(FS_H1);
-        doc.setFont('helvetica','bold');
+        doc.setFont(fontSel,'bold');
         setColor(C_DARK);
         var h1lines = doc.splitTextToSize(tok.text.toUpperCase(), TW);
         doc.text(h1lines, PW / 2, y + lh(FS_H1) - 0.5, { align: 'center' });
@@ -841,12 +969,11 @@ function buildPDF(parsed, materia, unidad, titulo) {
         break;
       }
 
-      // ── H2: Arial Bold 10pt, con subrayado ───────────────
       case 'h2': {
         y += 2;
         needSpace(lh(FS_H2) + 6);
         doc.setFontSize(FS_H2);
-        doc.setFont('helvetica','bold');
+        doc.setFont(fontSel,'bold');
         setColor(C_ACCENT);
         var h2lines = doc.splitTextToSize(tok.text, TW);
         doc.text(h2lines, ML, y);
@@ -858,14 +985,13 @@ function buildPDF(parsed, materia, unidad, titulo) {
         break;
       }
 
-      // ── H3: Arial Bold 10pt, barra izquierda ─────────────
       case 'h3': {
         y += 1.5;
         needSpace(lh(FS_H3) + 4);
         doc.setFillColor(C_SUB[0], C_SUB[1], C_SUB[2]);
         doc.rect(ML, y - lh(FS_H3) + 0.5, 1.8, lh(FS_H3), 'F');
         doc.setFontSize(FS_H3);
-        doc.setFont('helvetica','bold');
+        doc.setFont(fontSel,'bold');
         setColor(C_SUB);
         var h3lines = doc.splitTextToSize(tok.text, TW - 5);
         doc.text(h3lines, ML + 4, y);
@@ -873,61 +999,86 @@ function buildPDF(parsed, materia, unidad, titulo) {
         break;
       }
 
-      // ── HR ────────────────────────────────────────────────
-      case 'hr': {
-        y += 1.5;
-        needSpace(4);
-        setDraw(C_RULE);
-        doc.setLineWidth(0.2);
-        doc.line(ML + 8, y, PW - MR - 8, y);
+      case 'image_var': {
+        var rawBase64 = getStoredImageData(tok.rawKey);
         y += 2;
+        if (rawBase64) {
+          try {
+            var deg = getStoredImageRotation(tok.rawKey);
+            var finalBase64 = getRotatedBase64Sync(rawBase64, deg);
+
+            var maxImgW = TW;
+            var maxImgH = 100;
+            var imgProps = doc.getImageProperties(finalBase64);
+            var aspect = imgProps.width / imgProps.height;
+            var renderW = maxImgW;
+            var renderH = renderW / aspect;
+            if (renderH > maxImgH) {
+              renderH = maxImgH;
+              renderW = renderH * aspect;
+            }
+            var imgX = ML + (TW - renderW) / 2;
+
+            needSpace(renderH + 8);
+            // Dibujar imagen con 100% de color y nitidez sin filtros
+            doc.addImage(finalBase64, imgProps.fileType || 'PNG', imgX, y, renderW, renderH);
+            y += renderH + 3;
+
+            doc.setFontSize(8);
+            doc.setFont(fontSel, 'italic');
+            setColor(C_DIM);
+            doc.text('Figura / Lámina: ' + tok.label, PW / 2, y, { align: 'center' });
+            y += 5;
+          } catch(errImg) {
+            console.error('Error imagen:', errImg);
+            needSpace(10);
+            setDraw(C_RULE);
+            doc.setLineWidth(0.2);
+            doc.rect(ML, y, TW, 10);
+            doc.setFontSize(8);
+            doc.text('[Error al renderizar imagen: ' + tok.label + ']', PW / 2, y + 6, { align: 'center' });
+            y += 12;
+          }
+        } else {
+          needSpace(10);
+          doc.setDrawColor(0, 180, 220);
+          doc.setLineWidth(0.2);
+          doc.rect(ML, y, TW, 8);
+          doc.setFontSize(8);
+          doc.setFont(fontSel, 'italic');
+          setColor(C_ACCENT);
+          doc.text('📷 [Variable de imagen pendiente: ' + tok.label + ']', PW / 2, y + 5.5, { align: 'center' });
+          y += 11;
+        }
         break;
       }
 
-      // ── Fórmula ───────────────────────────────────────────
-      case 'formula': {
-        y += 1.5;
-        needSpace(lh(FS_FORM) + 5);
-        doc.setFillColor(255, 252, 235);
-        doc.roundedRect(ML + 4, y - lh(FS_FORM), TW - 8, lh(FS_FORM) + 3, 1.5, 1.5, 'F');
-        doc.setFontSize(FS_FORM);
-        doc.setFont('courier','bold');
-        setColor(C_FORM);
-        doc.text(tok.text, PW / 2, y, { align: 'center' });
-        y += lh(FS_FORM) + 2;
-        break;
-      }
-
-      // ── Lista nivel 1 ─────────────────────────────────────
       case 'li1': {
         needSpace(lh(FS_LI) + 1);
         doc.setFontSize(FS_LI + 0.5);
-        doc.setFont('helvetica','normal');
+        doc.setFont(fontSel,'normal');
         setColor(C_ACCENT);
         doc.text('•', ML + 4, y);
         renderInline(tok.segs || [{ text: tok.text, bold: false, italic: false }], ML + 9, TW - 9, FS_LI, C_DARK, false);
         break;
       }
 
-      // ── Lista nivel 2 ─────────────────────────────────────
       case 'li2': {
         needSpace(lh(FS_LI) + 1);
         doc.setFontSize(FS_LI - 0.5);
-        doc.setFont('helvetica','normal');
+        doc.setFont(fontSel,'normal');
         setColor(C_SUB);
         doc.text('◦', ML + 10, y);
         renderInline(tok.segs || [{ text: tok.text, bold: false, italic: false }], ML + 14, TW - 15, FS_LI - 0.5, C_DIM, false);
         break;
       }
 
-      // ── Párrafo cuerpo: inline bold/italic ────────────────
       case 'body': {
         needSpace(lh(FS_BODY) + 0.5);
         renderInline(tok.segs || [{ text: tok.text, bold: false, italic: false }], ML, TW, FS_BODY, C_BLACK, false);
         break;
       }
 
-      // ── Línea en blanco ───────────────────────────────────
       case 'blank': {
         y += lh(FS_BODY) * 0.4;
         break;
@@ -936,160 +1087,230 @@ function buildPDF(parsed, materia, unidad, titulo) {
     prevType = tok.type;
   });
 
-  // ── Última página: pie + número ──────────────────────────
-  if (opts.nums) {
+  if (opts && opts.nums) {
     doc.setFontSize(FS_HDR);
-    doc.setFont('helvetica','normal');
+    doc.setFont(fontSel,'normal');
     setColor(C_DIM);
     doc.text(String(pageNum), PW / 2, PH - 8, { align: 'center' });
   }
-  if (opts.footer) {
-    doc.setFontSize(FS_HDR - 0.5);
-    doc.setFont('helvetica','italic');
-    setColor(C_DIM);
-    doc.text(materia + ' · Unidad ' + unidad, ML, PH - 8);
-    doc.text(titulo, PW - MR, PH - 8, { align: 'right' });
-  }
-
-  // ── Metadatos ────────────────────────────────────────────
-  doc.setProperties({
-    title:   materia + ' - Unidad ' + unidad + ' - ' + titulo,
-    subject: materia,
-    keywords: materia + ', Unidad ' + unidad + ', apuntes',
-    creator: 'NeuroscanApuntes v2',
-    author:  materia
-  });
 
   return { blob: doc.output('blob'), pages: pageNum };
 }
 
-// ═══════════════════════════════════════
-//  MAIN PROCESS
-// ═══════════════════════════════════════
+// ── PROCESO PRINCIPAL DE COMPILACIÓN ORIGINAL ─────────────────────
 function startProcess() {
   var materia = document.getElementById('materia').value;
   var unidad  = document.getElementById('unidad').value;
-  var titulo  = document.getElementById('titulo').value.trim();
+  var titulo  = document.getElementById('titulo').value;
   var md      = document.getElementById('mdInput').value.trim();
 
-  hideErr();
-  if (!md)     { showErr('⚠ Pegá o cargá el contenido de tus apuntes (Paso 02).'); return; }
-  if (!titulo) { showErr('⚠ Ingresá el nombre del texto (Paso 01).'); document.getElementById('titulo').focus(); return; }
+  if (!md) {
+    alert('Por favor ingresá o pegá el texto antes de generar el PDF.');
+    return;
+  }
 
-  pdfFname = materia + '-Unidad N°' + unidad + '-' + titulo.replace(/[<>:"/\\|?*]/g,'').trim() + '.pdf';
-
-  document.getElementById('procBtn').disabled = true;
-  document.getElementById('progS').classList.add('on');
-  document.getElementById('plog').innerHTML = '';
-  document.getElementById('statsBox').classList.remove('on');
-  document.getElementById('dls').classList.remove('on');
-
-  log('Inicio · "' + titulo + '" · ' + materia, 'act');
-  log('Opciones: ' + Object.keys(opts).filter(function(k){return opts[k];}).join(', '));
-  setBar(10, 'Parseando Markdown...');
-  log('→ Parseando estructura Markdown...', 'act');
+  var btn = document.getElementById('procBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ COMPILANDO PDF...';
 
   setTimeout(function() {
     try {
       var parsed = parseMarkdown(md);
-      log('✓ ' + parsed.tokens.length + ' tokens · ' + parsed.sections + ' secciones · ' + parsed.words + ' palabras', 'ok');
-      log('✓ ' + parsed.formulas + ' fórmulas detectadas', parsed.formulas > 0 ? 'ok' : '');
+      var result = buildPDF(parsed, materia, unidad, titulo);
+      pdfBlob = result.blob;
 
-      setBar(40, 'Construyendo layout A4...');
-      log('→ Generando PDF · Arial ' + bodyFontSize + 'pt · interlineado 1...', 'act');
+      var dlBtn = document.getElementById('dlBtn');
+      var dlBtn2Col = document.getElementById('dlBtn2Col');
+      dlBtn.style.display = 'inline-flex';
+      if (dlBtn2Col) dlBtn2Col.style.display = 'inline-flex';
+      dlBtn.onclick = function() {
+        var url = URL.createObjectURL(pdfBlob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = materia + ' - ' + titulo + '.pdf';
+        a.click();
+      };
 
-      setTimeout(function() {
-        try {
-          var result = buildPDF(parsed, materia, unidad, titulo);
-          pdfBlob = result.blob;
-
-          setBar(99, 'Compilando...');
-          log('→ Compilando archivo...', 'act');
-
-          setTimeout(function() {
-            setBar(100, '¡Completado!');
-
-            document.getElementById('stP').textContent  = result.pages + ' página' + (result.pages !== 1 ? 's' : '');
-            document.getElementById('stS').textContent  = parsed.sections + ' sección' + (parsed.sections !== 1 ? 'es' : '');
-            document.getElementById('stW').textContent  = parsed.words.toLocaleString('es') + ' palabras';
-            document.getElementById('stF').textContent  = parsed.formulas > 0 ? parsed.formulas + ' encontradas' : 'ninguna';
-            document.getElementById('stFnt').textContent = bodyFontSize + ' pt · Arial/Helvetica · interlineado 1';
-            document.getElementById('statsBox').classList.add('on');
-
-            log('✓ "' + pdfFname + '" · ' + result.pages + ' págs.', 'ok');
-            log('✓ Listo para descargar', 'ok');
-
-            document.getElementById('dlf').textContent = pdfFname;
-            document.getElementById('dls').classList.add('on');
-            document.getElementById('dlBtn').onclick = downloadPDF;
-          }, 200);
-
-        } catch(e) {
-          log('✗ Error generando PDF: ' + e.message, 'err');
-          showErr('Error generando PDF: ' + e.message);
-          document.getElementById('procBtn').disabled = false;
-          setBar(0, 'Error');
-        }
-      }, 80);
-
-    } catch(e) {
-      log('✗ Error parseando: ' + e.message, 'err');
-      showErr('Error parseando Markdown: ' + e.message);
-      document.getElementById('procBtn').disabled = false;
-      setBar(0, 'Error');
+      btn.disabled = false;
+      btn.textContent = '⚡ GENERAR PDF ACADÉMICO';
+      alert('¡PDF generado con éxito (' + result.pages + ' páginas)! Haz clic en DESCARGAR PDF.');
+    } catch(err) {
+      btn.disabled = false;
+      btn.textContent = '⚡ GENERAR PDF ACADÉMICO';
+      alert('Error al generar PDF: ' + err.message);
     }
-  }, 80);
+  }, 200);
 }
 
-// ═══════════════════════════════════════
-//  DOWNLOAD / RESET
-// ═══════════════════════════════════════
-function downloadPDF() {
+async function download2Columns() {
   if (!pdfBlob) return;
-  var url = URL.createObjectURL(pdfBlob);
-  var a = document.createElement('a'); a.href = url; a.download = pdfFname;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+  var btn = document.getElementById('dlBtn2Col');
+  var oldText = btn.innerHTML;
+  btn.innerHTML = '⏳ PROCESANDO...';
+  btn.disabled = true;
+
+  try {
+    var PDFLibObj = window.PDFLib;
+    if (!PDFLibObj) throw new Error("La librería PDF-Lib no está cargada.");
+
+    var rawPdfBytes = await pdfBlob.arrayBuffer();
+    var sourceDoc = await PDFLibObj.PDFDocument.load(rawPdfBytes);
+    var destDoc = await PDFLibObj.PDFDocument.create();
+
+    // Valores automáticos predeterminados del conversor
+    var marginPt = 4 * 2.83465; // Estrecho (4mm)
+    var gapPt = 4 * 2.83465; // Separación (4mm)
+    var sheetW = 841.89; // A4 Horizontal (ancho)
+    var sheetH = 595.28; // A4 Horizontal (alto)
+    var slotW = (sheetW - (marginPt * 2) - gapPt) / 2;
+    var slotH = sheetH - (marginPt * 2);
+
+    var totalPages = sourceDoc.getPageCount();
+    var zoom = 1.05; // 105% Ampliación del contenido
+
+    for (var i = 0; i < totalPages; i += 2) {
+      var newPage = destDoc.addPage([sheetW, sheetH]);
+
+      var colocar = async (idx, x0, y0) => {
+        if (idx >= totalPages) return;
+        var srcPage = sourceDoc.getPage(idx);
+        var caja = srcPage.getMediaBox();
+        
+        var L = caja.x, B = caja.y, R = caja.x + caja.width, T = caja.y + caja.height;
+        var w = R - L, h = T - B;
+
+        // Ajuste Llenar el hueco (Cover)
+        var arHueco = slotW / slotH;
+        var arPag = w / h;
+        if (arPag > arHueco) {
+            var nw = Math.max(h * arHueco, w * 0.88);
+            L += (w - nw) / 2; R -= (w - nw) / 2; w = nw;
+        } else {
+            var nh = Math.max(w / arHueco, h * 0.88);
+            B += (h - nh) / 2; T -= (h - nh) / 2; h = nh;
+        }
+
+        // Ampliación 105%
+        var nw2 = w / zoom, nh2 = h / zoom;
+        L += (w - nw2) / 2; R -= (w - nw2) / 2;
+        B += (h - nh2) / 2; T -= (h - nh2) / 2;
+
+        var bbox = { left: L, bottom: B, right: R, top: T };
+        var emb = await destDoc.embedPage(srcPage, bbox);
+        
+        var esc = Math.min(slotW / emb.width, slotH / emb.height);
+        var drawW = emb.width * esc;
+        var drawH = emb.height * esc;
+        var posX = x0 + (slotW - drawW) / 2;
+        var posY = y0 + (slotH - drawH) / 2;
+        newPage.drawPage(emb, { x: posX, y: posY, width: drawW, height: drawH });
+      };
+
+      await colocar(i, marginPt, marginPt); // Izquierda
+      await colocar(i + 1, marginPt + slotW + gapPt, marginPt); // Derecha
+    }
+
+    var outputPdfBytes = await destDoc.save();
+    var blob = new Blob([outputPdfBytes], { type: 'application/pdf' });
+    var blobUrl = URL.createObjectURL(blob);
+
+    var materia = document.getElementById('materia').value;
+    var titulo = document.getElementById('titulo').value;
+    var a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = materia + ' - ' + titulo + ' (2 Paginas por hoja).pdf';
+    a.click();
+    setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 10000);
+
+  } catch(err) {
+    alert("Error al procesar formato 2 columnas: " + err.message);
+  } finally {
+    btn.innerHTML = oldText;
+    btn.disabled = false;
+  }
+}
+
+function loadMDFile(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(evt) {
+    var text = evt.target.result;
+    document.getElementById('mdInput').value = text;
+    detectImageVariables(text);
+  };
+  reader.readAsText(file);
 }
 
 function resetAll() {
-  pdfBlob = null; pdfFname = '';
-  document.getElementById('progS').classList.remove('on');
-  document.getElementById('dls').classList.remove('on');
-  document.getElementById('statsBox').classList.remove('on');
-  document.getElementById('plog').innerHTML = '';
-  document.getElementById('bf').style.width = '0%';
-  document.getElementById('procBtn').disabled = false;
-  hideErr();
+  if (confirm('¿Limpiar pantalla?')) {
+    document.getElementById('mdInput').value = '';
+    updateImageDetectionStatus();
+  }
 }
 
-// ═══════════════════════════════════════
-//  PROMPT MODAL & COPY
-// ═══════════════════════════════════════
-function openPrompt() {
-  document.getElementById('promptModal').style.display = 'flex';
+
+// ── AUTO-GUARDADO Y RESTAURACIÓN DE SESIÓN EN LOCALSTORAGE ──────────
+function saveCurrentSession() {
+  try {
+    var txt = document.getElementById('mdInput').value;
+    if (txt && txt.trim()) {
+      localStorage.setItem('ep_pdf_last_text', txt);
+    }
+  } catch(e) {}
 }
-function closePrompt() {
-  document.getElementById('promptModal').style.display = 'none';
+
+function restoreLastSession() {
+  try {
+    var savedText = localStorage.getItem('ep_pdf_last_text');
+    var savedStore = localStorage.getItem('ep_pdf_image_store');
+
+    if (savedStore) {
+      imageStore = JSON.parse(savedStore);
+    }
+    var savedRots = localStorage.getItem('ep_pdf_image_rotations');
+    if (savedRots) {
+      imageRotations = JSON.parse(savedRots);
+    }
+
+    if (savedText && savedText.trim()) {
+      document.getElementById('mdInput').value = savedText;
+      detectImageVariables(savedText);
+      alert('¡Sesión e imágenes restauradas con éxito!');
+    } else {
+      // Si no hay texto guardado explícitamente, intentar cargar el texto por defecto de la unidad
+      fetchDefaultText();
+    }
+  } catch(e) {
+    alert('Error al restaurar sesión: ' + e.message);
+  }
 }
-function copyPrompt() {
-  var copyText = document.getElementById("promptText");
-  copyText.select();
-  copyText.setSelectionRange(0, 99999);
-  navigator.clipboard.writeText(copyText.value);
-  var btn = document.getElementById("copyBtn");
-  var originalText = btn.innerHTML;
-  btn.innerHTML = "✅ ¡COPIADO!";
-  btn.style.background = "var(--green)";
-  setTimeout(function() {
-    btn.innerHTML = originalText;
-    btn.style.background = "linear-gradient(135deg,var(--purple),#5a189a)";
-  }, 2000);
+
+function fetchDefaultText() {
+  var defaultText = "=================================================================\n RESUMEN COMPLETO DE LA UNIDAD: T\u00c9CNICAS PROYECTIVAS GR\u00c1FICAS\n               (VERSI\u00d3N DE M\u00c1XIMA DENSIDAD CL\u00cdNICA)\n=================================================================\n\n\n-----------------------------------------------------------------\n1. El dibujo de la figura humana como t\u00e9cnica proyectiva. Actualizaci\u00f3n de criterios de an\u00e1lisis \u2014 Contini, Lacunza y Caballero (2018)\n-----------------------------------------------------------------\n\n# **EL DIBUJO DE LA FIGURA HUMANA COMO T\u00c9CNICA PROYECTIVA. ACTUALIZACI\u00d3N DE CRITERIOS DE AN\u00c1LISIS**\n\n## **INTRODUCCI\u00d3N**\n\nActualizaci\u00f3n de los criterios de an\u00e1lisis del DFH en la cl\u00ednica infanto-juvenil (C\u00e1tedra de Evaluaci\u00f3n y Diagn\u00f3stico Psicol\u00f3gico Infanto Juvenil, UNT, 2021). Entendido como la proyecci\u00f3n de la imagen corporal y el concepto de s\u00ed mismo.\n\n## **PAUTAS ESTRUCTURALES Y AN\u00c1LISIS DE CONTENIDO**\n\u2022 **Cabeza**: *centro del concepto del Yo, intelecci\u00f3n y control emocional*.\n\u2022 **Cara y rasgos faciales**: *zona de comunicaci\u00f3n e interacci\u00f3n social (ojos, boca, nariz)*.\n\u2022 **Cuello**: *mediaci\u00f3n racional entre la cabeza (control) y el tronco (impulsos)*.\n\u2022 **Tronco y hombros**: *sede de los impulsos biol\u00f3gicos y la fuerza f\u00edsica*.\n\u2022 **Extremidades**: *\u00f3rganos de contacto con el medio, adaptaci\u00f3n social y apoyo en la realidad*.\n\n\n\n-----------------------------------------------------------------\n2. Las t\u00e9cnicas proyectivas gr\u00e1ficas. Consideraciones te\u00f3ricas y cl\u00ednicas de los aspectos formales \u2014 Coronel y Gronda (2002)\n-----------------------------------------------------------------\n\n# **LAS T\u00c9CNICAS PROYECTIVAS GR\u00c1FICAS. CONSIDERACIONES TE\u00d3RICAS Y CL\u00cdNICAS DE LOS ASPECTOS FORMALES**\n\n## **INTRODUCCI\u00d3N**\n\nEl presente trabajo tiene por objetivo realizar un estudio sistem\u00e1tico, desde una perspectiva te\u00f3rica y cl\u00ednica, de los aspectos formales del grafismo. Se han seleccionado los aspectos formales del grafismo puesto que estos se encuentran implicados en todas las t\u00e9cnicas que plantean las tareas del dibujar, tales como el Dibujo de la Casa, \u00c1rbol y Persona (HTP), la Figura Humana (FH), la Familia Kin\u00e9tica Actual (FKA) y Prospectiva (FKP), el Test de las Dos Personas, el Hombre Bajo la Lluvia, entre otras.\n\nEste abordaje se centra espec\u00edficamente en la cl\u00ednica infanto-juvenil. Es necesario recalcar este aspecto, pues consideramos que la cl\u00ednica centrada en los ni\u00f1os y adolescentes presenta una conformaci\u00f3n diferencial y no homologable con la cl\u00ednica del adulto. Si bien la sistematizaci\u00f3n de los aspectos formales es la misma en todos los gr\u00e1ficos y para todas las edades, la lectura, articulaci\u00f3n y el diagn\u00f3stico que de esta surgir\u00e1n no se corresponden con la realizada en un adulto. En la infancia hay que considerar un aspecto esencial que es el evolutivo; la valoraci\u00f3n de la conducta infantil siempre se debe realizar en el contexto de desarrollo. Otro aspecto importante es la consideraci\u00f3n del ambiente social y cultural en el que el ni\u00f1o est\u00e1 inmerso, as\u00ed como el contexto familiar y escolar como otro gran eje que lo diferencia de la cl\u00ednica del adulto.\n\n## **\u00bfQU\u00c9 ES UNA T\u00c9CNICA PROYECTIVA GR\u00c1FICA?**\n\nGeneralmente se habla de *t\u00e9cnica* en oposici\u00f3n al concepto de *test*. Este \u00faltimo designa un tipo de prueba psicol\u00f3gica que supone b\u00e1sicamente tres requisitos:\n\u2022 Una situaci\u00f3n estandarizada.\n\u2022 La posibilidad de estimar diferencias individuales en relaci\u00f3n con datos estad\u00edsticos que conforman los valores normativos.\n\u2022 Contar con informaci\u00f3n sobre la confiabilidad y validez de la t\u00e9cnica.\n\nEn s\u00edntesis, el test es un *instrumento sistem\u00e1tico y tipificado que compara la conducta de dos o m\u00e1s personas*. Por otro lado, la noci\u00f3n de *t\u00e9cnica*, al no reunir los nombrados requisitos, remite a una *evaluaci\u00f3n cualitativa, a trav\u00e9s de un material ambiguo y poco estructurado, centrando el inter\u00e9s en los resultados y en el proceso, y con la finalidad de realizar una investigaci\u00f3n din\u00e1mica y hol\u00edstica de la personalidad*.\n\nCon respecto a la proyecci\u00f3n, el t\u00e9rmino ha sido tomado de Freud y considerado, en el sentido propiamente psicoanal\u00edtico, como una *operaci\u00f3n por medio de la cual el sujeto expulsa de s\u00ed y localiza en el otro, persona o cosas, cualidades, sentimientos, deseos, incluso objetos que no reconoce o rechaza en s\u00ed mismo*. Se trata de una defensa muy arcaica. Posteriormente se advirti\u00f3 que el mismo Freud vio la proyecci\u00f3n en un sentido m\u00e1s amplio, como un proceso perceptual general, por lo cual la proyecci\u00f3n funcionar\u00eda como un *mecanismo expresivo y no s\u00f3lo como un mecanismo defensivo*.\n\nEn los dibujos proyectivos, as\u00ed como en los sue\u00f1os, los conflictos inconscientes emplean el *lenguaje simb\u00f3lico* con bastante facilidad. Los dibujos, al igual que el lenguaje simb\u00f3lico, alcanzan las capas m\u00e1s primitivas del sujeto. La producci\u00f3n gr\u00e1fica es una *creaci\u00f3n personal de recreaci\u00f3n simb\u00f3lica del mundo interno*. Los gr\u00e1ficos conllevan la impronta de aquellos hechos que dejaron huellas e incidieron de un modo conflictivo o no en la estructuraci\u00f3n del yo.\n\nDe esta manera, los dibujos proporcionan un medio excelente para explorar el mundo infantil porque representan un *modo de expresi\u00f3n tan importante como la palabra para el adulto*. Cuando el ni\u00f1o dibuja crea e inventa; de ah\u00ed que consideremos al dibujo como un *mensaje a descifrar*. El dibujo es el *comportamiento desplegado sobre el papel que informa acerca del nivel intelectual, la vida afectiva y la percepci\u00f3n que el ni\u00f1o tiene del mundo que lo rodea (familiar, escolar, cultural)*.\n\nCuando se le pide a un ni\u00f1o que dibuje se pone en juego la *dimensi\u00f3n corporal*. Este tema fue abordado por la psicomotricidad, entendida como el *estudio del rol del movimiento en la organizaci\u00f3n psicol\u00f3gica*. Un concepto clave es el de *imagen corporal*, entendida como la *imagen o representaci\u00f3n mental que tenemos de nosotros mismos*. Implica un registro de nuestro cuerpo que incluye experiencias pasadas que han quedado fuera de la conciencia y han formado modelos organizados de nosotros mismos, por medio de los cuales reconocemos posturas, partes corporales y movimientos.\n\nEl dibujo est\u00e1 determinado por *factores psicodin\u00e1micos* y por *factores socio-culturales*. La tendencia de las investigaciones recientes es considerar a los factores socioculturales como *determinantes expresivos de rasgos espec\u00edficos en relaci\u00f3n con el grupo de pertenencia*.\n\n## **CRITERIOS A TENER EN CUENTA EN EL AN\u00c1LISIS DE LAS T\u00c9CNICAS PROYECTIVAS GR\u00c1FICAS**\n\nA partir de un material gr\u00e1fico se realiza una interpretaci\u00f3n, y para asegurar la validez de las inferencias se deben seguir los siguientes pasos:\n\n### **Visi\u00f3n guest\u00e1ltica**\n\u2022 Primera recomendaci\u00f3n dada por Hammer, consistente en estar atento a la *primera impresi\u00f3n que nos llega de la producci\u00f3n del ni\u00f1o*.\n\n### **An\u00e1lisis detallado**\n\u2022 Pautas formales.\n\u2022 Pautas de contenido.\n\u2022 An\u00e1lisis de las asociaciones verbales.\n\u2022 Evidencias m\u00faltiples: se presentan en los \u00edtems anteriores. Un elemento adquiere significado s\u00f3lo en relaci\u00f3n con el total; no se deben realizar interpretaciones aisladas.\n\n### **Integraci\u00f3n final de los datos y elaboraci\u00f3n de hip\u00f3tesis presuntivas**\n\u2022 Contar con suficiente evidencia para la interpretaci\u00f3n.\n\u2022 La profundidad de la interpretaci\u00f3n debe ser apropiada al material.\n\u2022 Estimaci\u00f3n de la intensidad de la tendencia.\n\u2022 Contextuar los datos con la historia de vida del ni\u00f1o, su comportamiento manifiesto y las caracter\u00edsticas de su grupo familiar, teniendo en cuenta la *edad cronol\u00f3gica (EC)* y el *nivel sociocultural*.\n\u2022 Especificar tanto los aspectos adaptativos como los patol\u00f3gicos.\n\n## **LAS PAUTAS FORMALES DEL GRAFISMO Y AN\u00c1LISIS CL\u00cdNICO DE FIGURAS**\n\nLa *fase estructural, expresiva o formal del dibujo* es una *sistematizaci\u00f3n del aspecto gr\u00e1fico independientemente del tipo de dibujo de que se trate*. Abarca el tama\u00f1o, la presi\u00f3n, el ritmo, la exactitud, el emplazamiento, los detalles y el borrado.\n\n[imagen 1: Aspectos Formales Celener - Micrografismo en sector superior izquierdo]\n\n### **Tama\u00f1o**\n\u2022 Toma en cuenta el uso del espacio que realiza el ni\u00f1o y que confiere a sus gr\u00e1ficos (peque\u00f1o, adecuado o grande).\n\u2022 Significaci\u00f3n diagn\u00f3stica:\n  \u25e6 **Tama\u00f1o grande o expansividad**: indica *impulsividad, falta de l\u00edmites y de controles*.\n  \u25e6 **Tama\u00f1o peque\u00f1o o micrografismo**: indica *inhibici\u00f3n y timidez*.\n\n**[AN\u00c1LISIS CL\u00cdNICO DE CASOS ILUSTRADOS EN EL TEXTO]**:\n- **Figura I (Dibujo Libre de Mar\u00eda, 6 a\u00f1os)**: Micrografismo acentuado en el cuadrante superior izquierdo con trazo de presi\u00f3n d\u00e9bil. Refleja inhibici\u00f3n, timidez, sentimientos de peque\u00f1ez y retracci\u00f3n del Yo vinculados a deprivaci\u00f3n afectiva previa.\n- **Figura II (Familia en Acci\u00f3n de Mar\u00eda, 6 a\u00f1os)**: Figuras humanas de tama\u00f1o peque\u00f1o en sector superior izquierdo con extrema pobreza de detalles y ausencia de objetos complementarios. Evidencia bajo nivel de recursos yoicos, distanciamiento interpersonal y angustia de abandono.\n- **Figura III (Dibujo Libre de Florencia, 10 a\u00f1os)**: Tama\u00f1o grande y expansividad gr\u00e1fica ocupando gran parte de la hoja. Riqueza de detalles adecuada a su nivel evolutivo, con trazos inestables que expresan impulsividad y labilidad de controles emocionales.\n- **Figura IV (Familia en Acci\u00f3n de Florencia, 10 a\u00f1os)**: Emplazamiento horizontal de lado a lado por debajo del punto medio. Indica apego a la realidad concreta con figuras de complejidad simplificada y asimetr\u00eda, dando cuenta de inestabilidad y conflicto relacional.\n\n### **Presi\u00f3n**\n\u2022 Indica el *nivel energ\u00e9tico del sujeto*.\n  \u25e6 **Presi\u00f3n intensa o trazo fuerte**: *pulsiones agresivas, agresividad e impulsividad*.\n  \u25e6 **Presi\u00f3n d\u00e9bil**: *inhibici\u00f3n, timidez y retraimiento*.\n  \u25e6 **Presi\u00f3n inestable**: *inestabilidad emocional, debilitamiento en los controles e irrupci\u00f3n de fuerzas pulsionales reprimidas*.\n\n[imagen 2: Aspectos Formales Celener - Emplazamiento e inflaci\u00f3n yoica / Macrografismo]\n\n### **Emplazamiento**\n\u2022 **Eje horizontal**: *Derecha* (estabilidad, control, postergaci\u00f3n impulsiva) vs. *Izquierda* (impulsividad, satisfacci\u00f3n inmediata).\n\u2022 **Eje vertical**: *Arriba* (satisfacci\u00f3n en la fantas\u00eda) vs. *Abajo* (ligado a la realidad concreta).\n\u2022 **Sectores blancos**: *zonas de prohibici\u00f3n*.\n\n[imagen 3: Aspectos Formales Celener - Emplazamiento inferior horizontal con asimetr\u00eda]\n\n### **Detalles, Borraduras y Ritmo**\n\u2022 **Detalles**: articulados con *objetos complementarios* (no esenciales pero que contextualizan la acci\u00f3n). Pobreza en detalles (Yo d\u00e9bil, bajos recursos) vs. Presencia (Yo ajustado).\n\u2022 **Borraduras**: uso cuidadoso (perfeccionismo, alto nivel cognoscitivo) vs. uso compulsivo (inseguridad, falta de control interno).\n\u2022 **Ritmo**: tiempo dedicado a cada figura; desembarazarse velozmente denota temor o rivalidad.\n\n## **CONCLUSIONES**\n\nEl an\u00e1lisis de las pautas formales articulado con el an\u00e1lisis de contenido posibilita un abordaje integral de la personalidad en la cl\u00ednica infanto-juvenil.\n\n\n\n-----------------------------------------------------------------\n3. La t\u00e9cnica proyectiva gr\u00e1fica de la familia. Dibujos kin\u00e9ticos y akin\u00e9ticos \u2014 Coronel (2006)\n-----------------------------------------------------------------\n\n# **LA T\u00c9CNICA PROYECTIVA GR\u00c1FICA DE LA FAMILIA. DIBUJOS KIN\u00c9TICOS Y AKIN\u00c9TICOS**\n\n## **INTRODUCCI\u00d3N**\n\nLa evaluaci\u00f3n de las relaciones familiares a trav\u00e9s del grafismo constituye un pilar esencial en el diagn\u00f3stico psicodiagn\u00f3stico infanto-juvenil. Comparaci\u00f3n entre la prueba akin\u00e9tica (est\u00e1tica) y kin\u00e9tica (din\u00e1mica).\n\n## **DIBUJOS AKIN\u00c9TICOS VS. DIBUJOS KIN\u00c9TICOS**\n\u2022 **Familia Akin\u00e9tica (Corman)**: Consigna *\"Dibuja a tu familia\"*. Posici\u00f3n est\u00e1tica, jerarqu\u00eda de personajes y adiciones/omisiones.\n\u2022 **Familia Kin\u00e9tica Actual - FKA (Frank de Verthelyi)**: Consigna *\"Dibuja a tu familia haciendo algo\"*. La acci\u00f3n introduce la din\u00e1mica relacional real o fantasiosa entre los integrantes.\n\n[imagen 4: Dibujo de la Familia - Ejemplo de Familia Kin\u00e9tica Actual (FKA)]\n\n## **CRITERIOS DE AN\u00c1LISIS ESPEC\u00cdFICOS Y REGISTROS GR\u00c1FICOS**\n\u2022 **Composici\u00f3n y estructura**: *figuras incluidas y omitidas; adici\u00f3n de animales u objetos de seguridad*.\n\u2022 **Emplazamiento y distancia f\u00edsica**: *proximidad afectiva vs. distanciamiento o barreras f\u00edsicas (l\u00edneas de divisi\u00f3n/compartimentos)*.\n\u2022 **Acciones e interacci\u00f3n kin\u00e9tica**: *acciones individuales aisladas vs. acciones integradas/cooperativas*.\n\u2022 **Objetos complementarios**: *elementos que contextualizan la acci\u00f3n*.\n\n**[AN\u00c1LISIS DE ILUSTRACIONES CL\u00cdNICAS]**:\n- **Protocolos con compartimentos**: L\u00edneas divisorias entre miembros que se\u00f1alan aislamiento afectivo y severo bloqueo en la comunicaci\u00f3n familiar.\n- **Protocolos con omisi\u00f3n de figuras principales**: Desplazamiento del conflicto e imposibilidad de representar la figura parental.\n\n\n\n-----------------------------------------------------------------\n4. Indicadores emocionales en el Dibujo de la Figura Humana \u2014 Lacunza y Caballero (2023)\n-----------------------------------------------------------------\n\n# INDICADORES EMOCIONALES EN EL DIBUJO DE LA FIGURA HUMANA (DFH): LECTURA DESDE EL MODELO DIMENSIONAL \u2014 LACUNZA Y CABALLERO (2023)\n\n## 1. Introducci\u00f3n al Dibujo de la Figura Humana (DFH)\nEl dibujo constituye una de las actividades infantiles m\u00e1s placenteras y una forma primordial de representar la realidad. Evolutivamente, comienza como una prolongaci\u00f3n de la actividad motora (trazos, zigzag, ondulaciones al azar) para luego transformarse en la representaci\u00f3n intencional de objetos, animales y personas. Esta evoluci\u00f3n gr\u00e1fica evidencia un complejo entramado de variables madurativas, cognitivas y emocionales.\n\nEn el campo de la evaluaci\u00f3n psicol\u00f3gica, el DFH ocupa un lugar privilegiado porque permite acceder directamente a la *imagen que el ni\u00f1o o adolescente tiene de s\u00ed mismo*. Al dibujar, el ni\u00f1o debe percibir, abstraer y generalizar los aspectos de su propio cuerpo. Este reconocimiento corporal se aprende a trav\u00e9s del movimiento y es fundamental para la consolidaci\u00f3n de la propia identidad. Siguiendo a Celener et al. (2003), el DFH transmite caracter\u00edsticas esenciales del funcionamiento psicol\u00f3gico, evidenciando capacidades, conflictos, impulsos, deseos y ansiedades del sujeto.\n\nHist\u00f3ricamente, el DFH se utiliz\u00f3 para evaluar aspectos madurativos y cognitivos (formaci\u00f3n de conceptos no verbales, habilidades visomotoras), como en los cl\u00e1sicos estudios de Harris (1963) o Koppitz (1968). El ni\u00f1o agrupa mentalmente aspectos de los objetos percibidos mediante abstracci\u00f3n y generalizaci\u00f3n. Sin embargo, en este proceso organizativo intervienen fuertemente variables afectivas, lo que convirti\u00f3 al DFH en una excelente prueba de *screening* (rastrillaje) de la din\u00e1mica emocional infantil. Aunque originalmente se cre\u00eda libre de influencias culturales, los estudios regionales demostraron que la estimulaci\u00f3n socioambiental y el contexto inciden fuertemente en la producci\u00f3n gr\u00e1fica.\n\n## 2. Los Indicadores Emocionales (IE) del DFH seg\u00fan E. Koppitz\nElizabeth Koppitz (1968, 2006) sistematiz\u00f3 un an\u00e1lisis del DFH con una perspectiva evolutiva, neurol\u00f3gica y emocional. Su abordaje cualitativo postula que la presencia de un Indicador Emocional (IE) en el dibujo *no est\u00e1 relacionada primariamente con la edad cronol\u00f3gica ni con el nivel madurativo*, sino que es el reflejo directo de las actitudes, preocupaciones y ansiedades subyacentes del ni\u00f1o.\n\nEl marco te\u00f3rico de Koppitz se sostiene en la teor\u00eda de las relaciones interpersonales de Harry Sullivan, quien conceb\u00eda la personalidad como una construcci\u00f3n basada en la interacci\u00f3n con los \"otros significativos\". As\u00ed, la psicopatolog\u00eda infantil se modela en complementariedad con las figuras parentales.\n\nPara que un rasgo gr\u00e1fico sea considerado un verdadero **Indicador Emocional (IE)**, Koppitz estableci\u00f3 tres criterios metodol\u00f3gicos estrictos:\n1. **Validez cl\u00ednica:** Debe ser capaz de discriminar estad\u00edsticamente entre ni\u00f1os con perturbaciones emocionales y ni\u00f1os sin ellas (poblaci\u00f3n cl\u00ednica vs. poblaci\u00f3n general).\n2. **Inusualidad:** Debe presentarse en menos del 16% de los ni\u00f1os no consultantes de la misma franja etaria.\n3. **Independencia madurativa:** No debe estar correlacionado directamente con la edad o el nivel de maduraci\u00f3n cognitiva.\n\n## 3. Revisi\u00f3n Local y Clasificaci\u00f3n de Indicadores Emocionales\nEl texto retoma las investigaciones locales (Fern\u00e1ndez Liporace et al., 2017; Brizzio et al., 2014) en poblaci\u00f3n infantil argentina (6 a 12 a\u00f1os), las cuales depuraron la lista original de Koppitz de 38 indicadores, validando aquellos que cumpl\u00edan rigurosamente los tres criterios. Estos se clasifican en tres grandes categor\u00edas cl\u00ednicas:\n\n### A) Signos Cualitativos (Referidos al trazo y estructura global)\n[imagen 5: DFH Koppitz - Sombreado de rostro/manos (Ansiedad de internalizaci\u00f3n)]\n\n1. **Sombreado de manos/cuello (Desde los 6 a\u00f1os):** Refleja angustia y ansiedad por actividades reales o fantaseadas que implican el uso de las manos o el control de los impulsos (cuello).\n[imagen 6: DFH Koppitz - Inclinaci\u00f3n de la figura mayor a 15 grados]\n\n2. **Inclinaci\u00f3n de la figura en 15 grados o m\u00e1s (Desde los 6 a\u00f1os):** Expresa inestabilidad emocional, desequilibrio y la sensaci\u00f3n de carecer de una \"base firme\" en la cual sostenerse.\n3. **Transparencias (Desde los 6 a\u00f1os):** Indicador severo de inmadurez, impulsividad cl\u00ednica y conductas actuadoras (acting-out). P\u00e9rdida de los l\u00edmites corporales.\n4. **Integraci\u00f3n pobre de las partes (Desde los 7 a\u00f1os):** Denota impulsividad, inmadurez emocional y fallas en la s\u00edntesis del esquema corporal.\n5. **Pronunciada asimetr\u00eda de extremidades (Desde los 7 a\u00f1os):** Relacionado con agresividad, impulsos desorganizados, o posibles dificultades en la coordinaci\u00f3n y el predominio lateral.\n6. **Figura peque\u00f1a (4 cm o menos) (Desde los 8 a\u00f1os):** Macado retraimiento, inhibici\u00f3n severa, constricci\u00f3n yoica y sentimientos profundos de inadecuaci\u00f3n frente al entorno.\n\n### B) Detalles Especiales\n[imagen 7: DFH Koppitz - Figura grotesca o monstruosa (Inadecuaci\u00f3n personal)]\n\n1. **Figura monstruosa (Desde los 6 a\u00f1os):** Refleja sentimientos agudos de inadecuaci\u00f3n y una autoestima excesivamente devaluada.\n[imagen 8: DFH Koppitz - Figura cortada por el borde de la hoja]\n\n2. **Figura interrumpida por el borde de la hoja (Desde los 6 a\u00f1os):** Sentimiento de carencia de apoyo afectivo y b\u00fasqueda desesperada de una base de sost\u00e9n ambiental.\n3. **Brazos largos, hasta debajo de las rodillas (Desde los 6 a\u00f1os):** Indicador franco de agresividad dirigida hacia el afuera, necesidad de controlar el entorno o de aferrarse violentamente a los objetos.\n4. **Manos grandes, del tama\u00f1o de la cara (Desde los 6 a\u00f1os):** Comportamiento agresivo expansivo y tendencias marcadas a la actuaci\u00f3n de los impulsos.\n5. **Genitales expuestos (Desde los 6 a\u00f1os):** Evidencia de agresividad manifiesta, pobre control de los impulsos y fallas en la represi\u00f3n (com\u00fan en abusos o psicopatolog\u00eda grave).\n6. **Dientes visibles (Desde los 6 a\u00f1os):** Signo cl\u00e1sico de agresividad y hostilidad oral (debe interpretarse con cautela, contextualizado con otros signos).\n7. **Omisi\u00f3n de manos (Desde los 7 a\u00f1os):** Sentimiento de profunda inadecuaci\u00f3n, ansiedad de castraci\u00f3n y culpa/preocupaci\u00f3n por funciones o actos vinculados con las manos (ej. masturbaci\u00f3n, robos).\n\n### C) Omisiones (Supresi\u00f3n de partes vitales del esquema)\n1. **Omisi\u00f3n de ojos (Desde los 6 a\u00f1os):** Severo rechazo a afrontar situaciones conflictivas con el mundo exterior. Aislamiento social y negaci\u00f3n perceptiva (no querer ver).\n2. **Omisi\u00f3n de boca (Desde los 6 a\u00f1os):** Rechazo agudo hacia la comunicaci\u00f3n interpersonal. Imposibilidad o negativa a expresar el afecto.\n3. **Omisi\u00f3n de cuerpo (Desde los 6 a\u00f1os):** Perturbaci\u00f3n emocional aguda y desorganizaci\u00f3n ps\u00edquica vinculada a una enorme ansiedad corporal.\n4. **Omisi\u00f3n de brazos (Desde los 6 a\u00f1os):** Ansiedad persecutoria por conductas socialmente inaceptables que implican contacto f\u00edsico o aprehensi\u00f3n manual. Culpa.\n5. **Omisi\u00f3n de piernas (Desde los 6 a\u00f1os):** Intensa inseguridad y p\u00e9rdida de autonom\u00eda.\n6. **Omisi\u00f3n de pies (Desde los 6 a\u00f1os):** Sentimiento agudo de inseguridad, desvalimiento y \"falta de piso\" (arraigo).\n7. **Omisi\u00f3n de cuello (Desde los 8 a\u00f1os):** Impulsividad severa. Fallas en el control intelectual sobre los impulsos (el cuello separa la mente de los instintos corporales).\n8. **Omisi\u00f3n de nariz (Desde los 9 a\u00f1os):** Timidez extrema, retraimiento psicosocial y sentimientos cr\u00f3nicos de indefensi\u00f3n.\n\n## 4. Evidencias M\u00faltiples y el Modelo Dimensional de Achenbach\nEl diagn\u00f3stico infantil moderno exige la exploraci\u00f3n sistem\u00e1tica de estilos interpersonales, habilidades sociales y rasgos de car\u00e1cter. Lacunza y Caballero proponen organizar la lectura de los IE del DFH utilizando el modelo dimensional de la psicopatolog\u00eda propuesto por **Thomas Achenbach (1991)**. Este modelo clasifica los problemas de conducta en dos grandes polaridades (dimensiones):\n\n[imagen 9: DFH Koppitz - Macrografismo con trazo tajante y dientes destacados (Externalizaci\u00f3n)]\n\n### Dimensi\u00f3n Externalizante (Actuaci\u00f3n hacia el afuera / Estilo Agresivo)\nEsta dimensi\u00f3n agrupa los conflictos que el ni\u00f1o descarga contra el entorno, caracterizados por rebeld\u00eda, agresividad, hiperactividad e impulsividad. Los indicadores del DFH que convergen emp\u00edricamente con esta dimensi\u00f3n son:\n- **Signos cualitativos:** Transparencias (impulsividad) e integraci\u00f3n pobre de las partes.\n- **Detalles especiales:** Brazos largos, manos enormes, presencia de genitales y dientes remarcados.\n- **Omisiones:** Omisi\u00f3n del cuello (falla de controles internos).\n*(Nota emp\u00edrica: Investigaciones locales como las de Bichara evidenciaron que los varones escolarizados presentan significativamente mayor cantidad de estos indicadores externalizantes que las mujeres, y se correlacionan directamente con el TDAH).*\n\n[imagen 10: DFH Koppitz - Omisi\u00f3n de boca/ojos y brazos pegados al cuerpo (Internalizaci\u00f3n)]\n\n### Dimensi\u00f3n Internalizante (Sufrimiento interno / Estilo Inhibido)\nAgrupa los conflictos que el ni\u00f1o dirige hacia s\u00ed mismo, manifestados en depresi\u00f3n, miedos, timidez, retracci\u00f3n social y quejas som\u00e1ticas. Los indicadores gr\u00e1ficos convergentes son:\n- **Signos cualitativos:** Sombreado excesivo (ansiedad) y figura excesivamente peque\u00f1a (micrograf\u00eda).\n- **Detalles especiales:** Figura monstruosa (baja autoestima), figura cortada por los bordes (b\u00fasqueda de apoyo externo), omisi\u00f3n de manos o dedos (culpa, inadecuaci\u00f3n).\n- **Omisiones masivas de contacto:** Omisi\u00f3n de ojos, boca, piernas, pies y nariz.\n\n## 5. Conclusiones y Consideraciones Diagn\u00f3sticas\nLas autoras concluyen con una advertencia categ\u00f3rica: **la presencia de un solo indicador emocional aislado jam\u00e1s determina el diagn\u00f3stico de una psicopatolog\u00eda**. La regla de oro para el psic\u00f3logo evaluador establece que:\n1. Debe considerarse estrictamente la edad cronol\u00f3gica (ya que algunos signos son esperables evolutivamente antes de ciertas edades, como la omisi\u00f3n del cuello antes de los 8 a\u00f1os).\n2. Se requiere la acumulaci\u00f3n de **varios indicadores emocionales** (m\u00e1s de uno o dos) para formular la hip\u00f3tesis de una perturbaci\u00f3n cl\u00ednica significativa.\n3. Es mandatorio aplicar el criterio de **evidencias m\u00faltiples intratest e intertest**: cruzar los hallazgos del DFH con pruebas complementarias, entrevistas a padres, pruebas sociom\u00e9tricas y observaci\u00f3n conductual para alcanzar un diagn\u00f3stico integral y hol\u00edstico.\n\n\n\n-----------------------------------------------------------------\n5. Interacci\u00f3n y proyecto familiar. Cap. 2: Test de la familia kin\u00e9tica. Versi\u00f3n actual \u2014 Verthelyi (1987)\n-----------------------------------------------------------------\n\n# INTERACCI\u00d3N Y PROYECTO FAMILIAR: CAP. 2 TEST DE LA FAMILIA KIN\u00c9TICA. VERSI\u00d3N ACTUAL (VERTHELYI, 1987)\n\n## 1. Introducci\u00f3n al Test de la Familia Kin\u00e9tica y sus Antecedentes Hist\u00f3ricos\nEl presente cap\u00edtulo aborda las consideraciones te\u00f3rico-cl\u00ednicas del Test de la Familia Kin\u00e9tica (TFK), desarrollado originariamente por Robert Burns y S. Harvard Kaufman a principios de la d\u00e9cada de 1970. Renata Frank de Verthelyi retoma estos aportes fundacionales para cuestionar profundamente la administraci\u00f3n cl\u00e1sica del dibujo de la familia. Seg\u00fan la autora, la consigna tradicional (que simplemente ped\u00eda \"dibuja a tu familia\") tend\u00eda a arrojar representaciones est\u00e1ticas, estereotipadas, r\u00edgidas y empobrecidas, similares a una fotograf\u00eda de pose, donde los miembros aparec\u00edan alineados y carentes de interacci\u00f3n. \n\nLa introducci\u00f3n del **movimiento (kinesia)** se plantea entonces como el eje central y revolucionario de esta t\u00e9cnica proyectiva gr\u00e1fica. Rompiendo con el estatismo, el movimiento promueve la emergencia de un material inmensamente din\u00e1mico y relacional. Al solicitarle al examinado que dibuje a su familia \"haciendo algo\", se facilita de manera directa la exteriorizaci\u00f3n de la din\u00e1mica vincular subyacente. Se revelan los roles adjudicados consciente e inconscientemente a cada integrante, las fantas\u00edas de relaci\u00f3n interpersonal, los patrones de comunicaci\u00f3n intrafamiliar, los niveles de empat\u00eda y, fundamentalmente, los conflictos latentes en el seno familiar que en un dibujo est\u00e1tico quedar\u00edan enmascarados por la represi\u00f3n o las defensas racionales.\n\nEl aporte m\u00e1s distintivo y original de Verthelyi a la obra de Burns y Kaufman consiste en adaptar, sistematizar y ampliar exponencialmente el rango de aplicaci\u00f3n del TFK. Mientras que la versi\u00f3n primaria estadounidense estaba casi exclusivamente reservada para la evaluaci\u00f3n de la poblaci\u00f3n infantil, Verthelyi legitima y estandariza su uso en **adolescentes y adultos**. Ella descubre en estas franjas etarias una riqueza proyectiva invaluable, demostrando que el adulto proyecta en la acci\u00f3n asignada a su familia gran parte de su conflictiva actual. \n\nAdem\u00e1s, su obra instaura el concepto de **\"evaluaci\u00f3n multiescalar\"**, proponiendo que la prueba no debe limitarse al \u00e1mbito individual. Verthelyi sugiere administrarla de forma di\u00e1dica (por ejemplo, en el diagn\u00f3stico vincular de parejas o v\u00ednculos parento-filiales) y de forma conjunta o grupal (durante la Hora de Juego Familiar o entrevistas vinculares conjuntas). Esto representa un verdadero hito cl\u00ednico, ya que posibilita el pasaje epistemol\u00f3gico de una lectura estrictamente intraps\u00edquica (centrada solo en el mundo interno del sujeto) a una comprensi\u00f3n de car\u00e1cter vincular, interaccional y sist\u00e9mico de la estructura familiar como una totalidad.\n\n## 2. Objetivos, Alcance y Metodolog\u00eda de Administraci\u00f3n Cl\u00ednica\nEl TFK, bajo la conceptualizaci\u00f3n de Verthelyi, no restringe su prop\u00f3sito al an\u00e1lisis psicomotor, evolutivo o formal del grafismo. Su objetivo principal es develar la estructura de la personalidad del evaluado en estrecha y continua interacci\u00f3n con su entorno afectivo primario. \n\nLa metodolog\u00eda de administraci\u00f3n requiere especial cuidado. La consigna debe impartirse de manera completamente abierta y desestructurada: *\"Dibuja a tu familia haciendo algo, con alg\u00fan movimiento o tarea\"*. El cl\u00ednico debe abstenerse tajantemente de proporcionar directrices, sugerencias o ejemplos sobre qu\u00e9 actividades dibujar, c\u00f3mo representar a los integrantes o a qui\u00e9nes incluir. Cualquier intervenci\u00f3n limitar\u00eda la libertad proyectiva y contaminar\u00eda el material cl\u00ednico. \n\n- **Valoraci\u00f3n de los v\u00ednculos y jerarqu\u00edas afectivas:** El dibujo en acci\u00f3n permite al psic\u00f3logo observar de manera directa c\u00f3mo el sujeto transmite su propia valoraci\u00f3n personal y qu\u00e9 lugar emocional, espacial y jer\u00e1rquico le asigna a cada miembro de la familia. Se observa qui\u00e9n domina la escena, qui\u00e9n es relegado y qui\u00e9n es excluido.\n- **Exteriorizaci\u00f3n de expectativas, conflictos y temores inconscientes:** La inclusi\u00f3n obligatoria de una acci\u00f3n (kinesia) facilita la externalizaci\u00f3n de las ansiedades predominantes, los mecanismos defensivos prevalentes y los deseos inconscientes. Lo que cada figura est\u00e1 \"haciendo\" es una met\u00e1fora visual de c\u00f3mo el evaluado experimenta la funci\u00f3n de esa persona en la vida real.\n- **El rol activo y presencial del evaluador:** Verthelyi enfatiza que el profesional no debe, bajo ning\u00fan concepto, abandonar al sujeto durante la ejecuci\u00f3n del test. Es indispensable realizar una observaci\u00f3n cl\u00ednica minuciosa y sostenida del proceso de producci\u00f3n gr\u00e1fica. Se deben registrar: los comentarios espont\u00e1neos, los borrones, las tachaduras, las vacilaciones, el tiempo de latencia antes de comenzar, y sobre todo, la **secuencia cronol\u00f3gica** de aparici\u00f3n de los personajes. Todo este material paraling\u00fc\u00edstico y conductual es inseparable de la interpretaci\u00f3n gr\u00e1fica final y a menudo revela m\u00e1s sobre la ansiedad que el dibujo terminado.\n\n## 3. La Familia Kin\u00e9tica Actual frente a la Versi\u00f3n Prospectiva: Una Evaluaci\u00f3n Tridimensional\nUna de las innovaciones te\u00f3ricas y metodol\u00f3gicas m\u00e1s relevantes que introduce la autora en el campo psicodiagn\u00f3stico es la bifurcaci\u00f3n temporal de la prueba. Verthelyi configura dos instancias de administraci\u00f3n independientes que, al articularse, brindan una lectura tridimensional (pasado/presente/futuro) de la psique del evaluado.\n\n[imagen 11: TFK-A Verthelyi - Representaci\u00f3n de la familia en acci\u00f3n conjunta]\n\n### Test de la Familia Kin\u00e9tica Actual (TFK-A)\nLa consigna b\u00e1sica del TFK-A invita al sujeto a plasmar a su familia en el momento presente, en el instante actual de su ciclo vital. Esta modalidad gr\u00e1fica refleja c\u00f3mo el individuo vivencia, interpreta y organiza cognitivamente el momento que est\u00e1 atravesando su grupo de pertenencia primario. \n- Permite visualizar de forma contundente la percepci\u00f3n actual del nivel de cohesi\u00f3n familiar, el grado de aislamiento o simbiosis de sus miembros, las alianzas afectivas (manifiestas u ocultas), y las rivalidades o tensiones agresivas operantes en el *aqu\u00ed y ahora*.\n- Funciona como un diagn\u00f3stico transversal del estado de los v\u00ednculos, la permeabilidad de las fronteras familiares y la distribuci\u00f3n de roles contempor\u00e1neos (qui\u00e9n sostiene, qui\u00e9n demanda, qui\u00e9n agrede, qui\u00e9n se a\u00edsla).\n\n### Test de la Familia Kin\u00e9tica Prospectiva (TFK-P)\nPara complementar la visi\u00f3n actual, Verthelyi propone el TFK-P, que se administra solicitando al examinado que imagine y grafique a su familia en el futuro (habitualmente se sugiere proyectarse a un lapso de cinco o diez a\u00f1os, dependiendo de la etapa vital del sujeto).\n- Esta segunda fase permite investigar a fondo el **proyecto familiar**. Eval\u00faa si el sujeto concibe un futuro signado por el crecimiento, el desarrollo y la individuaci\u00f3n, o si, por el contrario, predominan fantas\u00edas depresivas de estancamiento, disoluci\u00f3n, enfermedad o desintegraci\u00f3n del n\u00facleo familiar.\n- Al contrastar la situaci\u00f3n presente (TFK-A) con las expectativas evolutivas (TFK-P), el cl\u00ednico adquiere una herramienta invaluable para detectar la capacidad yoica del individuo para tolerar el paso del tiempo, aceptar los cambios evolutivos, elaborar duelos (como el nido vac\u00edo o el crecimiento de los hijos) y proyectar la maduraci\u00f3n, independencia y autonom\u00eda de los miembros del grupo.\n\n## 4. Criterios Exhaustivos de An\u00e1lisis Cl\u00ednico e Interpretaci\u00f3n Sistematizada\nVerthelyi advierte de manera severa sobre el riesgo del \"signismo\", la interpretaci\u00f3n un\u00edvoca, mec\u00e1nica o enciclop\u00e9dica (al estilo de \"esto significa exactamente aquello\"). Ning\u00fan indicador gr\u00e1fico, por m\u00e1s llamativo que sea, debe interpretarse de forma aislada. La lectura debe estar enmarcada e imbricada con la historia vital del paciente, las entrevistas previas y los resultados del resto de la bater\u00eda psicodiagn\u00f3stica. Para facilitar el an\u00e1lisis, la autora sistematiza la evaluaci\u00f3n del TFK en dos grandes dimensiones: pautas formales y pautas de contenido.\n\n[imagen 12: TFK-A Verthelyi - Adici\u00f3n de objetos complementarios]\n\n### A) An\u00e1lisis Gest\u00e1ltico, Din\u00e1mico y Pautas Formales\nEl primer acercamiento del cl\u00ednico a la producci\u00f3n gr\u00e1fica exige suspender la atenci\u00f3n al detalle para observar el **impacto gest\u00e1ltico global** del dibujo. Esta primera impresi\u00f3n permite inferir el nivel de desestructuraci\u00f3n, la fortaleza del Yo y la modalidad defensiva preponderante.\n\n- **Predominancia perceptual y tonalidad afectiva:** El cl\u00ednico debe evaluar sistem\u00e1ticamente si la impresi\u00f3n gest\u00e1ltica primaria transmite una sensaci\u00f3n de armon\u00eda, integraci\u00f3n y vitalidad (lo cual es un fuerte indicador de recursos yoicos adaptativos y plasticidad emocional). Por el contrario, un dibujo que comunica caos, fragmentaci\u00f3n, rigidez extrema o vac\u00edo, orienta hacia un Yo fr\u00e1gil. Si la familia est\u00e1 dibujada con extrema distancia geom\u00e9trica, el sujeto apela a defensas obsesivas-racionales (como el aislamiento del afecto o la formaci\u00f3n reactiva). Si el trazo es impulsivo y desorganizado, se infiere que est\u00e1 desbordado por afectos sensoriales y pulsionales incontrolables.\n- **Manejo del espacio y Emplazamiento:** La distribuci\u00f3n espacial de los personajes en la hoja revela la estructuraci\u00f3n del espacio vital y el sentimiento de expansi\u00f3n o retracci\u00f3n yoica. Un emplazamiento centrado y proporcionado habla de seguridad. Si todos los personajes est\u00e1n arrinconados en un margen (generalmente inferior o izquierdo), se evidencia inseguridad, necesidad de aferrarse al pasado o depresi\u00f3n. El emplazamiento de cada figura respecto al centro del papel indica su jerarqu\u00eda: ubicar a un personaje en el centro gravitacional del dibujo refleja que el sujeto le otorga la mayor investidura afectiva o el mayor peso en la din\u00e1mica familiar.\n- **Tama\u00f1o (Macrograf\u00eda y Micrograf\u00eda):** El tama\u00f1o de los personajes es el principal \u00edndice de autoconcepto y valoraci\u00f3n del otro. Un tama\u00f1o desproporcionadamente grande (macrograf\u00eda) puede denotar actitudes defensivas compensatorias, tendencias expansivas, impulsividad o narcisismo exacerbado. La micrograf\u00eda (dibujos excesivamente peque\u00f1os), en cambio, sugiere intensa inhibici\u00f3n, constricci\u00f3n afectiva, retraimiento o sentimientos profundos de minusval\u00eda e inferioridad frente al entorno.\n\n[imagen 13: TFK-A Verthelyi - Compartimentaci\u00f3n espacial y barreras intrafamiliares]\n\n[imagen 14: TFK-A Verthelyi - Omisi\u00f3n del propio sujeto en el gr\u00e1fico familiar]\n\n### B) An\u00e1lisis Espec\u00edfico de los Personajes y la Din\u00e1mica Vincular (Pautas de Contenido)\nEl nivel de contenido profundiza en las interacciones, las posturas y los atributos individuales conferidos a cada familiar. Este es el verdadero n\u00facleo diferencial de la t\u00e9cnica kin\u00e9tica, donde el movimiento otorga significado cl\u00ednico.\n\n- **Las Acciones Asignadas (Kinesia):** El tipo de actividad en la que se involucran los personajes es el elemento crucial que revela la calidad del v\u00ednculo intraps\u00edquico e interpersonal. Verthelyi establece una diferenciaci\u00f3n cl\u00ednica fundamental entre:\n   - *Acciones conjuntas o compartidas:* Donde dos o m\u00e1s miembros cooperan, juegan, comen o interact\u00faan mutuamente. Estas denotan una integraci\u00f3n real, cohesi\u00f3n familiar, comunicaci\u00f3n rec\u00edproca, permeabilidad y un \"nosotros\" familiar bien estructurado.\n   - *Acciones aisladas, escindidas o autistas:* Donde cada integrante realiza una tarea completamente independiente, dando la espalda a los dem\u00e1s o en compartimentos estancos (ej. \"mam\u00e1 cocina, pap\u00e1 lee, yo juego a la play\"). Esto sugiere graves barreras de incomunicaci\u00f3n, frialdad afectiva, alienaci\u00f3n o encapsulamiento narcisista defensivo.\n   - *Acciones conflictivas, agresivas o competitivas:* Revelan montos de hostilidad latente, tensi\u00f3n pulsional o rivalidades manifiestas no resueltas.\n- **Omisiones y Adiciones:** La omisi\u00f3n deliberada o inconsciente de un miembro de la familia real conviviente es uno de los indicadores de alarma cl\u00ednica m\u00e1s severos. Nunca es accidental. Suele representar un intento defensivo de negaci\u00f3n de una realidad que resulta dolorosa, una evitaci\u00f3n ante un conflicto intolerable, celos intensos o un deseo inconsciente de anular, suprimir o destruir a dicha figura (muy frecuente en omisiones de hermanos menores motivadas por intensa rivalidad fraterna). Por otro lado, las *adiciones* (la inclusi\u00f3n gr\u00e1fica de personas fallecidas, vecinos, t\u00edos lejanos o incluso mascotas dotadas de roles humanizados) act\u00faan como objetos sustitutos y compensatorios frente a agudas carencias afectivas, o como canales de desplazamiento de afectos que no pueden volcarse en la familia nuclear.\n- **Secuencia y Orden de ejecuci\u00f3n:** Registrar estrictamente el orden cronol\u00f3gico en que se dibujan los personajes es de vital importancia diagn\u00f3stica. El primer personaje trazado concentra la mayor carga libidinal; es generalmente la figura de mayor identificaci\u00f3n narcisista o aquella con la cual el sujeto mantiene el v\u00ednculo m\u00e1s intenso y determinante (ya sea de profunda dependencia, amor incondicional o severo conflicto y sumisi\u00f3n). Inversamente, el \u00faltimo personaje en ser dibujado suele representar a la figura m\u00e1s rechazada, devaluada, temida o hacia la cual existe mayor ambivalencia afectiva.\n- **Nivel de detalle y Tratamiento gr\u00e1fico diferencial:** El evaluador debe comparar c\u00f3mo est\u00e1 tratado cada cuerpo. Las diferencias notables en el esmero, la riqueza de detalles, los accesorios, los borrones (que son indicadores irrefutables de ansiedad local extrema), el remarcado obsesivo del trazo o el empobrecimiento gr\u00e1fico deliberado de una figura espec\u00edfica frente a las dem\u00e1s, indican con precisi\u00f3n milim\u00e9trica las zonas de conflicto intraps\u00edquico y las cargas pulsionales diferenciales dirigidas hacia ese v\u00ednculo en particular.\n\n## 5. S\u00edntesis e Integraci\u00f3n Te\u00f3rico-Cl\u00ednica Final\nEn su detallada conclusi\u00f3n, Renata Frank de Verthelyi posiciona al Test de la Familia Kin\u00e9tica como una herramienta cl\u00ednica irremplazable, potente y altamente sensible para la evaluaci\u00f3n contempor\u00e1nea. Al obligar al sujeto a plasmar el movimiento y al permitir una proyecci\u00f3n temporal tanto en el eje del presente como en la dimensi\u00f3n del futuro (prospectiva), la t\u00e9cnica logra burlar y trascender las r\u00edgidas barreras defensivas est\u00e1ticas que suelen bloquear la expresividad en otros tests proyectivos gr\u00e1ficos tradicionales como el Test del \u00c1rbol o la Casa. \n\nEl TFK, por ende, le franquea al psic\u00f3logo el acceso privilegiado a la intimidad del teatro familiar interno del sujeto. Permite desentra\u00f1ar la matriz relacional inconsciente, evaluar con enorme riqueza diagn\u00f3stica no solo c\u00f3mo el individuo percibe, codifica, goza o padece su entorno actual, sino tambi\u00e9n vislumbrar con claridad pron\u00f3stica hacia d\u00f3nde proyecta sus anhelos m\u00e1s profundos, sus miedos paralizantes y su potencial de desarrollo vincular en el horizonte temporal de su vida.\n\n\n\n-----------------------------------------------------------------\n6. El dibujo infantil, algunas aproximaciones te\u00f3ricas \u2014 Verthelyi (2005)\n-----------------------------------------------------------------\n\n# EL DIBUJO INFANTIL, ALGUNAS APROXIMACIONES TE\u00d3RICAS \u2014 VERTHELYI (2005)\n\n## 1. El Dibujo Infantil como Expresi\u00f3n Primaria\nMucho antes de ser utilizado como instrumento psicom\u00e9trico o t\u00e9cnica proyectiva, el dibujo ha sido un modo de expresi\u00f3n natural y primario en el desarrollo infantil. Apenas el ni\u00f1o descubre la conducta gr\u00e1fica, experimenta un enorme placer cenest\u00e9sico al garabatear, un goce inicial por el movimiento que gradualmente dar\u00e1 lugar a la satisfacci\u00f3n de crear formas representativas. \n\nEn la infancia, **juego y dibujo est\u00e1n \u00edntimamente unidos**. Dibujar es fundamentalmente una actividad l\u00fadica (por ello, en la Hora de Juego Diagn\u00f3stica siempre se incluyen elementos gr\u00e1ficos). A diferencia del ni\u00f1o, el adulto, al acceder y priorizar la palabra como v\u00eda de comunicaci\u00f3n, suele perder esta capacidad l\u00fadica y gr\u00e1fica. Las investigaciones demuestran que el nivel de graficaci\u00f3n de la figura humana suele estancarse alrededor de los 11 a\u00f1os si no es estimulado. Por este motivo, comenzar una evaluaci\u00f3n psicol\u00f3gica con un dibujo libre favorece el *rapport* en ni\u00f1os, pero suele generar incomodidad y resistencias en adultos.\n\n## 2. Aportes desde Diferentes Teor\u00edas Psicoanal\u00edticas\nEl grafismo infantil ha sido abordado desde m\u00faltiples perspectivas psicoanal\u00edticas, coincidiendo todas en que es un mensaje cifrado que el cl\u00ednico debe aprender a decodificar con la misma \"atenci\u00f3n flotante\" que Freud suger\u00eda para el discurso verbal.\n\n- **Sigmund Freud:** El dibujo, al igual que el juego, es entendido como la expresi\u00f3n de una **sublimaci\u00f3n exitosa** de los impulsos, \u00edntimamente ligada a los procesos de identificaci\u00f3n. Las pulsiones sexuales y agresivas logran satisfacerse de manera \"desexualizada\", permitiendo la gratificaci\u00f3n del Yo.\n- **Melanie Klein y Arminda Aberastury:** Desde la escuela kleiniana, la capacidad simb\u00f3lica y gr\u00e1fica se liga directamente a la **posibilidad de reparar**. El ni\u00f1o experimenta angustia ante la fugacidad de las im\u00e1genes (externas y propias); al lograr recrearlas y retenerlas en el papel, disminuye su angustia. Los garabatos destructivos reflejan la fantas\u00eda de ataque (angustia paranoide), pero los dibujos estructurados operan como \"hijos fantaseados\" ofrecidos a la madre en un acto de reparaci\u00f3n (disminuyendo la ansiedad depresiva). A diferencia del juego (evanescente), el dibujo garantiza la permanencia y supervivencia del objeto simbolizado.\n- **I. Luzuriaga:** El dibujo se asemeja estructuralmente al proceso de so\u00f1ar y al s\u00edntoma: permite la emergencia del inconsciente pero de forma enmascarada (mediante condensaci\u00f3n y desplazamiento). Permite tratar temas angustiantes que el ni\u00f1o no puede verbalizar. Luzuriaga diferencia los dibujos meramente \"expulsivos\" (defensivos) de los \"elaborativos\" (donde el ni\u00f1o busca comunicar genuinamente un conflicto).\n- **Donald Winnicott:** Cuestiona la reducci\u00f3n del dibujo a simple represi\u00f3n o sublimaci\u00f3n. Para \u00e9l, el acto de dibujar surge del **espacio transicional**, aquella zona intermedia entre la realidad ps\u00edquica interna y la realidad externa (inaugurada en el v\u00ednculo temprano madre-beb\u00e9). Es exclusivamente en este espacio l\u00fadico y creativo donde el individuo descubre su verdadero *self*. (Esta es la base de su t\u00e9cnica del \"garabateo\").\n- **Fran\u00e7oise Dolto y Sami-Ali:** Jerarquizan la verbalizaci\u00f3n posterior al dibujo. Para Dolto, el dibujo espont\u00e1neo permite localizar instancias del aparato ps\u00edquico y descifrar fantasmas. En sesi\u00f3n, el ni\u00f1o antropomorfiza su dibujo, armando escenas y f\u00e1bulas imaginarias. Dolto diferencia el \"esquema corporal\" (universal para la especie humana, consciente/preconsciente) de la **\"imagen del cuerpo\"** (completamente inconsciente, singular de cada sujeto, s\u00edntesis de su historia emocional y relacional).\n\n## 3. El Grafismo como Movimiento Expresivo (Pautas Formales y de Contenido)\nEn la d\u00e9cada de 1940, autores como Wolff, Allport, Vernon y Hammer estudiaron el dibujo como conducta motriz y de simbolizaci\u00f3n. El postulado central es que **los movimientos gr\u00e1ficos son el reflejo y la resultante directa de los movimientos corporales y las tendencias internas** proyectadas sobre el papel. Como sostiene Hammer: *\"los m\u00fasculos nunca mienten, el lenguaje puede mentir\"*. La expresi\u00f3n gr\u00e1fica est\u00e1 profundamente influenciada por la motricidad, el sistema neurovegetativo y las experiencias infantiles precoces, acerc\u00e1ndose mucho m\u00e1s al *proceso primario* que la elaboraci\u00f3n ling\u00fc\u00edstica (proceso secundario).\n\nEn la evaluaci\u00f3n proyectiva, el an\u00e1lisis se divide metodol\u00f3gicamente en dos dimensiones que luego se integran:\n- **Pautas formales (Wolff) o Rasgos expresivos (Hammer):** Refieren al \"c\u00f3mo\" se dibuja. Incluyen la presi\u00f3n, el ritmo, el tama\u00f1o, el emplazamiento, el tipo de l\u00ednea y la simetr\u00eda. Reflejan las cualidades estructurales y estables de la personalidad (Ej: un trazo tenso y recto implica control y firmeza; un trazo d\u00e9bil e interrumpido indica inseguridad y falta de energ\u00eda).\n- **Pautas de contenido:** Refieren al \"qu\u00e9\" se dibuja. Abordan la manera particular en que el sujeto resuelve la tem\u00e1tica solicitada (ej. los detalles del rostro, el tipo de ropa, etc.). Son m\u00e1s variables y susceptibles al momento vital actual.\n\n## 4. Recurrencias y Convergencias (El Proceso de Integraci\u00f3n Diagn\u00f3stica)\nNing\u00fan indicador gr\u00e1fico tiene valor diagn\u00f3stico si se interpreta de forma aislada. La cl\u00ednica exige rastrear constelaciones de pautas:\n- **Recurrencia:** Es la reiteraci\u00f3n de un mismo indicador (formal o de contenido) en varias zonas de un mismo dibujo o en dibujos diferentes de la bater\u00eda. Ej: dibujar *siempre* figuras muy peque\u00f1as y arrinconadas en la hoja. La recurrencia indica la fijeza o estabilidad de un rasgo de personalidad.\n- **Convergencia:** Es la reiteraci\u00f3n de una din\u00e1mica psicol\u00f3gica (ej. ansiedad, defensa, agresividad) que se expresa a trav\u00e9s de indicadores gr\u00e1ficos dis\u00edmiles, e incluso aparentemente opuestos. Ej: convergencia de trazo d\u00e9bil (minusval\u00eda) + figura sin piso (inseguridad) + excesivo detallismo en botones (defensa obsesiva ante esa inseguridad). La convergencia permite integrar el dibujo libre, la Familia Kin\u00e9tica e incluso t\u00e9cnicas verbales (como el Desiderativo) para armar hip\u00f3tesis diagn\u00f3sticas s\u00f3lidas.\n\n## 5. Evaluaci\u00f3n de la Fortaleza Yoica: Los Criterios de P. Elkisch\nPaula Elkisch sistematiz\u00f3 las pautas expresivas ubic\u00e1ndolas en continuums o duplas, que permiten evaluar la riqueza, flexibilidad y adaptaci\u00f3n del Yo. El uso moderado y equilibrado de ambas polaridades indica un Yo sano y fuerte. La exacerbaci\u00f3n de un extremo denota rigidez defensiva o patolog\u00eda.\n\n1. **Ritmo (Armon\u00eda/Flexibilidad) vs. Regla (Fuerza/Discriminaci\u00f3n):** \n   - El *ritmo* implica l\u00edneas curvas y soltura (ej. dibujar una flor). Su exacerbaci\u00f3n (sin control) produce dibujos confusos, perseverantes, man\u00edacos o impulsivos. \n   - La *regla* implica l\u00edneas rectas, control y tensi\u00f3n (ej. dibujar un edificio). Su exacerbaci\u00f3n ensucia el dibujo por borrado obsesivo, indicando escrupulosidad compulsiva, rasgos esquizoides o un Yo d\u00e9bil que necesita hipercontrolarse.\n2. **Complejidad (Riqueza/Observaci\u00f3n) vs. Simplicidad (Capacidad de S\u00edntesis):** \n   - La *complejidad* equilibrada denota buen contacto con la realidad. Su exacerbaci\u00f3n (detallismo obsesivo) muestra morosidad, dificultad para desprenderse de la obra y control extremo. \n   - La *simplicidad* adecuada es capacidad de s\u00edntesis. Su exacerbaci\u00f3n (simpleza excesiva o pobreza gr\u00e1fica) indica deterioro, inhibici\u00f3n, depresi\u00f3n, baja inteligencia o Yo empobrecido.\n3. **Expansi\u00f3n (Fuerza/Afirmaci\u00f3n) vs. Compresi\u00f3n (Aceptaci\u00f3n de l\u00edmites):** \n   - Refiere al uso del espacio. La *expansi\u00f3n* excesiva delata impulsividad, falta de l\u00edmites, megaloman\u00eda o actitudes psicop\u00e1ticas (inflaci\u00f3n del Yo). \n   - La *compresi\u00f3n* exacerbada da idea de encierro, coartaci\u00f3n y repliegue, t\u00edpico de estructuras f\u00f3bicas o depresivas.\n4. **Integraci\u00f3n (S\u00edntesis) vs. Separaci\u00f3n (Capacidad anal\u00edtica):** \n   - La *integraci\u00f3n* forzada (exacerbada) indica un esfuerzo defensivo gigante para evitar el desmoronamiento ps\u00edquico (t\u00edpico de estados pre-psic\u00f3ticos). \n   - La *no integraci\u00f3n* patol\u00f3gica es la fragmentaci\u00f3n o el \"splitting\", donde las partes pierden coherencia (t\u00edpico en la psicosis o esquizofrenia, donde el mundo interno se desorganiza).\n5. **Realismo vs. Simbolismo:** \n   - Exceso de *realismo* (copiar todo tal cual es) denota un Yo estereotipado, fobia a fantasear y exceso de represi\u00f3n. \n   - Exceso de *simbolismo* desconecta de la realidad (pensamiento m\u00e1gico). La salud mental (fuerza yoica) radica en la capacidad del Yo para tolerar la tensi\u00f3n de ambos opuestos, sintetiz\u00e1ndolos arm\u00f3nicamente.\n\n## 6. Dibujo, Esquema Corporal e Imagen del Cuerpo\nEl ser humano proyecta en el dibujo de la persona su \"autorretrato\" ps\u00edquico. Bas\u00e1ndose en P. Schilder, el texto define el **Esquema Corporal** como la imagen tridimensional que todos tenemos de nosotros mismos, construida mediante la interacci\u00f3n continua entre experiencias neurol\u00f3gicas, posturales y libidinales. \n\nAl dibujar una figura humana, el ni\u00f1o refleja la percepci\u00f3n de la superficie de su cuerpo, su disponibilidad para el contacto interpersonal y la huella de los v\u00ednculos primarios. Como se\u00f1alaban Fisher y Cleveland, la manera en que el ni\u00f1o fue alimentado, sostenido (holding) y mirado por sus padres, se inscribe en su psiquismo como sensaciones f\u00edsicas que terminan esculpiendo su imagen corporal, la cual quedar\u00e1 indeleblemente plasmada en cada trazado que realice sobre el papel.\n\n\n\n-----------------------------------------------------------------\n7. La evaluaci\u00f3n psicol\u00f3gica en ni\u00f1os. Cap. 5: El dibujo de la figura humana (DFH) en edad escolar \u2014 Koppitz (1984)\n-----------------------------------------------------------------\n\n# LA EVALUACI\u00d3N PSICOL\u00d3GICA EN NI\u00d1OS. CAP. 5: EL DIBUJO DE LA FIGURA HUMANA EN EDAD ESCOLAR \u2014 KOPPITZ (1984)\n\n## 1. Fundamentos Te\u00f3ricos del Sistema Koppitz\nElizabeth M\u00fcnsterberg Koppitz desarroll\u00f3 uno de los sistemas de evaluaci\u00f3n m\u00e1s influyentes y rigurosos para el Test del Dibujo de la Figura Humana (DFH) en ni\u00f1os de 5 a 12 a\u00f1os (edad escolar). Su enfoque metodol\u00f3gico se distanci\u00f3 de las interpretaciones exclusivamente psicoanal\u00edticas e intuitivas (como las de Karen Machover) para proponer un sistema de tabulaci\u00f3n normativo, estad\u00edstico y emp\u00edricamente validado.\n\nEl pilar te\u00f3rico de Koppitz se apoya en la teor\u00eda de las relaciones interpersonales de Harry Stack Sullivan. Seg\u00fan esta visi\u00f3n, la personalidad del ni\u00f1o no est\u00e1 determinada \u00fanicamente por pulsiones biol\u00f3gicas innatas, sino que se construye dial\u00e9cticamente a trav\u00e9s de la interacci\u00f3n con los \"otros significativos\" (padres, pares, maestros). Por lo tanto, el DFH no es solo un reflejo del esquema corporal est\u00e1tico, sino un *retrato interior din\u00e1mico* de c\u00f3mo el ni\u00f1o experimenta su yo en relaci\u00f3n con las exigencias, tensiones y afectos de su entorno interpersonal.\n\n## 2. La Doble Dimensi\u00f3n del Sistema de Puntuaci\u00f3n\nEl hito cl\u00ednico de Koppitz fue dividir la interpretaci\u00f3n del dibujo en dos escalas completamente independientes pero complementarias. Esta diferenciaci\u00f3n evita que se confunda la patolog\u00eda emocional con el retraso madurativo.\n\n### A) Los \u00cdtems Evolutivos (Desarrollo Cognitivo/Madurativo)\nMiden la madurez mental, la formaci\u00f3n de conceptos no verbales y la discriminaci\u00f3n visual del ni\u00f1o. Son detalles corporales (cabeza, ojos, tronco, brazos, etc.) cuya presencia est\u00e1 directamente correlacionada con la edad cronol\u00f3gica y el desarrollo cognitivo. Si un ni\u00f1o dibuja los \u00edtems evolutivos esperables para su edad, indica un desarrollo cognitivo normal. Su ausencia (especialmente de los \u00edtems \"esperados\" o \"excepcionales\") puede sugerir inmadurez neurol\u00f3gica, retraso mental o d\u00e9ficit de aprendizaje.\n\n### B) Los Indicadores Emocionales (Proyecci\u00f3n de la Personalidad)\nEval\u00faan las actitudes, ansiedades, conflictos y preocupaciones del ni\u00f1o. A diferencia de los \u00edtems evolutivos, los **Indicadores Emocionales (IE) NO est\u00e1n relacionados con la edad ni con el nivel de maduraci\u00f3n**. Reflejan exclusivamente el estado emocional del ni\u00f1o en ese momento vital. \n\nPara que un rasgo del dibujo sea validado cient\u00edficamente como un \"Indicador Emocional\", Koppitz exigi\u00f3 que cumpliera tres criterios estrictos:\n1. **Validez cl\u00ednica:** Discriminar estad\u00edsticamente entre ni\u00f1os con problemas emocionales (pacientes psiqui\u00e1tricos/cl\u00ednicos) y ni\u00f1os sin problemas (escolares normales).\n2. **Inusualidad:** Debe ocurrir infrecuentemente (en menos del 16%) en los dibujos de ni\u00f1os normales de la misma edad.\n3. **Independencia madurativa:** No aumentar ni disminuir \u00fanicamente en funci\u00f3n del crecimiento cronol\u00f3gico.\n\n## 3. Clasificaci\u00f3n Exhaustiva de los Indicadores Emocionales\nKoppitz aisl\u00f3 30 indicadores emocionales v\u00e1lidos y los agrup\u00f3 en categor\u00edas cl\u00ednicas fundamentales. Es imperativo recordar que un solo indicador *no hace diagn\u00f3stico*; operan como alertas cl\u00ednicas.\n\n[imagen 15: DFH Koppitz 1984 - Transparencias en la vestimenta]\n\n### I. Indicadores de Ansiedad, Impulsividad e Inestabilidad\n- **Sombreado denso (Ansiedad):** Remarcar agresivamente o sombrear oscuramente el rostro, el cuerpo o los miembros refleja angustia intensa. El sombreado de los genitales o las manos (a partir de los 7-8 a\u00f1os) se asocia espec\u00edficamente a ansiedad por culpa o impulsos inaceptables (ej. masturbaci\u00f3n o robo).\n- **Asimetr\u00eda marcada de extremidades:** Expresa inestabilidad emocional, impulsos contradictorios y falta de coordinaci\u00f3n yoica.\n- **Inclinaci\u00f3n de la figura (m\u00e1s de 15 grados):** Sensaci\u00f3n ps\u00edquica de desequilibrio. El ni\u00f1o siente que carece de una base firme o apoyo afectivo en su entorno familiar.\n- **Transparencias (Impulsividad):** Dibujar el cuerpo a trav\u00e9s de la ropa es normal en ni\u00f1os muy peque\u00f1os, pero en edad escolar denota grave inmadurez, impulsividad, falta de represi\u00f3n y conductas *acting-out* (p\u00e9rdida de los l\u00edmites corporales).\n- **Integraci\u00f3n pobre de las partes:** Brazos o piernas pegados arbitrariamente al cuerpo sin fluidez. Revela inestabilidad, personalidad pobremente integrada y d\u00e9ficit en la s\u00edntesis organizativa.\n\n[imagen 16: DFH Koppitz 1984 - Brazos largos y omisi\u00f3n de manos]\n\n### II. Indicadores de Agresividad y Hostilidad\n- **Brazos largos (hasta las rodillas):** Necesidad agresiva de controlar el ambiente, de aferrarse a las cosas o personas, o impulsos de golpear.\n- **Manos grandes:** Comportamiento expansivo y actuaci\u00f3n agresiva de los impulsos.\n- **Dientes visibles:** Hostilidad oral evidente. \n- **Genitales:** Rara vez se dibujan en ni\u00f1os sanos de edad escolar. Su presencia indica agresividad primaria, angustia de castraci\u00f3n severa, falta total de represi\u00f3n o indicador de abuso sexual (cuando se asocia a otros traumas).\n\n[imagen 17: DFH Koppitz 1984 - Omisi\u00f3n de cuello y pies flotantes]\n\n### III. Indicadores de Timidez, Retraimiento e Inadecuaci\u00f3n (Internalizantes)\n- **Figura peque\u00f1a (Micrograf\u00eda):** Encogimiento del Yo, retraimiento social, depresi\u00f3n infantil y sentimientos abrumadores de inadecuaci\u00f3n e inferioridad.\n- **Brazos cortos o pegados al cuerpo:** Dificultad extrema para conectarse con el entorno. Inhibici\u00f3n de los impulsos y pasividad.\n- **Figura monstruosa o grotesca:** Autoestima severamente devaluada. El ni\u00f1o se percibe a s\u00ed mismo como distinto, rechazado, raro o rid\u00edculo.\n- **Omisi\u00f3n de manos:** Sentimiento agudo de inadecuaci\u00f3n operativa y culpa.\n\n### IV. Omisiones Cr\u00edticas (Evitaci\u00f3n y Negaci\u00f3n)\nLa regla cl\u00ednica de Koppitz indica que *aquello que el ni\u00f1o omite suele ser m\u00e1s importante y conflictivo que lo que dibuja*.\n- **Omisi\u00f3n de ojos:** Negaci\u00f3n perceptiva. El ni\u00f1o se niega a ver la realidad conflictiva de su hogar; aislamiento social (tendencias esquizoides).\n- **Omisi\u00f3n de la boca:** Negaci\u00f3n a comunicarse. Imposibilidad de verbalizar la angustia o asma/problemas respiratorios y alimentarios.\n- **Omisi\u00f3n del cuerpo:** Ansiedad catastr\u00f3fica por el esquema corporal. Desorganizaci\u00f3n patol\u00f3gica.\n- **Omisi\u00f3n de pies/piernas:** Inseguridad aguda, p\u00e9rdida de arraigo, desvalimiento afectivo (\"no tener d\u00f3nde pararse\").\n- **Omisi\u00f3n del cuello (despu\u00e9s de los 9 a\u00f1os):** El cuello es el \u00f3rgano simb\u00f3lico del control intelectual sobre los instintos del cuerpo. Su omisi\u00f3n indica fallas severas en el control de la impulsividad.\n\n## 4. Consideraciones Cl\u00ednicas y Precauciones Diagn\u00f3sticas\nKoppitz es tajante respecto al uso \u00e9tico y cl\u00ednico de su sistema. Establece tres reglas fundamentales para el psic\u00f3logo evaluador:\n\n1. **Rechazo al diagn\u00f3stico mec\u00e1nico:** La presencia de indicadores emocionales formula *hip\u00f3tesis de trabajo*, no diagn\u00f3sticos definitivos. Un ni\u00f1o normal que atraviesa una crisis temporal (mudanza, divorcio de los padres) puede dibujar indicadores emocionales transitorios.\n2. **Evaluaci\u00f3n hol\u00edstica (Gestalt):** El dibujo debe evaluarse primero como una totalidad. La impresi\u00f3n gest\u00e1ltica global (armon\u00eda vs. caos) dicta el tono de la interpretaci\u00f3n de los detalles.\n3. **Criterio de evidencias m\u00faltiples:** El DFH jam\u00e1s debe utilizarse como \u00fanica prueba psicodiagn\u00f3stica. Sus hallazgos (los indicadores emocionales y madurativos) deben ser obligatoriamente triangulados con la historia cl\u00ednica, la entrevista a los padres, la observaci\u00f3n de la conducta en sesi\u00f3n y otras pruebas proyectivas o psicom\u00e9tricas (como el Test de Bender o WISC). \n\n*En s\u00edntesis, el Cap\u00edtulo 5 de Koppitz cristaliza el pasaje de la interpretaci\u00f3n gr\u00e1fica intuitiva a la sistematizaci\u00f3n cl\u00ednica rigurosa, dotando al psic\u00f3logo de una herramienta estad\u00edstica y proyectiva invaluable para evaluar el sufrimiento ps\u00edquico en la infancia.*\n\n\n\n-----------------------------------------------------------------\n8. Dossier FKA y Test de la Familia Kin\u00e9tica (Anexo Pr\u00e1ctico)\n-----------------------------------------------------------------\n\n# DOSSIER FKA Y TEST DE LA FAMILIA KIN\u00c9TICA (ANEXO PR\u00c1CTICO)\n\n## Naturaleza del Dossier Cl\u00ednico\nEl \"Dossier FKA\" no constituye un texto te\u00f3rico-conceptual, sino que funciona como un **anexo estrictamente pr\u00e1ctico y cl\u00ednico**. Est\u00e1 compuesto \u00edntegramente por un corpus de 20 protocolos gr\u00e1ficos (dibujos) realizados por pacientes infantiles durante procesos de psicodiagn\u00f3stico real. \n\nSu funci\u00f3n pedag\u00f3gica y cl\u00ednica es proveer el material emp\u00edrico necesario para que el estudiante o profesional se ejercite en el *an\u00e1lisis cl\u00ednico proyectivo* aplicando los marcos te\u00f3ricos desarrollados en la bibliograf\u00eda de la unidad (principalmente Verthelyi, Coronel y Koppitz).\n\n## Objetivos de la Evaluaci\u00f3n Pr\u00e1ctica\nFrente a los gr\u00e1ficos de este dossier, el evaluador debe poner en pr\u00e1ctica la lectura integrada de las dos grandes dimensiones de an\u00e1lisis proyectivo:\n\n[imagen 18: Dossier FKA - Caso Cl\u00ednico 1 Dibujo kin\u00e9tico con alta riqueza]\n\n### 1. Pautas Formales (Rasgos Expresivos)\nSe exige la evaluaci\u00f3n del impacto gest\u00e1ltico y el an\u00e1lisis del \"c\u00f3mo\" dibuja el ni\u00f1o:\n- **Emplazamiento:** Ubicaci\u00f3n en la hoja (superior, inferior, central, m\u00e1rgenes) para inferir expansi\u00f3n, retraimiento, inseguridad o necesidad de apoyo.\n- **Tama\u00f1o:** Macrografismo (inflaci\u00f3n yoica, impulsividad, agresividad) vs. Micrografismo (inhibici\u00f3n, depresi\u00f3n, minusval\u00eda).\n- **Trazo y Presi\u00f3n:** Tensi\u00f3n de las l\u00edneas, trazos cortados, d\u00e9biles, remarcados (ansiedad local), rectos (regla/control) o curvos (ritmo/flexibilidad).\n- **Simetr\u00eda y Proporci\u00f3n:** Indicadores de integraci\u00f3n del esquema corporal o posible desorganizaci\u00f3n (asimetr\u00edas marcadas).\n\n[imagen 19: Dossier FKA - Caso Cl\u00ednico 2 Borraduras en hermano menor]\n\n[imagen 20: Dossier FKA - Caso Cl\u00ednico 3 Barreras f\u00edsicas entre habitaciones]\n\n### 2. Pautas de Contenido (Din\u00e1mica Vincular y Kin\u00e9tica)\nSe exige decodificar el \"qu\u00e9\" dibuja y \"qu\u00e9 hacen\" los personajes (Test de la Familia Kin\u00e9tica):\n- **Interacci\u00f3n Kin\u00e9tica:** Determinar si existe kinesia (movimiento) compartida, acciones conjuntas que denoten cohesi\u00f3n, o acciones aisladas que revelen incomunicaci\u00f3n, encapsulamiento y frialdad afectiva.\n- **Integraci\u00f3n del Esquema Corporal:** Detecci\u00f3n de omisiones cl\u00ednicamente significativas (ojos, boca, manos, piernas) que operan como negaciones de realidades dolorosas o ansiedades graves.\n- **Jerarquizaci\u00f3n Vincular:** Identificaci\u00f3n del orden de ejecuci\u00f3n, tama\u00f1o relativo de los personajes y distancias espaciales (para deducir alianzas, exclusiones y figuras de identificaci\u00f3n primaria).\n- **Objetos Complementarios y Adiciones:** An\u00e1lisis del significado de la inclusi\u00f3n de mascotas, objetos agresivos o defensivos, como desplazamientos o compensaciones de la carga afectiva intrafamiliar. \n\n*En s\u00edntesis, este dossier es el territorio de aplicaci\u00f3n pr\u00e1ctica donde se articula la teor\u00eda proyectiva gr\u00e1fica para formular hip\u00f3tesis diagn\u00f3sticas sobre el funcionamiento emocional y relacional del ni\u00f1o.*\n\n\n\n";
+  document.getElementById('mdInput').value = defaultText;
+  try { localStorage.setItem('ep_pdf_last_text', defaultText); } catch(e) {}
+  detectImageVariables(defaultText);
+  alert('¡Texto de la Unidad FKA e imágenes asociadas cargadas de LocalStorage!');
 }
-window.onclick = function(event) {
-  var modal = document.getElementById('promptModal');
-  if (event.target == modal) closePrompt();
-}
+
+// Auto-guardar texto cuando cambia el mdInput
+document.getElementById('mdInput').addEventListener('input', function() {
+  saveCurrentSession();
+  detectImageVariables(this.value);
+});
+
+// Auto-restaurar sesión al cargar el navegador
+window.addEventListener('DOMContentLoaded', function() {
+  var savedText = localStorage.getItem('ep_pdf_last_text');
+  var currentInput = document.getElementById('mdInput').value;
+
+  if ((!currentInput || !currentInput.trim()) && savedText && savedText.trim()) {
+    document.getElementById('mdInput').value = savedText;
+  }
+  detectImageVariables(document.getElementById('mdInput').value);
+});
+
 </script>
 </body>
 </html>
